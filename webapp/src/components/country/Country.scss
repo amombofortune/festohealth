@@ -1,0 +1,13 @@
+.country {
+  display: flex;
+
+  .countryContainer {
+    flex: 6;
+
+    .countryForm {
+      padding: 50px;
+      display: flex;
+      gap: 20px;
+    }
+  }
+}

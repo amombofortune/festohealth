@@ -1,0 +1,103 @@
+/* CSS code */
+/*Modal box container */
+
+.adverseReaction {
+  display: flex;
+
+  .adverseReactionContainer {
+    flex: 6;
+  }
+}
+
+/* Table */
+.table-container {
+  width: 80%;
+  margin: 0 auto;
+}
+
+/*Add Appointment Button */
+.button-container {
+  display: flex;
+  align-items: center;
+  padding: 0 0px;
+  width: 100%;
+  margin-bottom: 30px;
+  margin-top: 80px;
+}
+
+.appointment-container {
+  display: inline-block;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.search-container {
+  flex: 1;
+  margin-right: 45px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  /*margin: 0 auto;*/
+  margin-left: 300px;
+}
+
+.search-container .search-btn {
+  width: 100%;
+  height: 45px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 400;
+  padding: 10px;
+}
+
+/*Book Appointment Button */
+.button-container .add_appointment {
+  color: #fff;
+  border: none;
+  margin: 0;
+  cursor: pointer;
+  border-radius: 6px;
+  font-weight: 400;
+  transition: all 0.2s ease;
+  background-color: green;
+}
+
+.button-container .add_appointment:hover {
+  background-color: rgb(33, 75, 33);
+}
+
+/* Table row */
+.MuiTableRow-root {
+  border-bottom: 1px solid red;
+}
+
+/* Customize the styles of the table cell */
+.MuiTableCell-root {
+  padding: 10px;
+  font-size: 14px;
+}
+
+/* Customize the styles of the table pagination */
+.MuiTablePagination-root {
+  margin-top: 5px;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-around;
+}
+
+.actions svg {
+  cursor: pointer;
+}
+
+.delete-btn {
+  color: #e10d05;
+}
+
+/* Responsive  */
+@media screen and (max-width: 500px) {
+  .admission_form .column {
+    flex-wrap: wrap;
+  }
+}

@@ -1,9 +1,41 @@
 from datetime import date, datetime, time
 from pydantic import BaseModel
-    
+
+
+"""Administrator"""
+
+
+class AdministratorBase(BaseModel):
+    firstname: str
+    lastname: str
+    dob: date
+    gender: str
+    phone_number: str
+    email: str
+    address: str
+    city: str
+    state: str
+    zip_code: str
+    country: str
+    hospital_id: str
+
+
+class AdministratorCreate(AdministratorBase):
+    pass
+
+
+class AdministratorResponse(AdministratorBase):
+    id: str
+    created_at: datetime
+
+    class Config:
+        orm_mode = True
+
+
 """Admission"""
+
+
 class AdmissionBase(BaseModel):
-    id: int
     patient_id: int
     admission_date: date
     admission_time: time
@@ -14,18 +46,23 @@ class AdmissionBase(BaseModel):
     treatment: str
     doctor_id: int
 
+
 class AdmissionCreate(AdmissionBase):
     pass
 
+
 class AdmissionResponse(AdmissionBase):
+    id: int
     created_at: datetime
 
     class Config:
-        orm_mode= True
+        orm_mode = True
+
 
 """Adverse Reaction"""
+
+
 class AdverseReactionBase(BaseModel):
-    id: int
     patient_id: int
     reaction_date: date
     reaction_time: time
@@ -36,51 +73,62 @@ class AdverseReactionBase(BaseModel):
     severity: str
     treatment: str
 
+
 class AdverseReactionCreate(AdverseReactionBase):
     pass
 
 
 class AdverseReactionResponse(AdverseReactionBase):
+    id: int
     created_at: datetime
 
     class Config:
-        orm_mode= True
+        orm_mode = True
+
 
 """Adverse Reaction Type"""
+
+
 class AdverseReactionTypeBase(BaseModel):
-    id: int
     name: str
     description: str
+
 
 class AdverseReactionTypeCreate(AdverseReactionTypeBase):
     pass
 
 
 class AdverseReactionTypeResponse(AdverseReactionTypeBase):
+    id: int
     created_at: datetime
 
     class Config:
-        orm_mode= True
+        orm_mode = True
+
 
 """Allergy"""
+
+
 class AllergyBase(BaseModel):
-    id: int
     name: str
+
 
 class AllergyCreate(AllergyBase):
     pass
 
+
 class AllergyResponse(AllergyBase):
+    id: int
     created_at: datetime
 
     class Config:
-        orm_mode= True
-
+        orm_mode = True
 
 
 """Appointment Reminder"""
+
+
 class AppointmentReminderBase(BaseModel):
-    id: int
     appointment_id: int
     user_id: int
     reminder_date: date
@@ -88,20 +136,23 @@ class AppointmentReminderBase(BaseModel):
     reminder_type: str
     status: str
 
+
 class AppointmentReminderCreate(AppointmentReminderBase):
     pass
 
 
 class AppointmentReminderResponse(AppointmentReminderBase):
+    id: int
     created_at: datetime
 
     class Config:
-        orm_mode= True
+        orm_mode = True
 
 
-"""Appointment""" 
+"""Appointment"""
+
+
 class AppointmentBase(BaseModel):
-    id: int
     patient_id: int
     doctor_id: int
     appointment_type: str
@@ -111,273 +162,305 @@ class AppointmentBase(BaseModel):
     description: str
     status: str
 
+
 class AppointmentCreate(AppointmentBase):
     pass
 
 
 class AppointmentResponse(AppointmentBase):
+    id: int
     created_at: datetime
 
     class Config:
-        orm_mode= True
+        orm_mode = True
+
+"""Appointment type"""
 
 
-"""Bed""" 
-class BedBase(BaseModel):
+class AppointmentTypeBase(BaseModel):
+    name: str
+    description: str
+
+
+class AppointmentTypeCreate(AppointmentTypeBase):
+    pass
+
+
+class AppointmentTypeResponse(AppointmentTypeBase):
     id: int
-    ward_id: int
+    created_at: datetime
+
+    class Config:
+        orm_mode = True
+
+"""Bed"""
+
+
+class BedBase(BaseModel):
+    ward: str
     bed_no: int
     bed_type: str
     availability: bool
     occupied_by: int
+
 
 class BedCreate(BedBase):
     pass
 
 
 class BedResponse(BedBase):
+    id: int
     created_at: datetime
 
     class Config:
-        orm_mode= True
+        orm_mode = True
 
-"""Bed Assignment""" 
+
+"""Bed Assignment"""
+
+
 class BedAssignmentBase(BaseModel):
-    id: int
     bed_id: int
     patient_id: int
     assigned_by: int
     assigned_at: datetime
     discharged_at: datetime
 
+
 class BedAssignmentCreate(BedAssignmentBase):
     pass
 
 
 class BedAssignmentResponse(BedAssignmentBase):
+    id: int
     created_at: datetime
 
     class Config:
-        orm_mode= True
+        orm_mode = True
+
 
 """Billing"""
+
+
 class BillingBase(BaseModel):
-     id: int
-     patient_id: int
-     bill_date: date
-     amount_due: float
-     amount_paid: float
-     payment_method: str
+    patient_id: int
+    bill_date: date
+    amount_due: float
+    amount_paid: float
+    payment_method: str
+
 
 class BillingCreate(BillingBase):
     pass
 
 
 class BillingResponse(BillingBase):
-    created_at: datetime
-
-    class Config:
-        orm_mode= True
-
-"""Care Team """
-class CareTeamBase(BaseModel):
     id: int
-    first_name: str
-    last_name: str
-    role: str
-    contact_number: int
-    email: str
-    patient_id: int
-    start_date: date
-    end_date: date
-
-class CareTeamCreate(CareTeamBase):
-    pass
-
-
-class CareTeamResponse(CareTeamBase):
     created_at: datetime
 
     class Config:
-        orm_mode= True
+        orm_mode = True
+
+
+
 
 """Chronic condition"""
+
+
 class ChronicConditionBase(BaseModel):
-    id: int
-    patient_id: int
-    condition: str
-    diagnosis_date: date
-    severity: str
-    notes: str
+    name: str
+    description: str
+
 
 class ChronicConditionCreate(ChronicConditionBase):
     pass
 
 
 class ChronicConditionResponse(ChronicConditionBase):
+    id: int
     created_at: datetime
 
     class Config:
-        orm_mode= True
+        orm_mode = True
+
 
 """Country"""
+
+
 class CountryBase(BaseModel):
-    id: int
     name: str
     code: str
+
 
 class CountryCreate(CountryBase):
     pass
 
 
 class CountryResponse(CountryBase):
+    id: int
     created_at: datetime
 
     class Config:
-        orm_mode= True
+        orm_mode = True
 
 
 """Department"""
+
+
 class DepartmentBase(BaseModel):
-    id: int
     name: str
     description: str
-    head_doctor_id: int
+    hospital: str
+    head_doctor: str
+
 
 class DepartmentCreate(DepartmentBase):
     pass
 
 
 class DepartmentResponse(DepartmentBase):
+    id: int
     created_at: datetime
 
     class Config:
-        orm_mode= True
+        orm_mode = True
 
 
 """Diagnosis"""
+
+
 class DiagnosisBase(BaseModel):
-    id: int
-    patient_id: int
-    disease_id: int
-    diagnosis: int
+    patient_id: str
+    disease: str
+    diagnosis: str
     date: date
-    doctor_id: int
+    doctor_id: str
     notes: str
+
 
 class DiagnosisCreate(DiagnosisBase):
     pass
 
 
 class DiagnosisResponse(DiagnosisBase):
+    id: int
     created_at: datetime
 
     class Config:
-        orm_mode= True
+        orm_mode = True
+
 
 """Diseases"""
+
+
 class DiseaseBase(BaseModel):
-    id: int
     name: str
     description: str
     symptoms: str
     treatment: str
     prevention: str
 
+
 class DiseaseCreate(DiseaseBase):
     pass
 
 
 class DiseaseResponse(DiseaseBase):
+    id: int
     created_at: datetime
 
     class Config:
-        orm_mode= True
+        orm_mode = True
+
 
 """Doctor"""
+
+
 class DoctorBase(BaseModel):
-    id: int
     firstname: str
+    middlename: str
     lastname: str
-    email: str
+    dob: date
+    gender: str
     phone_number: str
+    email: str
     specialty: str
+    licence_number: str
+    address: str
+    city: str
+    state: str
+    postal_code: str
+    country: str
+    consultation_fee: float
+    rating: float
     verified: bool
-    work_schedule: str
+
 
 class DoctorCreate(DoctorBase):
     pass
 
 
 class DoctorResponse(DoctorBase):
+    id: str
     created_at: datetime
 
     class Config:
-        orm_mode= True
+        orm_mode = True
 
-"""Doctor Schedules"""
-class DoctorScheduleBase(BaseModel):
-    id: int
-    doctor_id: int
-    date: date
-    start_time: time
-    end_time: time
-    patient_id: int
-    status: str
-
-class DoctorScheduleCreate(DoctorScheduleBase):
-    pass
-
-class DoctorScheduleResponse(DoctorScheduleBase):
-    created_at: datetime
-
-    class Config:
-        orm_mode= True
 
 """Genetic Condition"""
+
+
 class GeneticConditionBase(BaseModel):
-    id: int
     name: str
     description: str
     patient_id: int
     inheritance_pattern: str
+
 
 class GeneticConditionCreate(GeneticConditionBase):
     pass
 
 
 class GeneticConditionResponse(GeneticConditionBase):
+    id: int
     created_at: datetime
 
     class Config:
-        orm_mode= True
+        orm_mode = True
+
 
 """ Hospital """
+
+
 class HospitalBase(BaseModel):
-    id: int
     name: str
     address: str
     city: str
     state: str
     zip_code: str
-    country_id: int
+    country: str
     phone_number: str
     website: str
     rating: float
+
 
 class HospitalCreate(HospitalBase):
     pass
 
 
 class HospitalResponse(HospitalBase):
+    id: str
     created_at: datetime
 
     class Config:
-        orm_mode= True
+        orm_mode = True
+
 
 """Immunization"""
+
+
 class ImmunizationBase(BaseModel):
-    id: int
     patient_id: int
     vaccine_name: str
     dose_number: int
@@ -391,17 +474,19 @@ class ImmunizationCreate(ImmunizationBase):
 
 
 class ImmunizationResponse(ImmunizationBase):
+    id: int
     created_at: datetime
 
     class Config:
-        orm_mode= True
+        orm_mode = True
 
 
 """Insurance claims"""
+
+
 class InsuranceClaimBase(BaseModel):
-    id: int
-    patient_id: int
-    provider_id: int
+    patient_id: str
+    provider_id: str
     date_of_service: date
     procedure_code: str
     diagnosis_code: str
@@ -410,134 +495,176 @@ class InsuranceClaimBase(BaseModel):
     patient_paid: float
     status: str
 
+
 class InsuranceClaimCreate(InsuranceClaimBase):
     pass
 
 
 class InsuranceClaimResponse(InsuranceClaimBase):
+    id: str
     created_at: datetime
 
     class Config:
-        orm_mode= True
+        orm_mode = True
 
 
 """Insurance provider"""
+
+
 class InsuranceProviderBase(BaseModel):
-    id: int
     name: str
     type: str
     address: str
-    country_id: int
+    city: str
+    state: str
+    postal_code: str
+    country: str
     phone_number: int
     email: str
     website: str
+
 
 class InsuranceProviderCreate(InsuranceProviderBase):
     pass
 
 
 class InsuranceProviderResponse(InsuranceProviderBase):
+    id: str
     created_at: datetime
 
     class Config:
-        orm_mode= True
+        orm_mode = True
 
-"""Insurance information"""
-class InsuranceInformationBase(BaseModel):
-    id: int
-    patient_id: int
-    provider_name: str
-    policy_number: int
-    group_number: int
-    plan_name: str
-    plan_type: str
-    effective_date: date
-    expiration_date: date
+"""Insurance provider type"""
 
-class InsuranceInformationCreate(InsuranceInformationBase):
+
+class InsuranceProviderTypeBase(BaseModel):
+    name: str
+    description: str
+
+
+class InsuranceProviderTypeCreate(InsuranceProviderTypeBase):
     pass
 
 
-class InsuranceInformationResponse(InsuranceInformationBase):
+class InsuranceProviderTypeResponse(InsuranceProviderTypeBase):
+    id: int
     created_at: datetime
 
     class Config:
-        orm_mode= True
+        orm_mode = True
+
+
+"""IT Staff"""
+
+
+class ItstaffBase(BaseModel):
+    firstname: str
+    lastname: str
+    dob: date
+    gender: str
+    phone_number: str
+    email: str
+    address: str
+    city: str
+    state: str
+    zip_code: str
+    country: str
+    hospital_id: str
+
+
+class ItstaffCreate(ItstaffBase):
+    pass
+
+
+class ItstaffResponse(ItstaffBase):
+    id: str
+    created_at: datetime
+
+    class Config:
+        orm_mode = True
+
+
+"""Lab Technician"""
+
+
+class LabTechnicianBase(BaseModel):
+    firstname: str
+    lastname: str
+    dob: date
+    gender: str
+    phone_number: str
+    email: str
+    address: str
+    city: str
+    state: str
+    zip_code: str
+    country: str
+    hospital_id: str
+
+
+class LabTechnicianCreate(LabTechnicianBase):
+    pass
+
+
+class LabTechnicianResponse(LabTechnicianBase):
+    id: str
+    created_at: datetime
+
+    class Config:
+        orm_mode = True
 
 
 """Lab test"""
+
+
 class LabTestBase(BaseModel):
-    id: int
     test_name: str
     test_description: str
     test_type: str
     test_cost: float
+
 
 class LabTestCreate(LabTestBase):
     pass
 
 
 class LabTestResponse(LabTestBase):
-    created_at: datetime
-
-    class Config:
-        orm_mode= True
-
-"""Lab test Order"""
-class LabTestOrderBase(BaseModel):
     id: int
-    patient_id: int
-    doctor_id: int
-    test_id: int
-    order_date: date
-
-class LabTestOrderCreate(LabTestOrderBase):
-    pass
-
-
-class LabTestOrderResponse(LabTestOrderBase):
     created_at: datetime
 
     class Config:
-        orm_mode= True
+        orm_mode = True
+
 
 """Lab Test Result"""
+
+
 class LabTestResultBase(BaseModel):
-    id: int
-    order_id: int
-    result_date: date
-    result_value: float
-    result_units: str
+    patient_id: int
+    lab_test_name: str
+    test_date: date
+    test_result: str
+    units: str
+    comments: str
+
 
 class LabTestResultCreate(LabTestResultBase):
     pass
 
 
 class LabTestResultResponse(LabTestResultBase):
-    created_at: datetime
-
-    class Config:
-        orm_mode= True
-
-"""Lab Test Interpretation"""
-class LabTestInterpretationBase(BaseModel):
     id: int
-    result_id: int
-    text: str
-
-class LabTestInterpretationCreate(LabTestInterpretationBase):
-    pass
-
-
-class LabTestInterpretationResponse(LabTestInterpretationBase):
     created_at: datetime
 
     class Config:
-        orm_mode= True
+        orm_mode = True
+
 
 """Medication Alerts"""
+
+
 class MedicationAlertBase(BaseModel):
-    id: int
     patient_id: int
     medication_id: int
     dosage: str
@@ -546,144 +673,139 @@ class MedicationAlertBase(BaseModel):
     alert_text: str
     status: str
 
+
 class MedicationAlertCreate(MedicationAlertBase):
     pass
 
 
 class MedicationAlertResponse(MedicationAlertBase):
+    id: int
     created_at: datetime
 
     class Config:
-        orm_mode= True
-   
+        orm_mode = True
+
+
 """Medical conditions"""
+
+
 class MedicalConditionBase(BaseModel):
-    id: int
     patient_id: int
     name: str
     description: str
     diagnosis_date: date
     treatment: str
 
+
 class MedicalConditionCreate(MedicalConditionBase):
     pass
 
 
 class MedicalConditionResponse(MedicalConditionBase):
+    id: int
     created_at: datetime
 
     class Config:
-        orm_mode= True
-     
+        orm_mode = True
+
 
 """Medical devices"""
+
+
 class MedicalDeviceBase(BaseModel):
-    id: int
     name: str
     manufacturer: str
     model: str
     serial_number: str
-    hospital_id: int
-    department_id: int
+    hospital: str
+    department: str
     last_maintenance: date
-    next_maintenace: date #maintenance
+    next_maintenance: date  
+
 
 class MedicalDeviceCreate(MedicalDeviceBase):
     pass
 
 
 class MedicalDeviceResponse(MedicalDeviceBase):
+    id: int
     created_at: datetime
 
     class Config:
-        orm_mode= True
+        orm_mode = True
+
 
 """Medical images"""
+
+
 class MedicalImageBase(BaseModel):
-    id: int
     patient_id: int
     doctor_id: int
     image_type: str
     image_date: date
+
 
 class MedicalImageCreate(MedicalImageBase):
     pass
 
 
 class MedicalImageResponse(MedicalImageBase):
+    id: int
     created_at: datetime
 
     class Config:
-        orm_mode= True
+        orm_mode = True
 
 
 """Medical notes"""
+
+
 class MedicalNoteBase(BaseModel):
-    id: int
     patient_id: int
     doctor_id: int
     date: date
     content: str
+
 
 class MedicalNoteCreate(MedicalNoteBase):
     pass
 
 
 class MedicalNoteResponse(MedicalNoteBase):
+    id: int
     created_at: datetime
 
     class Config:
-        orm_mode= True
+        orm_mode = True
+
 
 """Medical procedures"""
+
+
 class MedicalProcedureBase(BaseModel):
-    id: int
     patient_id: int
     doctor_id: int
     name: str
     date: date
     notes: str
 
+
 class MedicalProcedureCreate(MedicalProcedureBase):
     pass
 
 
 class MedicalProcedureResponse(MedicalProcedureBase):
-    created_at: datetime
-
-    class Config:
-        orm_mode= True
-
-"""Medical staff"""
-class MedicalStaffBase(BaseModel):
     id: int
-    name: str
-    gender: str
-    dob: date
-    address: str
-    city: str
-    state: str
-    zip_code: str
-    country_id: int
-    phone_number: int
-    email: str
-    job_title: str
-    department_id: int
-    date_hired: date
-
-class MedicalStaffCreate(MedicalStaffBase):
-    pass
-
-
-class MedicalStaffResponse(MedicalStaffBase):
     created_at: datetime
 
     class Config:
-        orm_mode= True
+        orm_mode = True
+
 
 """Medication"""
+
+
 class MedicationBase(BaseModel):
-    id: int
     name: str
     description: str
     route_of_administration: str
@@ -693,59 +815,101 @@ class MedicationBase(BaseModel):
     patient_id: int
     doctor_id: int
 
+
 class MedicationCreate(MedicationBase):
     pass
 
 
 class MedicationResponse(MedicationBase):
+    id: int
     created_at: datetime
 
     class Config:
-        orm_mode= True
+        orm_mode = True
+
+
+"""Nurse"""
+
+
+class NurseBase(BaseModel):
+    firstname: str
+    lastname: str
+    dob: date
+    gender: str
+    phone_number: str
+    email: str
+    licence_number: str
+    hospital_id: str
+    address: str
+    city: str
+    state: str
+    postal_code: str
+    country: str
+    work_schedule: str
+    verified: bool
+
+
+class NurseCreate(NurseBase):
+    pass
+
+
+class NurseResponse(NurseBase):
+    id: str
+    created_at: datetime
+
+    class Config:
+        orm_mode = True
 
 
 """Patient consent"""
+
+
 class PatientConsentBase(BaseModel):
-    id: int
     patient_id: int
     consent_type: str
     consent_date: date
     expiration_date: date
+
 
 class PatientConsentCreate(PatientConsentBase):
     pass
 
 
 class PatientConsentResponse(PatientConsentBase):
+    id: int
     created_at: datetime
 
     class Config:
-        orm_mode= True
+        orm_mode = True
 
 
 """Patient feedback"""
+
+
 class PatientFeedbackBase(BaseModel):
-    id: int
     patient_id: int
     doctor_id: int
     date: date
     text: str
     rating: int
 
+
 class PatientFeedbackCreate(PatientFeedbackBase):
     pass
 
 
 class PatientFeedbackResponse(PatientFeedbackBase):
-    #created_at: datetime
+    id: int
+    # created_at: datetime
 
     class Config:
-        orm_mode= True
+        orm_mode = True
 
 
 """Patient visit"""
+
+
 class PatientVisitBase(BaseModel):
-    id: int
     patient_id: int
     doctor_id: int
     appointment_id: int
@@ -754,34 +918,44 @@ class PatientVisitBase(BaseModel):
     diagnosis_id: int
     notes: str
 
+
 class PatientVisitCreate(PatientVisitBase):
     pass
 
 
 class PatientVisitResponse(PatientVisitBase):
+    id: int
     created_at: datetime
 
     class Config:
-        orm_mode= True
+        orm_mode = True
 
 
 """Patient """
+
+
 class PatientBase(BaseModel):
-    id: int
     firstname: str
+    middlename: str
     lastname: str
-    date_of_birth: date
+    dob: date
     gender: str
-    phone_number: int
+    phonenumber: str
     email: str
     address: str
     city: str
     state: str
-    zip_code: str
-    country_id: int
+    postal_code: str
+    country: str
     emergency_contact_name: str
     emergency_contact_phone: str
-    insurance_provider_id: int
+    relationship: str
+    insurance: bool
+    provider_name: str
+    policy_number: str
+    group_number: str
+    effective_date: date
+    expiration_date: date
 
 
 class PatientCreate(PatientBase):
@@ -789,14 +963,48 @@ class PatientCreate(PatientBase):
 
 
 class PatientResponse(PatientBase):
+    id: str
     created_at: datetime
 
     class Config:
-        orm_mode= True
+        orm_mode = True
 
-"""Prescription""" 
+
+"""Pharmacist"""
+
+
+class PharmacistBase(BaseModel):
+    firstname: str
+    lastname: str
+    dob: date
+    gender: str
+    phone_number: str
+    email: str
+    licence_number: str
+    address: str
+    city: str
+    state: str
+    zip_code: str
+    country: str
+    verified: bool
+
+
+class PharmacistCreate(PharmacistBase):
+    pass
+
+
+class PharmacistResponse(PharmacistBase):
+    id: str
+    created_at: datetime
+
+    class Config:
+        orm_mode = True
+
+
+"""Prescription"""
+
+
 class PrescriptionBase(BaseModel):
-    id: int
     doctor_id: int
     patient_id: int
     medication: str
@@ -809,19 +1017,55 @@ class PrescriptionCreate(PrescriptionBase):
 
 
 class PrescriptionResponse(PrescriptionBase):
+    id: int
     created_at: datetime
 
     class Config:
-        orm_mode= True
+        orm_mode = True
+
+
+"""Receptionist"""
+
+
+class ReceptionistBase(BaseModel):
+    firstname: str
+    lastname: str
+    dob: date
+    gender: str
+    phone_number: str
+    email: str
+    address: str
+    city: str
+    state: str
+    zip_code: str
+    country: str
+    hospital_id: str
+
+
+class ReceptionistCreate(ReceptionistBase):
+    pass
+
+
+class ReceptionistResponse(ReceptionistBase):
+    id: str
+    created_at: datetime
+
+    class Config:
+        orm_mode = True
+
+
+
 
 """Referrals"""
+
+
 class ReferralBase(BaseModel):
-    id: int
-    referring_patient_id: int
-    referred_patient_id: int
-    referring_doctor_id: int
-    referred_doctor_id: int
-    referred_hospital_id: int
+    referring_patient: str
+    referred_patient: str
+    referring_doctor: str
+    referred_doctor: str
+    referring_hospital: str
+    referred_hospital: str
     referral_date: date
     referral_reason: str
     status: str
@@ -832,45 +1076,61 @@ class ReferralCreate(ReferralBase):
 
 
 class ReferralResponse(ReferralBase):
+    id: int
     created_at: datetime
 
     class Config:
-        orm_mode= True
+        orm_mode = True
 
-"""User""" 
-class UserBase(BaseModel):
+
+"""Specialty"""
+
+
+class SpecialtyBase(BaseModel):
+    name: str
+    description: str
+
+
+class SpecialtyCreate(SpecialtyBase):
+    pass
+
+
+class SpecialtyResponse(SpecialtyBase):
     id: int
-    username: str
-    password: str
-    first_name: str
-    last_name: str
-    date_of_birth: date
+    created_at: datetime
+
+    class Config:
+        orm_mode = True
+
+"""User"""
+
+
+class UserBase(BaseModel):
     email: str
-    phone_number: int
-    address: str
-    city: str
-    state: str
-    zip_code: str
-    country_id: int
-    user_type: str
+    password: str
+    role: str
+
 
 class UserCreate(UserBase):
     pass
 
 
 class UserResponse(UserBase):
-    created_at: datetime
+    id: str
+    registration_date: datetime
 
     class Config:
-        orm_mode= True
+        orm_mode = True
+
 
 """Vaccinations """
+
+
 class VaccinationBase(BaseModel):
-    id: int
     patient_id: int
     vaccine_name: str
     administered_by: str
-    administered_at: datetime
+    administered_at: date
     next_dose_due: date
 
 
@@ -879,15 +1139,17 @@ class VaccinationCreate(VaccinationBase):
 
 
 class VaccinationResponse(VaccinationBase):
+    id: int
     created_at: datetime
 
     class Config:
-        orm_mode= True
+        orm_mode = True
 
 
 """Vital signs """
+
+
 class VitalSignBase(BaseModel):
-    id: int
     patient_id: int
     doctor_id: int
     heart_rate: float
@@ -898,7 +1160,7 @@ class VitalSignBase(BaseModel):
     height: float
     weight: float
     oxygen_saturation: int
-    recorded_at: datetime
+    recorded_at: date
 
 
 class VitalSignCreate(VitalSignBase):
@@ -906,30 +1168,54 @@ class VitalSignCreate(VitalSignBase):
 
 
 class VitalSignResponse(VitalSignBase):
+    id: int
     created_at: datetime
 
     class Config:
-        orm_mode= True
+        orm_mode = True
 
 
 """Ward """
+
+
 class WardBase(BaseModel):
-    id: int
     name: str
     type: str
     capacity: int
     location: str
     hospital_id: int
 
+
 class WardCreate(WardBase):
     pass
 
 
 class WardResponse(WardBase):
+    id: int
     created_at: datetime
 
     class Config:
-        orm_mode= True
+        orm_mode = True
 
 
-        
+"""Work Schedule """
+
+
+class WorkScheduleBase(BaseModel):
+    doctor: str
+    nurse: str
+    day_of_week: str
+    start_time: datetime
+    end_time: datetime
+
+
+class WorkScheduleCreate(WorkScheduleBase):
+    pass
+
+
+class WorkScheduleResponse(WorkScheduleBase):
+    id: int
+    created_at: datetime
+
+    class Config:
+        orm_mode = True

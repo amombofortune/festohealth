@@ -40,8 +40,15 @@ def get_one_admission(id: int, db: Session = Depends(get_db),
 def get_admission(db: Session = Depends(get_db),
                   current_user: int = Depends(oauth2.get_current_user)):
     print(current_user.email)
+
     admission = db.query(models.Admission).filter(models.Admission.user_id == current_user.id).all()
+
+    if admission.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
     return admission
+
+
 
 # Update Admission
 @router.put("/{id}", response_model=schemas.AdmissionResponse)

@@ -18,7 +18,7 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_bed_assignment(bed_assignment: schemas.BedAssignmentCreate, db: Session = Depends(get_db),
                           current_user: int = Depends(oauth2.get_current_user)):
-    new_bed_assignment = models.BedAssignment(**bed_assignment.dict())
+    new_bed_assignment = models.BedAssignment(user_id= current_user.id, **bed_assignment.dict())
     db.add(new_bed_assignment)
     db.commit()
     db.refresh(new_bed_assignment)
@@ -62,6 +62,10 @@ def update_bed_assignment(id: int, updated_bed_assignment: schemas.BedAssignment
     if bed_assignment == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Bed assignment with id: {id} does not exist")
+    
+    if bed_assignment.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
     bed_assignment_query.update(
         updated_bed_assignment.dict(), synchronize_session=False)
@@ -74,13 +78,19 @@ def update_bed_assignment(id: int, updated_bed_assignment: schemas.BedAssignment
 def delete_bed(id: int, db: Session = Depends(get_db),
                current_user: int = Depends(oauth2.get_current_user)):
 
-    bed_assignment = db.query(models.BedAssignment).filter(
+    bed_assignment_query = db.query(models.BedAssignment).filter(
         models.BedAssignment.id == id)
+    
+    bed_assignment = bed_assignment_query.first()
 
-    if bed_assignment.first() == None:
+    if bed_assignment == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Bed assignment with id: {id} does not exist")
+    
+    if bed_assignment.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
-    bed_assignment.delete(synchronize_session=False)
+    bed_assignment_query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

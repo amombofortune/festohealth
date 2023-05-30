@@ -19,7 +19,7 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_allergy(allergy: schemas.AllergyCreate, db: Session = Depends(get_db),
                    current_user: int = Depends(oauth2.get_current_user)):
-    new_allergy = models.Allergy(**allergy.dict())
+    new_allergy = models.Allergy(user_id= current_user.id, **allergy.dict())
     db.add(new_allergy)
     db.commit()
     db.refresh(new_allergy)
@@ -61,6 +61,10 @@ def update_allergy(id: int, updated_allergy: schemas.AllergyCreate, db: Session 
     if allergy == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Allergy with id: {id} does not exist")
+    
+    if allergy.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
     allergy_query.update(updated_allergy.dict(), synchronize_session=False)
     db.commit()
@@ -72,12 +76,18 @@ def update_allergy(id: int, updated_allergy: schemas.AllergyCreate, db: Session 
 def delete_allergy(id: int, db: Session = Depends(get_db),
                    current_user: int = Depends(oauth2.get_current_user)):
 
-    allergy = db.query(models.Allergy).filter(models.Allergy.id == id)
+    allergy_query = db.query(models.Allergy).filter(models.Allergy.id == id)
 
-    if allergy.first() == None:
+    allergy = allergy_query.first()
+
+    if allergy == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Allergy with id: {id} does not exist")
+    
+    if allergy.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
-    allergy.delete(synchronize_session=False)
+    allergy_query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

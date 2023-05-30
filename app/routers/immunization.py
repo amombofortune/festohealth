@@ -20,7 +20,7 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_immunization(immunization: schemas.ImmunizationCreate, db: Session = Depends(get_db),
                         current_user: int = Depends(oauth2.get_current_user)):
-    new_immunization = models.Immunization(**immunization.dict())
+    new_immunization = models.Immunization(user_id= current_user.id, **immunization.dict())
     db.add(new_immunization)
     db.commit()
     db.refresh(new_immunization)
@@ -64,6 +64,10 @@ def update_immunization(id: int, updated_immunization: schemas.ImmunizationCreat
     if immunization == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Immunization with id: {id} does not exist")
+    
+    if immunization.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
     immunization_query.update(
         updated_immunization.dict(), synchronize_session=False)
@@ -76,13 +80,20 @@ def update_immunization(id: int, updated_immunization: schemas.ImmunizationCreat
 def delete_immunization(id: int, db: Session = Depends(get_db),
                         current_user: int = Depends(oauth2.get_current_user)):
 
-    immunization = db.query(models.Immunization).filter(
+    immunization_query = db.query(models.Immunization).filter(
         models.Immunization.id == id)
+    
+    immunization = immunization_query.first()
 
-    if immunization.first() == None:
+
+    if immunization == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Immunization with id: {id} does not exist")
+    
+    if immunization.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
-    immunization.delete(synchronize_session=False)
+    immunization_query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

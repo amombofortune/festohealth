@@ -17,8 +17,8 @@ router = APIRouter(
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_adverse_reaction_type(adverse_reaction_type: schemas.AdverseReactionTypeCreate, db: Session = Depends(get_db),
-                                 user_id: int = Depends(oauth2.get_current_user)):
-    new_adverse_reaction_type = models.AdverseReactionType(
+                                 current_user: int = Depends(oauth2.get_current_user)):
+    new_adverse_reaction_type = models.AdverseReactionType(user_id= current_user.id,
         **adverse_reaction_type.dict())
     db.add(new_adverse_reaction_type)
     db.commit()
@@ -63,6 +63,10 @@ def update_adverse_reaction_type(id: int, updated_adverse_reaction_type: schemas
     if adverse_reaction == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Adverse reaction type with id: {id} does not exist")
+    
+    if adverse_reaction.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
     adverse_reaction_type_query.update(
         updated_adverse_reaction_type.dict(), synchronize_session=False)
@@ -75,13 +79,19 @@ def update_adverse_reaction_type(id: int, updated_adverse_reaction_type: schemas
 def delete_adverse_reaction_type(id: int, db: Session = Depends(get_db),
                                  current_user: int = Depends(oauth2.get_current_user)):
 
-    adverse_reaction_type = db.query(models.AdverseReactionType).filter(
+    adverse_reaction_type_query = db.query(models.AdverseReactionType).filter(
         models.AdverseReactionType.id == id)
+    
+    adverse_reaction_type = adverse_reaction_type_query.first()
 
-    if adverse_reaction_type.first() == None:
+    if adverse_reaction_type == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Adverse Reaction type with id: {id} does not exist")
+    
+    if adverse_reaction_type.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
-    adverse_reaction_type.delete(synchronize_session=False)
+    adverse_reaction_type_query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

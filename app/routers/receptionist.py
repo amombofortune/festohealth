@@ -21,7 +21,7 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_receptionist(receptionist: schemas.ReceptionistCreate, db: Session = Depends(get_db),
                          current_user: int = Depends(oauth2.get_current_user)):
-    receptionist = models.Receptionist(**receptionist.dict())
+    receptionist = models.Receptionist(user_id= current_user.id, **receptionist.dict())
     db.add(receptionist)
     db.commit()
     db.refresh(receptionist)
@@ -65,6 +65,10 @@ def update_receptionist(id: str, updated_receptionist: schemas.ReceptionistCreat
     if receptionist == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Receptionist with id: {id} does not exist")
+    
+    if receptionist.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
     receptionist_query.update(
         updated_receptionist.dict(), synchronize_session=False)
@@ -77,13 +81,20 @@ def update_receptionist(id: str, updated_receptionist: schemas.ReceptionistCreat
 def delete_receptionist(id: str, db: Session = Depends(get_db),
                         current_user: int = Depends(oauth2.get_current_user)):
 
-    receptionist = db.query(models.Receptionist).filter(
+    receptionist_query = db.query(models.Receptionist).filter(
         models.Receptionist.id == id)
+    
+    receptionist = receptionist_query.first()
 
-    if receptionist.first() == None:
+
+    if receptionist == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Receptionist with id: {id} does not exist")
+    
+    if receptionist.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
-    receptionist.delete(synchronize_session=False)
+    receptionist_query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

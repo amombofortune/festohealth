@@ -19,7 +19,7 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_medical_device(medical_device: schemas.MedicalDeviceCreate, db: Session = Depends(get_db),
                           current_user: int = Depends(oauth2.get_current_user)):
-    new_medical_device = models.MedicalDevice(**medical_device.dict())
+    new_medical_device = models.MedicalDevice(user_id= current_user.id, **medical_device.dict())
     db.add(new_medical_device)
     db.commit()
     db.refresh(new_medical_device)
@@ -61,6 +61,10 @@ def update_medical_device(id: int, updated_medical_device: schemas.MedicalDevice
     if medical_device == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Medical device with id: {id} does not exist")
+    
+    if medical_device.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
     medical_device_query.update(
         updated_medical_device.dict(), synchronize_session=False)
@@ -73,13 +77,20 @@ def update_medical_device(id: int, updated_medical_device: schemas.MedicalDevice
 def delete_medical_device(id: int, db: Session = Depends(get_db),
                           current_user: int = Depends(oauth2.get_current_user)):
 
-    medical_device = db.query(models.MedicalDevice).filter(
+    medical_device_query = db.query(models.MedicalDevice).filter(
         models.MedicalDevice.id == id)
+    
+    medical_device = medical_device_query.first()
 
-    if medical_device.first() == None:
+
+    if medical_device == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Medical device with id: {id} does not exist")
+    
+    if medical_device.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
-    medical_device.delete(synchronize_session=False)
+    medical_device_query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

@@ -19,7 +19,7 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_lab_result(lab_result: schemas.LabResultCreate, db: Session = Depends(get_db),
                       current_user: int = Depends(oauth2.get_current_user)):
-    new_lab_result = models.LabResult(**lab_result.dict())
+    new_lab_result = models.LabResult(user_id= current_user.id, **lab_result.dict())
     db.add(new_lab_result)
     db.commit()
     db.refresh(new_lab_result)
@@ -63,6 +63,10 @@ def update_lab_result(id: int, updated_lab_result: schemas.LabResultCreate, db: 
     if lab_result == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Lab result with id: {id} does not exist")
+    
+    if lab_result.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
     lab_result_query.update(
         updated_lab_result.dict(), synchronize_session=False)
@@ -75,13 +79,20 @@ def update_lab_result(id: int, updated_lab_result: schemas.LabResultCreate, db: 
 def delete_lab_result(id: int, db: Session = Depends(get_db),
                       current_user: int = Depends(oauth2.get_current_user)):
 
-    lab_result = db.query(models.LabResult).filter(
+    lab_result_query = db.query(models.LabResult).filter(
         models.LabResult.id == id)
+    
+    lab_result = lab_result_query.first()
 
-    if lab_result.first() == None:
+
+    if lab_result == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Lab result with id: {id} does not exist")
+    
+    if lab_result.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
-    lab_result.delete(synchronize_session=False)
+    lab_result_query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

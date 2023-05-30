@@ -20,7 +20,7 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_insurance_provider_type(insurance_provider_type: schemas.InsuranceProviderTypeCreate, db: Session = Depends(get_db),
                                    current_user: int = Depends(oauth2.get_current_user)):
-    new_insurance_provider_type = models.InsuranceProviderType(
+    new_insurance_provider_type = models.InsuranceProviderType(user_id= current_user.id, 
         **insurance_provider_type.dict())
     db.add(new_insurance_provider_type)
     db.commit()
@@ -63,6 +63,10 @@ def update_insurance_provider_type(id: int, updated_insurance_provider_type: sch
     if insurance_provider_type == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Insurance provider type with id: {id} does not exist")
+    
+    if insurance_provider_type.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
     insurance_provider_type_query.update(
         updated_insurance_provider_type.dict(), synchronize_session=False)
@@ -75,13 +79,19 @@ def update_insurance_provider_type(id: int, updated_insurance_provider_type: sch
 def delete_insurance_provider_type(id: int, db: Session = Depends(get_db),
                                    current_user: int = Depends(oauth2.get_current_user)):
 
-    insurance_provider_type = db.query(models.InsuranceProviderType).filter(
+    insurance_provider_type_query = db.query(models.InsuranceProviderType).filter(
         models.InsuranceProviderType.id == id)
+    
+    insurance_provider_type = insurance_provider_type_query.first()
 
-    if insurance_provider_type.first() == None:
+    if insurance_provider_type == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Insurance provider type with id: {id} does not exist")
+    
+    if insurance_provider_type.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
-    insurance_provider_type.delete(synchronize_session=False)
+    insurance_provider_type_query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

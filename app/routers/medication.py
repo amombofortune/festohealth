@@ -22,7 +22,7 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_medication(medication: schemas.MedicationCreate, db: Session = Depends(get_db),
                       current_user: int = Depends(oauth2.get_current_user)):
-    new_medication = models.Medication(**medication.dict())
+    new_medication = models.Medication(user_id= current_user.id, **medication.dict())
     db.add(new_medication)
     db.commit()
     db.refresh(new_medication)
@@ -66,6 +66,10 @@ def update_medication(id: int, updated_medication: schemas.MedicationCreate, db:
     if medication == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Medication with id: {id} does not exist")
+    
+    if medication.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
     medication_query.update(updated_medication.dict(),
                             synchronize_session=False)
@@ -78,12 +82,19 @@ def update_medication(id: int, updated_medication: schemas.MedicationCreate, db:
 def delete_medication(id: int, db: Session = Depends(get_db),
                       current_user: int = Depends(oauth2.get_current_user)):
 
-    medication = db.query(models.Medication).filter(models.Medication.id == id)
+    medication_query = db.query(models.Medication).filter(models.Medication.id == id)
 
-    if medication.first() == None:
+    medication = medication_query.first()
+
+
+    if medication == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Medication with id: {id} does not exist")
+    
+    if medication.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
-    medication.delete(synchronize_session=False)
+    medication_query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

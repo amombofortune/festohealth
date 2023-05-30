@@ -20,7 +20,7 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_billing(billing: schemas.BillingCreate, db: Session = Depends(get_db),
                    current_user: int = Depends(oauth2.get_current_user)):
-    new_billing = models.Billing(**billing.dict())
+    new_billing = models.Billing(user_id= current_user.id, **billing.dict())
     db.add(new_billing)
     db.commit()
     db.refresh(new_billing)
@@ -62,6 +62,10 @@ def update_billing(id: int, updated_billing: schemas.BillingCreate, db: Session 
     if billing == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Billing with id: {id} does not exist")
+    
+    if billing.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
     billing_query.update(updated_billing.dict(), synchronize_session=False)
     db.commit()
@@ -73,12 +77,19 @@ def update_billing(id: int, updated_billing: schemas.BillingCreate, db: Session 
 def delete_bill(id: int, db: Session = Depends(get_db),
                 current_user: int = Depends(oauth2.get_current_user)):
 
-    billing = db.query(models.Billing).filter(models.Billing.id == id)
+    billing_query = db.query(models.Billing).filter(models.Billing.id == id)
 
-    if billing.first() == None:
+    billing = billing_query.first()
+
+
+    if billing == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Billing with id: {id} does not exist")
+    
+    if billing.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
-    billing.delete(synchronize_session=False)
+    billing_query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

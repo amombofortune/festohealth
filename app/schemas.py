@@ -26,6 +26,7 @@ class AdministratorCreate(AdministratorBase):
 class AdministratorResponse(AdministratorBase):
     id: str
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -51,6 +52,7 @@ class AdmissionCreate(AdmissionBase):
 class AdmissionResponse(AdmissionBase):
     id: int
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -76,6 +78,7 @@ class AdverseReactionCreate(AdverseReactionBase):
 class AdverseReactionResponse(AdverseReactionBase):
     id: int
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -94,6 +97,7 @@ class AdverseReactionTypeCreate(AdverseReactionTypeBase):
 class AdverseReactionTypeResponse(AdverseReactionTypeBase):
     id: int
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -112,6 +116,7 @@ class AllergyCreate(AllergyBase):
 class AllergyResponse(AllergyBase):
     id: int
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -136,6 +141,7 @@ class AppointmentReminderCreate(AppointmentReminderBase):
 class AppointmentReminderResponse(AppointmentReminderBase):
     id: int
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -160,6 +166,7 @@ class AppointmentCreate(AppointmentBase):
 class AppointmentResponse(AppointmentBase):
     id: int
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -177,6 +184,7 @@ class AppointmentTypeCreate(AppointmentTypeBase):
 class AppointmentTypeResponse(AppointmentTypeBase):
     id: int
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -198,6 +206,7 @@ class BedCreate(BedBase):
 class BedResponse(BedBase):
     id: int
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -219,6 +228,7 @@ class BedAssignmentCreate(BedAssignmentBase):
 class BedAssignmentResponse(BedAssignmentBase):
     id: int
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -241,6 +251,7 @@ class BillingCreate(BillingBase):
 class BillingResponse(BillingBase):
     id: int
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -262,6 +273,7 @@ class ChronicConditionCreate(ChronicConditionBase):
 class ChronicConditionResponse(ChronicConditionBase):
     id: int
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -281,6 +293,7 @@ class CountryCreate(CountryBase):
 class CountryResponse(CountryBase):
     id: int
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -302,6 +315,7 @@ class DepartmentCreate(DepartmentBase):
 class DepartmentResponse(DepartmentBase):
     id: int
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -325,6 +339,7 @@ class DiagnosisCreate(DiagnosisBase):
 class DiagnosisResponse(DiagnosisBase):
     id: int
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -347,6 +362,7 @@ class DiseaseCreate(DiseaseBase):
 class DiseaseResponse(DiseaseBase):
     id: int
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -380,6 +396,7 @@ class DoctorCreate(DoctorBase):
 class DoctorResponse(DoctorBase):
     id: str
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -401,6 +418,7 @@ class GeneticConditionCreate(GeneticConditionBase):
 class GeneticConditionResponse(GeneticConditionBase):
     id: int
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -428,6 +446,7 @@ class HospitalCreate(HospitalBase):
 class HospitalResponse(HospitalBase):
     id: str
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -450,6 +469,7 @@ class ImmunizationCreate(ImmunizationBase):
 class ImmunizationResponse(ImmunizationBase):
     id: int
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -475,6 +495,7 @@ class InsuranceClaimCreate(InsuranceClaimBase):
 class InsuranceClaimResponse(InsuranceClaimBase):
     id: str
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -504,6 +525,7 @@ class InsuranceProviderCreate(InsuranceProviderBase):
 class InsuranceProviderResponse(InsuranceProviderBase):
     id: str
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -521,6 +543,7 @@ class InsuranceProviderTypeCreate(InsuranceProviderTypeBase):
 class InsuranceProviderTypeResponse(InsuranceProviderTypeBase):
     id: int
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -549,6 +572,7 @@ class ItstaffCreate(ItstaffBase):
 class ItstaffResponse(ItstaffBase):
     id: str
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -577,6 +601,7 @@ class LabTechnicianCreate(LabTechnicianBase):
 class LabTechnicianResponse(LabTechnicianBase):
     id: str
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -603,6 +628,7 @@ class LabTestResponse(LabTestBase):
     id: int
     created_at: datetime
     updated_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -622,6 +648,7 @@ class LabResultCreate(LabResultBase):
 class LabResultResponse(LabResultBase):
     id: int
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -646,6 +673,7 @@ class MedicationAlertCreate(MedicationAlertBase):
 class MedicationAlertResponse(MedicationAlertBase):
     id: int
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -667,6 +695,7 @@ class MedicalConditionCreate(MedicalConditionBase):
 class MedicalConditionResponse(MedicalConditionBase):
     id: int
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -691,6 +720,7 @@ class MedicalDeviceCreate(MedicalDeviceBase):
 class MedicalDeviceResponse(MedicalDeviceBase):
     id: int
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -710,6 +740,7 @@ class MedicalImageCreate(MedicalImageBase):
 class MedicalImageResponse(MedicalImageBase):
     id: int
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -730,6 +761,7 @@ class MedicalNoteCreate(MedicalNoteBase):
 class MedicalNoteResponse(MedicalNoteBase):
     id: int
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -751,6 +783,7 @@ class MedicalProcedureCreate(MedicalProcedureBase):
 class MedicalProcedureResponse(MedicalProcedureBase):
     id: int
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -776,6 +809,7 @@ class MedicationCreate(MedicationBase):
 class MedicationResponse(MedicationBase):
     id: int
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -807,6 +841,7 @@ class NurseCreate(NurseBase):
 class NurseResponse(NurseBase):
     id: str
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -827,6 +862,7 @@ class PatientConsentCreate(PatientConsentBase):
 class PatientConsentResponse(PatientConsentBase):
     id: int
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -848,6 +884,7 @@ class PatientFeedbackCreate(PatientFeedbackBase):
 class PatientFeedbackResponse(PatientFeedbackBase):
     id: int
     # created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -871,6 +908,7 @@ class PatientVisitCreate(PatientVisitBase):
 class PatientVisitResponse(PatientVisitBase):
     id: int
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -908,6 +946,7 @@ class PatientCreate(PatientBase):
 class PatientResponse(PatientBase):
     id: str
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -937,6 +976,7 @@ class PharmacistCreate(PharmacistBase):
 class PharmacistResponse(PharmacistBase):
     id: str
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -958,6 +998,7 @@ class PrescriptionCreate(PrescriptionBase):
 class PrescriptionResponse(PrescriptionBase):
     id: int
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -986,6 +1027,7 @@ class ReceptionistCreate(ReceptionistBase):
 class ReceptionistResponse(ReceptionistBase):
     id: str
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -1013,6 +1055,7 @@ class ReferralCreate(ReferralBase):
 class ReferralResponse(ReferralBase):
     id: int
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -1032,6 +1075,8 @@ class SpecialtyCreate(SpecialtyBase):
 class SpecialtyResponse(SpecialtyBase):
     id: int
     created_at: datetime
+    user_id: str
+
 
     class Config:
         orm_mode = True
@@ -1053,6 +1098,8 @@ class TimeSlotResponse(TimeSlotBase):
     id: int
     created_at: datetime
     updated_at: datetime
+    user_id: str
+
 
     class Config:
         orm_mode = True
@@ -1104,6 +1151,7 @@ class VaccinationCreate(VaccinationBase):
 class VaccinationResponse(VaccinationBase):
     id: int
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -1131,6 +1179,7 @@ class VitalSignCreate(VitalSignBase):
 class VitalSignResponse(VitalSignBase):
     id: int
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -1153,6 +1202,7 @@ class WardCreate(WardBase):
 class WardResponse(WardBase):
     id: int
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -1174,6 +1224,7 @@ class WorkScheduleCreate(WorkScheduleBase):
 class WorkScheduleResponse(WorkScheduleBase):
     id: int
     created_at: datetime
+    user_id: str
 
     class Config:
         orm_mode = True

@@ -19,7 +19,7 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_patient_consent(patient_consent: schemas.PatientConsentCreate, db: Session = Depends(get_db),
                            current_user: int = Depends(oauth2.get_current_user)):
-    patient_consent = models.PatientConsent(**patient_consent.dict())
+    patient_consent = models.PatientConsent(user_id= current_user.id, **patient_consent.dict())
     db.add(patient_consent)
     db.commit()
     db.refresh(patient_consent)
@@ -63,6 +63,10 @@ def update_patient_consent(id: int, updated_patient_consent: schemas.PatientCons
     if patient_consent == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Patient consent with id: {id} does not exist")
+    
+    if patient_consent.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
     patient_consent_query.update(
         updated_patient_consent.dict(), synchronize_session=False)
@@ -75,13 +79,20 @@ def update_patient_consent(id: int, updated_patient_consent: schemas.PatientCons
 def delete_patient_consent(id: int, db: Session = Depends(get_db),
                            current_user: int = Depends(oauth2.get_current_user)):
 
-    patient_consent = db.query(models.PatientConsent).filter(
+    patient_consent_query = db.query(models.PatientConsent).filter(
         models.PatientConsent.id == id)
+    
+    patient_consent = patient_consent_query.first()
 
-    if patient_consent.first() == None:
+
+    if patient_consent == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Patient consent with id: {id} does not exist")
+    
+    if patient_consent.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
-    patient_consent.delete(synchronize_session=False)
+    patient_consent_query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

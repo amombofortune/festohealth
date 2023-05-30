@@ -20,8 +20,8 @@ router = APIRouter(
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_work_schedule(work_schedule: schemas.WorkScheduleCreate, db: Session = Depends(get_db),
-                         user_id: int = Depends(oauth2.get_current_user)):
-    work_schedule = models.WorkSchedule(**work_schedule.dict())
+                         current_user: int = Depends(oauth2.get_current_user)):
+    work_schedule = models.WorkSchedule(user_id= current_user.id, **work_schedule.dict())
     db.add(work_schedule)
     db.commit()
     db.refresh(work_schedule)
@@ -32,7 +32,7 @@ def create_work_schedule(work_schedule: schemas.WorkScheduleCreate, db: Session 
 
 @router.get("/{id}", response_model=schemas.WorkScheduleResponse)
 def get_work_schedule(id: int, db: Session = Depends(get_db),
-                      user_id: int = Depends(oauth2.get_current_user)):
+                      current_user: int = Depends(oauth2.get_current_user)):
     work_schedule = db.query(models.WorkSchedule).filter(models.WorkSchedule.id == id).first()
 
     if not work_schedule:
@@ -45,7 +45,7 @@ def get_work_schedule(id: int, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.WorkScheduleResponse])
 def get_work_schedule(db: Session = Depends(get_db),
-                      user_id: int = Depends(oauth2.get_current_user)):
+                      current_user: int = Depends(oauth2.get_current_user)):
     work_schedule = db.query(models.WorkSchedule).all()
     return work_schedule
 
@@ -54,7 +54,7 @@ def get_work_schedule(db: Session = Depends(get_db),
 
 @router.put("/{id}", response_model=schemas.WorkScheduleResponse)
 def update_work_schedule(id: int, updated_work_schedule: schemas.WorkScheduleCreate, db: Session = Depends(get_db),
-                         user_id: int = Depends(oauth2.get_current_user)):
+                         current_user: int = Depends(oauth2.get_current_user)):
 
     work_schedule_query = db.query(models.WorkSchedule).filter(models.WorkSchedule.id == id)
 
@@ -63,6 +63,10 @@ def update_work_schedule(id: int, updated_work_schedule: schemas.WorkScheduleCre
     if work_schedule == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Work schedule with id: {id} does not exist")
+    
+    if work_schedule.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
     work_schedule_query.update(updated_work_schedule.dict(), synchronize_session=False)
     db.commit()
@@ -72,14 +76,21 @@ def update_work_schedule(id: int, updated_work_schedule: schemas.WorkScheduleCre
 # Delete work schedule
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_work_schedule(id: int, db: Session = Depends(get_db),
-                         user_id: int = Depends(oauth2.get_current_user)):
+                         current_user: int = Depends(oauth2.get_current_user)):
 
-    work_schedule = db.query(models.WorkSchedule).filter(models.WorkSchedule.id == id)
+    work_schedule_query = db.query(models.WorkSchedule).filter(models.WorkSchedule.id == id)
 
-    if work_schedule.first() == None:
+    work_schedule = work_schedule_query.first()
+
+
+    if work_schedule == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Work schedule with id: {id} does not exist")
+    
+    if work_schedule.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
-    work_schedule.delete(synchronize_session=False)
+    work_schedule_query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

@@ -20,7 +20,7 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_diagnosis(diagnosis: schemas.DiagnosisCreate, db: Session = Depends(get_db),
                      current_user: int = Depends(oauth2.get_current_user)):
-    new_diagnosis = models.Diagnosis(**diagnosis.dict())
+    new_diagnosis = models.Diagnosis(user_id= current_user.id, **diagnosis.dict())
     db.add(new_diagnosis)
     db.commit()
     db.refresh(new_diagnosis)
@@ -64,6 +64,10 @@ def update_diagnosis(id: int, updated_diagnosis: schemas.DiagnosisCreate, db: Se
     if diagnosis == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Diagnosis with id: {id} does not exist")
+    
+    if diagnosis.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
     diagnosis_query.update(updated_diagnosis.dict(), synchronize_session=False)
     db.commit()
@@ -75,12 +79,19 @@ def update_diagnosis(id: int, updated_diagnosis: schemas.DiagnosisCreate, db: Se
 def delete_diagnosis(id: int, db: Session = Depends(get_db),
                      current_user: int = Depends(oauth2.get_current_user)):
 
-    diagnosis = db.query(models.Diagnosis).filter(models.Diagnosis.id == id)
+    diagnosis_query = db.query(models.Diagnosis).filter(models.Diagnosis.id == id)
 
-    if diagnosis.first() == None:
+    diagnosis = diagnosis_query.first()
+
+
+    if diagnosis == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Diagnosis with id: {id} does not exist")
+    
+    if diagnosis.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
-    diagnosis.delete(synchronize_session=False)
+    diagnosis_query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

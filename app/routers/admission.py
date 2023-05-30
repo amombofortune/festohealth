@@ -17,8 +17,8 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_admission(admission: schemas.AdmissionCreate, db: Session = Depends(get_db),
                       current_user: int = Depends(oauth2.get_current_user)):
-    print(current_user.email)
-    new_admission = models.Admission(**admission.dict())
+    
+    new_admission = models.Admission(user_id= current_user.id, **admission.dict())
     db.add(new_admission)
     db.commit()
     db.refresh(new_admission)
@@ -57,6 +57,10 @@ def update_admission(id: int, updated_admission: schemas.AdmissionCreate, db: Se
     if admission == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Admission with allergy_id: {id} does not exist")
+    
+    if admission.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
     admission_query.update(updated_admission.dict(), synchronize_session=False)
     db.commit()
@@ -68,12 +72,19 @@ def update_admission(id: int, updated_admission: schemas.AdmissionCreate, db: Se
 def delete_admission(id: int, db: Session = Depends(get_db),
                      current_user: int = Depends(oauth2.get_current_user)):
 
-    admission = db.query(models.Admission).filter(models.Admission.id == id)
+    admission_query = db.query(models.Admission).filter(models.Admission.id == id)
 
-    if admission.first() == None:
+    admission = admission_query.first()
+
+    if admission == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Admission with id: {id} does not exist")
+    
+    if admission.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
-    admission.delete(synchronize_session=False)
+    admission_query.delete(synchronize_session=False)
     db.commit()
+
     return Response(status_code=status.HTTP_204_NO_CONTENT)

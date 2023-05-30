@@ -21,7 +21,7 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_vaccination(vaccination: schemas.VaccinationCreate, db: Session = Depends(get_db),
                        current_user: int = Depends(oauth2.get_current_user)):
-    vaccination = models.Vaccination(**vaccination.dict())
+    vaccination = models.Vaccination(user_id= current_user.id, **vaccination.dict())
     db.add(vaccination)
     db.commit()
     db.refresh(vaccination)
@@ -66,6 +66,10 @@ def update_vaccination(id: int, updated_vaccination: schemas.VaccinationCreate, 
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Vaccination with id: {id} does not exist")
 
+    if vaccination.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
+
     vaccination_query.update(updated_vaccination.dict(),
                              synchronize_session=False)
     db.commit()
@@ -77,13 +81,19 @@ def update_vaccination(id: int, updated_vaccination: schemas.VaccinationCreate, 
 def delete_vaccination(id: int, db: Session = Depends(get_db),
                        current_user: int = Depends(oauth2.get_current_user)):
 
-    vaccination = db.query(models.Vaccination).filter(
+    vaccination_query = db.query(models.Vaccination).filter(
         models.Vaccination.id == id)
+    
+    vaccination = vaccination_query.first()
 
-    if vaccination.first() == None:
+    if vaccination == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Vaccination with id: {id} does not exist")
+    
+    if vaccination.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
-    vaccination.delete(synchronize_session=False)
+    vaccination_query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

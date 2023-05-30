@@ -19,7 +19,7 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_disease(disease: schemas.DiseaseCreate, db: Session = Depends(get_db),
                    current_user: int = Depends(oauth2.get_current_user)):
-    new_disease = models.Disease(**disease.dict())
+    new_disease = models.Disease(user_id= current_user.id, **disease.dict())
     db.add(new_disease)
     db.commit()
     db.refresh(new_disease)
@@ -61,6 +61,10 @@ def update_disease(id: int, updated_disease: schemas.DiseaseCreate, db: Session 
     if disease == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Disease with id: {id} does not exist")
+    
+    if disease.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
     disease_query.update(updated_disease.dict(), synchronize_session=False)
     db.commit()
@@ -72,12 +76,19 @@ def update_disease(id: int, updated_disease: schemas.DiseaseCreate, db: Session 
 def delete_disease(id: int, db: Session = Depends(get_db),
                    current_user: int = Depends(oauth2.get_current_user)):
 
-    disease = db.query(models.Disease).filter(models.Disease.id == id)
+    disease_query = db.query(models.Disease).filter(models.Disease.id == id)
 
-    if disease.first() == None:
+    disease = disease_query.first()
+
+
+    if disease == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Disease with id: {id} does not exist")
+    
+    if disease.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
-    disease.delete(synchronize_session=False)
+    disease_query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

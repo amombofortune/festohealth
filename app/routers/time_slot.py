@@ -19,7 +19,7 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_time_slot(time_slot: schemas.TimeSlotCreate, db: Session = Depends(get_db),
                      current_user: int = Depends(oauth2.get_current_user)):
-    time_slot = models.TimeSlot(**time_slot.dict())
+    time_slot = models.TimeSlot(user_id= current_user.id, **time_slot.dict())
     db.add(time_slot)
     db.commit()
     db.refresh(time_slot)
@@ -61,6 +61,10 @@ def update_time_slot(id: str, updated_time_slot: schemas.TimeSlotCreate, db: Ses
     if time_slot == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Time slot with id: {id} does not exist")
+    
+    if time_slot.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
     time_slot_query.update(
         updated_time_slot.dict(), synchronize_session=False)
@@ -73,12 +77,19 @@ def update_time_slot(id: str, updated_time_slot: schemas.TimeSlotCreate, db: Ses
 def delete_time_slot(id: int, db: Session = Depends(get_db),
                      current_user: int = Depends(oauth2.get_current_user)):
 
-    time_slot = db.query(models.TimeSlot).filter(models.TimeSlot.id == id)
+    time_slot_query = db.query(models.TimeSlot).filter(models.TimeSlot.id == id)
 
-    if time_slot.first() == None:
+    time_slot = time_slot_query.first()
+
+
+    if time_slot == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Time slot with id: {id} does not exist")
+    
+    if time_slot.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
-    time_slot.delete(synchronize_session=False)
+    time_slot_query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

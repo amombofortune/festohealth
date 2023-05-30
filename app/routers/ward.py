@@ -21,8 +21,8 @@ router = APIRouter(
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_ward(ward: schemas.WardCreate, db: Session = Depends(get_db),
-                user_id: int = Depends(oauth2.get_current_user)):
-    ward = models.Ward(**ward.dict())
+                current_user: int = Depends(oauth2.get_current_user)):
+    ward = models.Ward(user_id= current_user.id, **ward.dict())
     db.add(ward)
     db.commit()
     db.refresh(ward)
@@ -33,7 +33,7 @@ def create_ward(ward: schemas.WardCreate, db: Session = Depends(get_db),
 
 @router.get("/{id}", response_model=schemas.WardResponse)
 def get_ward(id: int, db: Session = Depends(get_db),
-             user_id: int = Depends(oauth2.get_current_user)):
+             current_user: int = Depends(oauth2.get_current_user)):
     ward = db.query(models.Ward).filter(models.Ward.id == id).first()
 
     if not ward:
@@ -46,7 +46,7 @@ def get_ward(id: int, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.WardResponse])
 def get_ward(db: Session = Depends(get_db),
-             user_id: int = Depends(oauth2.get_current_user)):
+             current_user: int = Depends(oauth2.get_current_user)):
     ward = db.query(models.Ward).all()
     return ward
 
@@ -55,7 +55,7 @@ def get_ward(db: Session = Depends(get_db),
 
 @router.put("/{id}", response_model=schemas.WardResponse)
 def update_ward(id: int, updated_ward: schemas.WardCreate, db: Session = Depends(get_db),
-                user_id: int = Depends(oauth2.get_current_user)):
+                current_user: int = Depends(oauth2.get_current_user)):
 
     ward_query = db.query(models.Ward).filter(models.Ward.id == id)
 
@@ -64,6 +64,10 @@ def update_ward(id: int, updated_ward: schemas.WardCreate, db: Session = Depends
     if ward == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Ward with id: {id} does not exist")
+    
+    if ward.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
     ward_query.update(updated_ward.dict(), synchronize_session=False)
     db.commit()
@@ -73,14 +77,21 @@ def update_ward(id: int, updated_ward: schemas.WardCreate, db: Session = Depends
 # Delete ward
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_ward(id: int, db: Session = Depends(get_db),
-                user_id: int = Depends(oauth2.get_current_user)):
+                current_user: int = Depends(oauth2.get_current_user)):
 
-    ward = db.query(models.Ward).filter(models.Ward.id == id)
+    ward_query = db.query(models.Ward).filter(models.Ward.id == id)
+
+    ward = ward_query.first()
+
 
     if ward.first() == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Ward with id: {id} does not exist")
+    
+    if ward.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
-    ward.delete(synchronize_session=False)
+    ward_query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

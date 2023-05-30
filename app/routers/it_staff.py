@@ -21,7 +21,7 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_it_staff(it_staff: schemas.ItstaffCreate, db: Session = Depends(get_db),
                     current_user: int = Depends(oauth2.get_current_user)):
-    new_it_staff = models.Itstaff(
+    new_it_staff = models.Itstaff(user_id= current_user.id, 
         **it_staff.dict())
     db.add(new_it_staff)
     db.commit()
@@ -66,6 +66,10 @@ def update_it_staff(id: str, updated_it_staff: schemas.ItstaffCreate, db: Sessio
     if it_staff == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"IT Staff with id: {id} does not exist")
+    
+    if it_staff.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
     it_staff_query.update(
         updated_it_staff.dict(), synchronize_session=False)
@@ -78,13 +82,20 @@ def update_it_staff(id: str, updated_it_staff: schemas.ItstaffCreate, db: Sessio
 def delete_it_staff(id: str, db: Session = Depends(get_db),
                     current_user: int = Depends(oauth2.get_current_user)):
 
-    it_staff = db.query(models.Itstaff).filter(
+    it_staff_query = db.query(models.Itstaff).filter(
         models.Itstaff.id == id)
+    
+    it_staff = it_staff_query.first()
 
-    if it_staff.first() == None:
+
+    if it_staff == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"IT Staff with id: {id} does not exist")
+    
+    if it_staff.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
-    it_staff.delete(synchronize_session=False)
+    it_staff_query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

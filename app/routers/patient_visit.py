@@ -21,7 +21,7 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_patient_visit(patient_visit: schemas.PatientVisitCreate, db: Session = Depends(get_db),
                          current_user: int = Depends(oauth2.get_current_user)):
-    patient_visit = models.PatientVisit(**patient_visit.dict())
+    patient_visit = models.PatientVisit(user_id= current_user.id, **patient_visit.dict())
     db.add(patient_visit)
     db.commit()
     db.refresh(patient_visit)
@@ -65,6 +65,10 @@ def update_patient_visit(id: int, updated_patient_visit: schemas.PatientVisitCre
     if patient_visit == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Patient visit with id: {id} does not exist")
+    
+    if patient_visit.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
     patient_visit_query.update(
         updated_patient_visit.dict(), synchronize_session=False)
@@ -77,13 +81,20 @@ def update_patient_visit(id: int, updated_patient_visit: schemas.PatientVisitCre
 def delete_patient_visit(id: int, db: Session = Depends(get_db),
                          current_user: int = Depends(oauth2.get_current_user)):
 
-    patient_visit = db.query(models.PatientVisit).filter(
+    patient_visit_query = db.query(models.PatientVisit).filter(
         models.PatientVisit.id == id)
+    
+    patient_visit = patient_visit_query.first()
 
-    if patient_visit.first() == None:
+
+    if patient_visit == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Patient visit with id: {id} does not exist")
+    
+    if patient_visit.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
-    patient_visit.delete(synchronize_session=False)
+    patient_visit_query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

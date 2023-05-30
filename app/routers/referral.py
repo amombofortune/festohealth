@@ -21,7 +21,7 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_referral(referral: schemas.ReferralCreate, db: Session = Depends(get_db),
                     current_user: int = Depends(oauth2.get_current_user)):
-    referral = models.Referral(**referral.dict())
+    referral = models.Referral(user_id= current_user.id, **referral.dict())
     db.add(referral)
     db.commit()
     db.refresh(referral)
@@ -64,6 +64,10 @@ def update_referral(id: int, updated_referral: schemas.ReferralCreate, db: Sessi
     if referral == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Referral with id: {id} does not exist")
+    
+    if referral.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
     referral_query.update(updated_referral.dict(), synchronize_session=False)
     db.commit()
@@ -75,12 +79,19 @@ def update_referral(id: int, updated_referral: schemas.ReferralCreate, db: Sessi
 def delete_referral(id: int, db: Session = Depends(get_db),
                     current_user: int = Depends(oauth2.get_current_user)):
 
-    referral = db.query(models.Referral).filter(models.Referral.id == id)
+    referral_query = db.query(models.Referral).filter(models.Referral.id == id)
 
-    if referral.first() == None:
+    referral = referral_query.first()
+
+
+    if referral == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Referral with id: {id} does not exist")
+    
+    if referral.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
-    referral.delete(synchronize_session=False)
+    referral_query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

@@ -19,7 +19,7 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_appointment(appointment: schemas.AppointmentCreate, db: Session = Depends(get_db),
                        current_user: int = Depends(oauth2.get_current_user)):
-    new_appointment = models.Appointment(**appointment.dict())
+    new_appointment = models.Appointment(user_id= current_user.id, **appointment.dict())
     db.add(new_appointment)
     db.commit()
     db.refresh(new_appointment)
@@ -58,11 +58,15 @@ def update_appointment(id: int, updated_appointment: schemas.AppointmentCreate, 
     appointment_query = db.query(models.Appointment).filter(
         models.Appointment.id == id)
 
-    appointment_reminder = appointment_query.first()
+    appointment = appointment_query.first()
 
-    if appointment_reminder == None:
+    if appointment == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Appointment with id: {id} does not exist")
+    
+    if appointment.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
     appointment_query.update(updated_appointment.dict(),
                              synchronize_session=False)
@@ -75,13 +79,19 @@ def update_appointment(id: int, updated_appointment: schemas.AppointmentCreate, 
 def delete_appointment(id: int, db: Session = Depends(get_db),
                        current_user: int = Depends(oauth2.get_current_user)):
 
-    appointment = db.query(models.Appointment).filter(
+    appointment_query = db.query(models.Appointment).filter(
         models.Appointment.id == id)
+    
+    appointment = appointment_query.first()
 
-    if appointment.first() == None:
+    if appointment == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Appointment with id: {id} does not exist")
+    
+    if appointment.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
-    appointment.delete(synchronize_session=False)
+    appointment_query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

@@ -21,7 +21,7 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_medical_procedure(medical_procedure: schemas.MedicalProcedureCreate, db: Session = Depends(get_db),
                              current_user: int = Depends(oauth2.get_current_user)):
-    new_medical_procedure = models.MedicalProcedure(**medical_procedure.dict())
+    new_medical_procedure = models.MedicalProcedure(user_id= current_user.id, **medical_procedure.dict())
     db.add(new_medical_procedure)
     db.commit()
     db.refresh(new_medical_procedure)
@@ -65,6 +65,10 @@ def update_medical_procedure(id: int, updated_medical_procedure: schemas.Medical
     if medical_procedure == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Medical procedure with id: {id} does not exist")
+    
+    if medical_procedure.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
     medical_procedure_query.update(
         updated_medical_procedure.dict(), synchronize_session=False)
@@ -77,13 +81,19 @@ def update_medical_procedure(id: int, updated_medical_procedure: schemas.Medical
 def delete_medical_procedure(id: int, db: Session = Depends(get_db),
                              current_user: int = Depends(oauth2.get_current_user)):
 
-    medical_procedure = db.query(models.MedicalProcedure).filter(
+    medical_procedure_query = db.query(models.MedicalProcedure).filter(
         models.MedicalProcedure.id == id)
+    
+    medical_procedure = medical_procedure_query.first()
 
-    if medical_procedure.first() == None:
+    if medical_procedure == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Medical procedure with id: {id} does not exist")
+    
+    if medical_procedure.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
-    medical_procedure.delete(synchronize_session=False)
+    medical_procedure_query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

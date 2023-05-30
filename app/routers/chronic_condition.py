@@ -20,7 +20,7 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_chronic_condition(chronic_condition: schemas.ChronicConditionCreate, db: Session = Depends(get_db),
                              current_user: int = Depends(oauth2.get_current_user)):
-    new_chronic_condition = models.ChronicCondition(**chronic_condition.dict())
+    new_chronic_condition = models.ChronicCondition(user_id= current_user.id, **chronic_condition.dict())
     db.add(new_chronic_condition)
     db.commit()
     db.refresh(new_chronic_condition)
@@ -64,6 +64,10 @@ def update_chronic_condition(id: int, updated_chronic_condition: schemas.Chronic
     if chronic_condition == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Chronic condition with id: {id} does not exist")
+    
+    if chronic_condition.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
     chronic_condition_query.update(
         updated_chronic_condition.dict(), synchronize_session=False)
@@ -76,13 +80,19 @@ def update_chronic_condition(id: int, updated_chronic_condition: schemas.Chronic
 def delete_chronic_condition(id: int, db: Session = Depends(get_db),
                              current_user: int = Depends(oauth2.get_current_user)):
 
-    chronic_condition = db.query(models.ChronicCondition).filter(
+    chronic_condition_query = db.query(models.ChronicCondition).filter(
         models.ChronicCondition.id == id)
+    
+    chronic_condition = chronic_condition_query.first()
 
-    if chronic_condition.first() == None:
+    if chronic_condition == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Chronic condition with id: {id} does not exist")
+    
+    if chronic_condition.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
-    chronic_condition.delete(synchronize_session=False)
+    chronic_condition_query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

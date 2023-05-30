@@ -21,7 +21,7 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_hospital(hospital: schemas.HospitalCreate, db: Session = Depends(get_db),
                     current_user: int = Depends(oauth2.get_current_user)):
-    new_hospital = models.Hospital(**hospital.dict())
+    new_hospital = models.Hospital(user_id= current_user.id, **hospital.dict())
     db.add(new_hospital)
     db.commit()
     db.refresh(new_hospital)
@@ -64,6 +64,10 @@ def update_hospital(id: str, updated_hospital: schemas.HospitalCreate, db: Sessi
     if hospital == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Hospital with id: {id} does not exist")
+    
+    if hospital.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
     hospital_query.update(updated_hospital.dict(), synchronize_session=False)
     db.commit()
@@ -75,12 +79,19 @@ def update_hospital(id: str, updated_hospital: schemas.HospitalCreate, db: Sessi
 def delete_hospital(id: str, db: Session = Depends(get_db),
                     current_user: int = Depends(oauth2.get_current_user)):
 
-    hospital = db.query(models.Hospital).filter(models.Hospital.id == id)
+    hospital_query = db.query(models.Hospital).filter(models.Hospital.id == id)
 
-    if hospital.first() == None:
+    hospital = hospital_query.first()
+
+
+    if hospital == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Hospital with id: {id} does not exist")
+    
+    if hospital.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
-    hospital.delete(synchronize_session=False)
+    hospital_query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

@@ -19,7 +19,7 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_lab_test(lab_test: schemas.LabTestCreate, db: Session = Depends(get_db),
                     current_user: int = Depends(oauth2.get_current_user)):
-    new_lab_test = models.LabTest(**lab_test.dict())
+    new_lab_test = models.LabTest(user_id= current_user.id, **lab_test.dict())
     db.add(new_lab_test)
     db.commit()
     db.refresh(new_lab_test)
@@ -61,6 +61,10 @@ def update_lab_test(id: int, updated_lab_test: schemas.LabTestCreate, db: Sessio
     if lab_test == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Lab test with id: {id} does not exist")
+    
+    if lab_test.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
     lab_test_query.update(updated_lab_test.dict(), synchronize_session=False)
     db.commit()
@@ -72,12 +76,19 @@ def update_lab_test(id: int, updated_lab_test: schemas.LabTestCreate, db: Sessio
 def delete_lab_test(id: int, db: Session = Depends(get_db),
                     current_user: int = Depends(oauth2.get_current_user)):
 
-    lab_test = db.query(models.LabTest).filter(models.LabTest.id == id)
+    lab_test_query = db.query(models.LabTest).filter(models.LabTest.id == id)
 
-    if lab_test.first() == None:
+    lab_test = lab_test_query.first()
+
+
+    if lab_test == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Lab test with id: {id} does not exist")
+    
+    if lab_test.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
-    lab_test.delete(synchronize_session=False)
+    lab_test_query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

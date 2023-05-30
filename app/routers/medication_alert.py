@@ -19,7 +19,7 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_medical_alert(medication_alert: schemas.MedicationAlertCreate, db: Session = Depends(get_db),
                          current_user: int = Depends(oauth2.get_current_user)):
-    new_medical_alert = models.MedicationAlert(**medication_alert.dict())
+    new_medical_alert = models.MedicationAlert(user_id= current_user.id, **medication_alert.dict())
     db.add(new_medical_alert)
     db.commit()
     db.refresh(new_medical_alert)
@@ -63,6 +63,10 @@ def update_medical_alert(id: int, updated_medical_alert: schemas.MedicationAlert
     if medical_alert == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Medical alert with id: {id} does not exist")
+    
+    if medical_alert.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
     medical_alert_query.update(
         updated_medical_alert.dict(), synchronize_session=False)
@@ -75,13 +79,20 @@ def update_medical_alert(id: int, updated_medical_alert: schemas.MedicationAlert
 def delete_medical_alert(id: int, db: Session = Depends(get_db),
                          current_user: int = Depends(oauth2.get_current_user)):
 
-    medical_alert = db.query(models.MedicationAlert).filter(
+    medical_alert_query = db.query(models.MedicationAlert).filter(
         models.MedicationAlert.id == id)
+    
+    medical_alert = medical_alert_query.first()
 
-    if medical_alert.first() == None:
+
+    if medical_alert == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Medical alert with id: {id} does not exist")
+    
+    if medical_alert.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
-    medical_alert.delete(synchronize_session=False)
+    medical_alert_query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

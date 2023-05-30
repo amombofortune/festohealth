@@ -21,7 +21,7 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_genetic_condition(genetic_condition: schemas.GeneticConditionCreate, db: Session = Depends(get_db),
                              current_user: int = Depends(oauth2.get_current_user)):
-    new_genetic_condition = models.GeneticCondition(**genetic_condition.dict())
+    new_genetic_condition = models.GeneticCondition(user_id= current_user.id, **genetic_condition.dict())
     db.add(new_genetic_condition)
     db.commit()
     db.refresh(new_genetic_condition)
@@ -65,6 +65,10 @@ def update_genetic_condition(id: int, updated_genetic_condition: schemas.Genetic
     if genetic_condition == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Genetic condition with id: {id} does not exist")
+    
+    if genetic_condition.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
     genetic_condition_query.update(
         updated_genetic_condition.dict(), synchronize_session=False)
@@ -77,13 +81,19 @@ def update_genetic_condition(id: int, updated_genetic_condition: schemas.Genetic
 def delete_genetic_condition(id: int, db: Session = Depends(get_db),
                              current_user: int = Depends(oauth2.get_current_user)):
 
-    genetic_condition = db.query(models.GeneticCondition).filter(
+    genetic_condition_query = db.query(models.GeneticCondition).filter(
         models.GeneticCondition.id == id)
+    
+    genetic_condition = genetic_condition_query.first()
 
-    if genetic_condition.first() == None:
+    if genetic_condition == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Genetic condition with id: {id} does not exist")
+    
+    if genetic_condition.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
-    genetic_condition.delete(synchronize_session=False)
+    genetic_condition_query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

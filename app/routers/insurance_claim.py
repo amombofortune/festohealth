@@ -21,7 +21,7 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_insurance_claim(insurance_claim: schemas.InsuranceClaimCreate, db: Session = Depends(get_db),
                            current_user: int = Depends(oauth2.get_current_user)):
-    new_insurance_claim = models.InsuranceClaim(**insurance_claim.dict())
+    new_insurance_claim = models.InsuranceClaim(user_id= current_user.id, **insurance_claim.dict())
     db.add(new_insurance_claim)
     db.commit()
     db.refresh(new_insurance_claim)
@@ -66,6 +66,10 @@ def update_insurance_claim(id: str, updated_insurance_claim: schemas.InsuranceCl
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Insurance claim with id: {id} does not exist")
 
+    if insurance_claim.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
+
     insurance_claim_query.update(
         updated_insurance_claim.dict(), synchronize_session=False)
     db.commit()
@@ -77,13 +81,20 @@ def update_insurance_claim(id: str, updated_insurance_claim: schemas.InsuranceCl
 def delete_insurance_claim(id: str, db: Session = Depends(get_db),
                            current_user: int = Depends(oauth2.get_current_user)):
 
-    insurance_claim = db.query(models.InsuranceClaim).filter(
+    insurance_claim_query = db.query(models.InsuranceClaim).filter(
         models.InsuranceClaim.id == id)
+    
+    insurance_claim = insurance_claim_query.first()
 
-    if insurance_claim.first() == None:
+
+    if insurance_claim == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Insurance claim with id: {id} does not exist")
+    
+    if insurance_claim.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
-    insurance_claim.delete(synchronize_session=False)
+    insurance_claim_query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

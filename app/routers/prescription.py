@@ -19,7 +19,7 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_prescription(prescription: schemas.PrescriptionCreate, db: Session = Depends(get_db),
                         current_user: int = Depends(oauth2.get_current_user)):
-    prescription = models.Prescription(**prescription.dict())
+    prescription = models.Prescription(user_id= current_user.id, **prescription.dict())
     db.add(prescription)
     db.commit()
     db.refresh(prescription)
@@ -63,6 +63,10 @@ def update_prescription(id: int, updated_prescription: schemas.PrescriptionCreat
     if prescription == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Prescription with id: {id} does not exist")
+    
+    if prescription.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
     prescription_query.update(
         updated_prescription.dict(), synchronize_session=False)
@@ -75,13 +79,20 @@ def update_prescription(id: int, updated_prescription: schemas.PrescriptionCreat
 def delete_prescription(id: int, db: Session = Depends(get_db),
                         current_user: int = Depends(oauth2.get_current_user)):
 
-    prescription = db.query(models.Prescription).filter(
+    prescription_query = db.query(models.Prescription).filter(
         models.Prescription.id == id)
+    
+    prescription = prescription_query.first()
 
-    if prescription.first() == None:
+
+    if prescription == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Prescription with id: {id} does not exist")
+    
+    if prescription.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
-    prescription.delete(synchronize_session=False)
+    prescription_query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

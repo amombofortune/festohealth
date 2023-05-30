@@ -19,7 +19,7 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_lab_technician(lab_technician: schemas.LabTechnicianCreate, db: Session = Depends(get_db),
                           current_user: int = Depends(oauth2.get_current_user)):
-    new_lab_technician = models.LabTechnician(**lab_technician.dict())
+    new_lab_technician = models.LabTechnician(user_id= current_user.id, **lab_technician.dict())
     db.add(new_lab_technician)
     db.commit()
     db.refresh(new_lab_technician)
@@ -63,6 +63,10 @@ def update_lab_technician(id: str, updated_lab_technician: schemas.LabTechnician
     if lab_technician == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Lab technician with id: {id} does not exist")
+    
+    if lab_technician.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
     lab_technician_query.update(
         updated_lab_technician.dict(), synchronize_session=False)
@@ -75,13 +79,20 @@ def update_lab_technician(id: str, updated_lab_technician: schemas.LabTechnician
 def delete_lab_technician(id: str, db: Session = Depends(get_db),
                           current_user: int = Depends(oauth2.get_current_user)):
 
-    lab_technician = db.query(models.LabTechnician).filter(
+    lab_technician_query = db.query(models.LabTechnician).filter(
         models.LabTechnician.id == id)
+    
+    lab_technician = lab_technician_query.first()
 
-    if lab_technician.first() == None:
+
+    if lab_technician == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Lab technician with id: {id} does not exist")
+    
+    if lab_technician.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
-    lab_technician.delete(synchronize_session=False)
+    lab_technician_query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

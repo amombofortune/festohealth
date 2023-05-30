@@ -19,7 +19,7 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_medical_image(medical_image: schemas.MedicalImageCreate, db: Session = Depends(get_db),
                          current_user: int = Depends(oauth2.get_current_user)):
-    new_medical_image = models.MedicalImage(**medical_image.dict())
+    new_medical_image = models.MedicalImage(user_id= current_user.id, **medical_image.dict())
     db.add(new_medical_image)
     db.commit()
     db.refresh(new_medical_image)
@@ -63,6 +63,10 @@ def update_medical_image(id: int, updated_medical_image: schemas.MedicalImageCre
     if medical_image == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Medical image with id: {id} does not exist")
+    
+    if medical_image.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
     medical_image_query.update(
         updated_medical_image.dict(), synchronize_session=False)
@@ -75,13 +79,20 @@ def update_medical_image(id: int, updated_medical_image: schemas.MedicalImageCre
 def delete_medical_image(id: int, db: Session = Depends(get_db),
                          current_user: int = Depends(oauth2.get_current_user)):
 
-    medical_image = db.query(models.MedicalImage).filter(
+    medical_image_query = db.query(models.MedicalImage).filter(
         models.MedicalImage.id == id)
+    
+    medical_image = medical_image_query.first()
 
-    if medical_image.first() == None:
+
+    if medical_image == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Medical image with id: {id} does not exist")
+    
+    if medical_image.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
-    medical_image.delete(synchronize_session=False)
+    medical_image_query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

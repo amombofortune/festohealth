@@ -20,7 +20,7 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_country(country: schemas.CountryCreate, db: Session = Depends(get_db),
                     current_user: int = Depends(oauth2.get_current_user)):
-    new_country = models.Country(**country.dict())
+    new_country = models.Country(user_id= current_user.id, **country.dict())
     db.add(new_country)
     db.commit()
     db.refresh(new_country)
@@ -58,6 +58,10 @@ def update_country(id: int, updated_country: schemas.CountryCreate, db: Session 
     if country == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Country with id: {id} does not exist")
+    
+    if country.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
     country_query.update(updated_country.dict(), synchronize_session=False)
     db.commit()
@@ -69,12 +73,18 @@ def update_country(id: int, updated_country: schemas.CountryCreate, db: Session 
 def delete_country(id: int, db: Session = Depends(get_db),
                    current_user: int = Depends(oauth2.get_current_user)):
 
-    country = db.query(models.Country).filter(models.Country.id == id)
+    country_query = db.query(models.Country).filter(models.Country.id == id)
 
-    if country.first() == None:
+    country = country_query.first()
+
+    if country == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Country with id: {id} does not exist")
+    
+    if country.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
-    country.delete(synchronize_session=False)
+    country_query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

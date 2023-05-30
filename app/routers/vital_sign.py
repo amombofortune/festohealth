@@ -20,7 +20,7 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_vital_sign(vital_sign: schemas.VitalSignCreate, db: Session = Depends(get_db),
                       current_user: int = Depends(oauth2.get_current_user)):
-    vital_sign = models.VitalSign(**vital_sign.dict())
+    vital_sign = models.VitalSign(user_id= current_user.id, **vital_sign.dict())
     db.add(vital_sign)
     db.commit()
     db.refresh(vital_sign)
@@ -62,6 +62,10 @@ def update_vital_sign(id: int, updated_vital_sign: schemas.VitalSignCreate, db: 
     if vital_sign == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Vital sign with id: {id} does not exist")
+    
+    if vital_sign.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
     vital_sign_query.update(updated_vital_sign.dict(),
                             synchronize_session=False)
@@ -74,12 +78,19 @@ def update_vital_sign(id: int, updated_vital_sign: schemas.VitalSignCreate, db: 
 def delete_vital_sign(id: int, db: Session = Depends(get_db),
                       current_user: int = Depends(oauth2.get_current_user)):
 
-    vital_sign = db.query(models.VitalSign).filter(models.VitalSign.id == id)
+    vital_sign_query = db.query(models.VitalSign).filter(models.VitalSign.id == id)
 
-    if vital_sign.first() == None:
+    vital_sign = vital_sign_query.first()
+
+
+    if vital_sign == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Vital sign with id: {id} does not exist")
+    
+    if vital_sign.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
-    vital_sign.delete(synchronize_session=False)
+    vital_sign_query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

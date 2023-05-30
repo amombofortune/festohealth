@@ -19,7 +19,7 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_specialty(specialty: schemas.SpecialtyCreate, db: Session = Depends(get_db),
                      current_user: int = Depends(oauth2.get_current_user)):
-    specialty = models.Specialty(**specialty.dict())
+    specialty = models.Specialty(user_id= current_user.id, **specialty.dict())
     db.add(specialty)
     db.commit()
     db.refresh(specialty)
@@ -61,6 +61,10 @@ def update_specialty(id: int, updated_specialty: schemas.SpecialtyCreate, db: Se
     if specialty == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Specialty with id: {id} does not exist")
+    
+    if specialty.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
     specialty_query.update(
         updated_specialty.dict(), synchronize_session=False)
@@ -73,12 +77,19 @@ def update_specialty(id: int, updated_specialty: schemas.SpecialtyCreate, db: Se
 def delete_specialty(id: int, db: Session = Depends(get_db),
                      current_user: int = Depends(oauth2.get_current_user)):
 
-    specialty = db.query(models.Specialty).filter(models.Specialty.id == id)
+    specialty_query = db.query(models.Specialty).filter(models.Specialty.id == id)
 
-    if specialty.first() == None:
+    specialty = specialty_query.first()
+
+
+    if specialty == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Specialty with id: {id} does not exist")
+    
+    if specialty.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
-    specialty.delete(synchronize_session=False)
+    specialty_query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

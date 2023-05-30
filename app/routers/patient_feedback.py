@@ -22,7 +22,7 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_patient_feedback(patient_feedback: schemas.PatientFeedbackCreate, db: Session = Depends(get_db),
                              current_user: int = Depends(oauth2.get_current_user)):
-    patient_feedback = models.PatientFeedback(**patient_feedback.dict())
+    patient_feedback = models.PatientFeedback(user_id= current_user.id, **patient_feedback.dict())
     db.add(patient_feedback)
     db.commit()
     db.refresh(patient_feedback)
@@ -66,6 +66,10 @@ def update_patient_feedback(id: int, updated_patient_feedback: schemas.PatientFe
     if patient_feedback == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Patient feedback with id: {id} does not exist")
+    
+    if patient_feedback.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
     patient_feedback_query.update(
         updated_patient_feedback.dict(), synchronize_session=False)
@@ -78,13 +82,20 @@ def update_patient_feedback(id: int, updated_patient_feedback: schemas.PatientFe
 def delete_patient_feedback(id: int, db: Session = Depends(get_db),
                             current_user: int = Depends(oauth2.get_current_user)):
 
-    patient_feedback = db.query(models.PatientFeedback).filter(
+    patient_feedback_query = db.query(models.PatientFeedback).filter(
         models.PatientFeedback.id == id)
+    
+    patient_feedback = patient_feedback_query.first()
 
-    if patient_feedback.first() == None:
+
+    if patient_feedback == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Patient feedback with id: {id} does not exist")
+    
+    if patient_feedback.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
-    patient_feedback.delete(synchronize_session=False)
+    patient_feedback_query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

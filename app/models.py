@@ -20,7 +20,7 @@ class Administrator(Base):
     __tablename__ = "administrators"
 
     id = Column(String, primary_key=True)
-    user_id = Column(String, ForeignKey('users.id'))
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
     firstname = Column(String)
     lastname = Column(String)
     dob = Column(Date)
@@ -59,8 +59,9 @@ class Administrator(Base):
 class Admission(Base):
     __tablename__ = 'admissions'
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    patient_id = Column(String, ForeignKey('patients.id'))
-    doctor_id = Column(String, ForeignKey('doctors.id'))
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    patient_id = Column(String, ForeignKey('patients.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    doctor_id = Column(String, ForeignKey('doctors.id', ondelete='CASCADE', onupdate='NO ACTION'))
     admission_date = Column(Date)
     admission_time = Column(Time)
     discharge_date = Column(Date)
@@ -74,7 +75,8 @@ class Admission(Base):
     #patient = relationship("Patient", backref="admissions")
 
 
-    def __init__(self, patient_id, admission_date, admission_time, discharge_date, discharge_time, reason, diagnosis, treatment, doctor_id):
+    def __init__(self, user_id, patient_id, admission_date, admission_time, discharge_date, discharge_time, reason, diagnosis, treatment, doctor_id):
+        self.user_id = user_id
         self.patient_id = patient_id
         self.admission_date = admission_date
         self.admission_time = admission_time
@@ -87,14 +89,15 @@ class Admission(Base):
 
 
     def __repr__(self):
-        return f"({self.id}), {self.patient_id}, {self.admission_date}, {self.admission_time},  {self.discharge_date}, {self.discharge_time}, {self.reason}, {self.diagnosis}, {self.treatment}, {self.doctor_id})"
+        return f"({self.id}), {self.user_id}, {self.patient_id}, {self.admission_date}, {self.admission_time},  {self.discharge_date}, {self.discharge_time}, {self.reason}, {self.diagnosis}, {self.treatment}, {self.doctor_id})"
 
 """ ADVERSE REACTION """
 class AdverseReaction(Base):
     __tablename__ = "adverse_reactions"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    patient_id = Column(String, ForeignKey('patients.id') )
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    patient_id = Column(String, ForeignKey('patients.id', ondelete='CASCADE', onupdate='NO ACTION'))
     reaction_date = Column(Date)
     reaction_time = Column(TIME(timezone=True))
     reaction_type = Column(String)  # Foreign Key
@@ -106,7 +109,8 @@ class AdverseReaction(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, patient_id, reaction_date, reaction_time, reaction_type, reaction_details, medication_name, dosage, severity, treatment):
+    def __init__(self, user_id, patient_id, reaction_date, reaction_time, reaction_type, reaction_details, medication_name, dosage, severity, treatment):
+        self.user_id = user_id
         self.patient_id = patient_id
         self.reaction_date = reaction_date
         self.reaction_time = reaction_time
@@ -118,7 +122,7 @@ class AdverseReaction(Base):
         self.treatment = treatment
 
     def __repr__(self):
-        return f"({self.id}, {self.patient_id}, {self.reaction_date}, {self.reaction_time}, {self.reaction_type}, {self.reaction_details}, {self.medication_name}, {self.dosage}, {self.severity}, {self.treatment})"
+        return f"({self.id}, {self.user_id}, {self.patient_id}, {self.reaction_date}, {self.reaction_time}, {self.reaction_type}, {self.reaction_details}, {self.medication_name}, {self.dosage}, {self.severity}, {self.treatment})"
 
 
 """ADVERSE REACTION TYPE """
@@ -126,17 +130,19 @@ class AdverseReactionType(Base):
     __tablename__ = "adverse_reaction_types"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
     name = Column(String)
     description = Column(Text)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, name, description):
+    def __init__(self, user_id, name, description):
+        self.user_id = user_id
         self.name = name
         self.description = description
 
     def __repr__(self):
-        return f"({self.id}), {self.name}, {self.description})"
+        return f"{self.id}, {self.user_id}, {self.name}, {self.description})"
 
 
 Session = sessionmaker(bind=engine)
@@ -183,17 +189,19 @@ class Allergy(Base):
     __tablename__ = "allergies"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
     name = Column(String)
-    patient_id = Column(String, ForeignKey('patients.id'))
+    patient_id = Column(String, ForeignKey('patients.id', ondelete='CASCADE', onupdate='NO ACTION'))
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, name, patient_id):
+    def __init__(self, user_id, name, patient_id):
+        self.user_id = user_id
         self.name = name
         self.patient_id = patient_id
 
     def __repr__(self):
-        return f"({self.id}, {self.name}, {self.patient_id})"
+        return f"({self.id}, {self.user_id}, {self.name}, {self.patient_id})"
 
 
 Session = sessionmaker(bind=engine)
@@ -243,10 +251,10 @@ class AppointmentReminder(Base):
     __tablename__ = "appointment_reminders"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    appointment_id = Column(Integer, ForeignKey('appointments.id')) 
-    patient_id = Column(String, ForeignKey('patients.id'))
-    doctor_id = Column(String, ForeignKey('doctors.id'))
-    user_id = Column(Integer)
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    appointment_id = Column(Integer, ForeignKey('appointments.id', ondelete='CASCADE', onupdate='NO ACTION')) 
+    patient_id = Column(String, ForeignKey('patients.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    doctor_id = Column(String, ForeignKey('doctors.id', ondelete='CASCADE', onupdate='NO ACTION'))
     reminder_date = Column(Date)
     reminder_time = Column(TIME)
     reminder_type = Column(String)  # email, sms, push notification
@@ -254,18 +262,18 @@ class AppointmentReminder(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, appointment_id, patient_id, doctor_id,  user_id, reminder_date, reminder_time, reminder_type, status):
+    def __init__(self, user_id, appointment_id, patient_id, doctor_id, reminder_date, reminder_time, reminder_type, status):
+        self.user_id = user_id
         self.appointment_id = appointment_id
         self.patient_id = patient_id
         self.doctor_id = doctor_id
-        self.user_id = user_id
         self.reminder_date = reminder_date
         self.reminder_time = reminder_time
         self.reminder_type = reminder_type
         self.status = status
 
     def __repr__(self):
-        return f"({self.id}, {self.appointment_id}, {self.patient_id}, {self.doctor_id} {self.user_id}, {self.reminder_date}, {self.reminder_time}, {self.reminder_type}, {self.status})"
+        return f"({self.id}, {self.user_id}, {self.appointment_id}, {self.patient_id}, {self.doctor_id}, {self.reminder_date}, {self.reminder_time}, {self.reminder_type}, {self.status})"
 
 
 """ APPOINTMENTS """
@@ -273,8 +281,9 @@ class Appointment(Base):
     __tablename__ = "appointments"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    patient_id = Column(String, ForeignKey('patients.id'))
-    doctor_id = Column(String, ForeignKey('doctors.id'))
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    patient_id = Column(String, ForeignKey('patients.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    doctor_id = Column(String, ForeignKey('doctors.id', ondelete='CASCADE', onupdate='NO ACTION'))
     type = Column(String)  # In-person, Online
     date = Column(Date)
     start_time = Column(String)
@@ -284,7 +293,8 @@ class Appointment(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, patient_id, doctor_id, type, date, start_time, end_time, description, status):
+    def __init__(self, user_id, patient_id, doctor_id, type, date, start_time, end_time, description, status):
+        self.user_id = user_id
         self.patient_id = patient_id
         self.doctor_id = doctor_id
         self.type = type
@@ -295,7 +305,7 @@ class Appointment(Base):
         self.status = status
 
     def __repr__(self):
-        return f"({self.id}, {self.patient_id}, {self.doctor_id}, {self.type}, {self.date}, {self.start_time}, {self.end_time}, {self.description}, {self.status})"
+        return f"({self.id}, {self.user_id}, {self.patient_id}, {self.doctor_id}, {self.type}, {self.date}, {self.start_time}, {self.end_time}, {self.description}, {self.status})"
 
 
 
@@ -304,18 +314,20 @@ class AppointmentType(Base):
     __tablename__ = "appointment_types"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
     name = Column(String)
     description = Column(String)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, name, description):
+    def __init__(self, user_id, name, description):
+        self.user_id = user_id
         self.name = name
         self.description = description
         
 
     def __repr__(self):
-        return f"({self.name}, {self.description})"
+        return f"({self.name}, {self.user_id}, {self.description})"
 
 
 Session = sessionmaker(bind=engine)
@@ -352,16 +364,18 @@ class Bed(Base):
     __tablename__ = "beds"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    ward = Column(String)  # Foreign key
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    ward = Column(Integer, ForeignKey('wards.id', ondelete='CASCADE', onupdate='NO ACTION')) 
     bed_no = Column(Integer)
     bed_type = Column(String)  # ICU, general ward, private room
-    availability = Column(Boolean)
-    occupied_by = Column(String, ForeignKey('patients.id'))  # Foreing key
-    assigned_by = Column(String)  # Foreing key
+    availability = Column(Boolean, server_default='FALSE')
+    occupied_by = Column(String, ForeignKey('patients.id', ondelete='CASCADE', onupdate='NO ACTION'))  
+    assigned_by = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION')) 
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, ward, bed_no, bed_type, availability, occupied_by, assigned_by):
+    def __init__(self, user_id, ward, bed_no, bed_type, availability, occupied_by, assigned_by):
+        self.user_id = user_id
         self.ward = ward
         self.bed_no = bed_no
         self.bed_type = bed_type
@@ -370,22 +384,24 @@ class Bed(Base):
         self.assigned_by = assigned_by
 
     def __repr__(self):
-        return f"({self.id}, {self.ward}, {self.bed_no}, {self.bed_type}, {self.availability}, {self.occupied_by}, {self.assigned_by})"
+        return f"({self.id}, {self.user_id}, {self.ward}, {self.bed_no}, {self.bed_type}, {self.availability}, {self.occupied_by}, {self.assigned_by})"
 
 """ BED ASSIGNMENT """
 class BedAssignment(Base):
     __tablename__ = "bed_assignments"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
     bed_id = Column(Integer)
     patient_id = Column(Integer)
-    assigned_by = Column(Integer)  # Foreign key to the users table
+    assigned_by = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION')) 
     assigned_at = Column(TIMESTAMP(timezone=True))
     discharged_at = Column(TIMESTAMP(timezone=True))
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, bed_id, patient_id, assigned_by, assigned_at, discharged_at):
+    def __init__(self, user_id, bed_id, patient_id, assigned_by, assigned_at, discharged_at):
+        self.user_id = user_id
         self.bed_id = bed_id
         self.patient_id = patient_id
         self.assigned_by = assigned_by
@@ -393,14 +409,15 @@ class BedAssignment(Base):
         self.discharged_at = discharged_at
 
     def __repr__(self):
-        return f"({self.id}, {self.bed_id}, {self.patient_id}, {self.assigned_by}, {self.assigned_at}, {self.discharged_at})"
+        return f"({self.id}, {self.user_id}, {self.bed_id}, {self.patient_id}, {self.assigned_by}, {self.assigned_at}, {self.discharged_at})"
 
 """ BILLING """
 class Billing(Base):
     __tablename__ = "billings"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    patient_id = Column(String, ForeignKey('patients.id'))
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    patient_id = Column(String, ForeignKey('patients.id', ondelete='CASCADE', onupdate='NO ACTION'))
     bill_date = Column(DateTime)
     amount_due = Column(Float)
     amount_paid = Column(Float)
@@ -409,7 +426,8 @@ class Billing(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, patient_id, bill_date, amount_due, amount_paid, payment_method, status):
+    def __init__(self, user_id, patient_id, bill_date, amount_due, amount_paid, payment_method, status):
+        self.user_id = user_id
         self.patient_id = patient_id
         self.bill_date = bill_date
         self.amount_due = amount_due
@@ -418,27 +436,29 @@ class Billing(Base):
         self.status = status
 
     def __repr__(self):
-        return f"({self.id}, {self.patient_id}, {self.bill_date}, {self.amount_due}, {self.amount_paid}, {self.payment_method},  {self.status})"
+        return f"({self.id}, {self.user_id}, {self.patient_id}, {self.bill_date}, {self.amount_due}, {self.amount_paid}, {self.payment_method},  {self.status})"
 
 """ CHRONIC CONDITION """  # main
 class ChronicCondition(Base):
     __tablename__ = "chronic_conditions"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    patient_id = Column(String, ForeignKey('patients.id', ondelete='CASCADE', onupdate='NO ACTION'))
     name = Column(String)
     description = Column(String)
-    patient_id = Column(String, ForeignKey('patients.id'))
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, name, description, patient_id):
+    def __init__(self, user_id, patient_id, name, description ):
+        self.user_id = user_id
+        self.patient_id = patient_id
         self.name = name
         self.description = description
-        self.patient_id = patient_id
    
 
     def __repr__(self):
-        return f"({self.id}, {self.name}, {self.description}, {self.patient_id})"
+        return f"({self.id}, {self.user_id}, {self.patient_id} {self.name}, {self.description})"
 
 
 session = SessionLocal()
@@ -491,18 +511,20 @@ class Country(Base):
     __tablename__ = "countries"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
     name = Column(String)
     code = Column(String)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, name, code  ):
+    def __init__(self, user_id, name, code  ):
+        self.user_id = user_id
         self.name = name
         self.code = code
         
 
     def __repr__(self):
-        return f"({self.id}, {self.name}, {self.code})"
+        return f"({self.id}, {self.user_id}, {self.name}, {self.code})"
 
 
 session = SessionLocal()
@@ -531,23 +553,27 @@ class Department(Base):
     __tablename__ = "departments"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    name = Column(String, )
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    hospital_id = Column(String, ForeignKey('hospitals.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    doctor_id = Column(String, ForeignKey('doctors.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    nurse_id = Column(String, ForeignKey('nurses.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    name = Column(String)
     description = Column(Text)
-    hospital_id = Column(String, ForeignKey('hospitals.id'))
-    doctor_id = Column(String, ForeignKey('doctors.id'))
-    nurse_id = Column(String, ForeignKey('nurses.id'))
+    
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, name, description, hospital_id, doctor_id, nurse_id):
-        self.name = name
-        self.description = description
+    def __init__(self, user_id, hospital_id, doctor_id, nurse_id, name, description ):
+        self.user_id = user_id
         self.hospital_id = hospital_id
         self.doctor_id = doctor_id
         self.nurse_id = nurse_id
+        self.name = name
+        self.description = description
+        
 
     def __repr__(self):
-        return f"({self.id}, {self.name}, {self.description}, {self.hospital_id}, {self.doctor_id}, {self.nurse_id})"
+        return f"({self.id}, {self.user_id},  {self.hospital_id}, {self.doctor_id}, {self.nurse_id}, {self.name}, {self.description})"
 
 
 session = SessionLocal()
@@ -608,9 +634,10 @@ class Diagnosis(Base):
     __tablename__ = "diagnoses"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    patient_id = Column(String, ForeignKey('patients.id'))
-    doctor_id = Column(String, ForeignKey('doctors.id'))
-    hospital_id = Column(String, ForeignKey('hospitals.id'))
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    patient_id = Column(String, ForeignKey('patients.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    doctor_id = Column(String, ForeignKey('doctors.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    hospital_id = Column(String, ForeignKey('hospitals.id', ondelete='CASCADE', onupdate='NO ACTION'))
     disease = Column(String)
     diagnosis = Column(String)
     date = Column(Date)
@@ -618,7 +645,8 @@ class Diagnosis(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, patient_id, doctor_id, hospital_id, disease, diagnosis, date, notes):
+    def __init__(self, user_id, patient_id, doctor_id, hospital_id, disease, diagnosis, date, notes):
+        self.user_id = user_id
         self.patient_id = patient_id
         self.doctor_id = doctor_id
         self.hospital_id = hospital_id
@@ -628,14 +656,15 @@ class Diagnosis(Base):
         self.notes = notes
 
     def __repr__(self):
-        return f"({self.id}, {self.patient_id}, {self.doctor_id}, {self.hospital_id}, {self.disease}, {self.diagnosis}, {self.date}, {self.notes})"
+        return f"({self.id}, {self.user_id}, {self.patient_id}, {self.doctor_id}, {self.hospital_id}, {self.disease}, {self.diagnosis}, {self.date}, {self.notes})"
 
 """ DISEASES """
 class Disease(Base):
     __tablename__ = 'diseases'
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    patient_id = Column(String, ForeignKey('patients.id'))
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    patient_id = Column(String, ForeignKey('patients.id', ondelete='CASCADE', onupdate='NO ACTION'))
     name = Column(String)
     description = Column(Text)
     symptoms = Column(Text)
@@ -644,7 +673,8 @@ class Disease(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, patient_id, name, description, symptoms, treatment, prevention):
+    def __init__(self, user_id, patient_id, name, description, symptoms, treatment, prevention):
+        self.user_id = user_id
         self.patient_id = patient_id
         self.name = name
         self.description = description
@@ -653,7 +683,7 @@ class Disease(Base):
         self.prevention = prevention
 
     def __repr__(self):
-        return f"({self.id}, {self.patient_id}, {self.name}, {self.description}, {self.symptoms}, {self.treatment}, {self.prevention})"
+        return f"({self.id}, {self.user_id}, {self.patient_id}, {self.name}, {self.description}, {self.symptoms}, {self.treatment}, {self.prevention})"
 
 
 """ DOCTOR """
@@ -661,8 +691,7 @@ class Doctor(Base):
     __tablename__ = "doctors"
 
     id = Column(String, primary_key=True)
-
-    #user_id = Column(String, ForeignKey('users.id'))
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
     firstname = Column(String)
     middlename = Column(String)
     lastname = Column(String)
@@ -679,15 +708,16 @@ class Doctor(Base):
     country = Column(String)
     consultation_fee = Column(Float, nullable=True)
     rating = Column(Float, nullable=True)
-    verified = Column(Boolean)
+    verified = Column(Boolean, server_default='FALSE')
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
 
     #user = relationship("User", backref="doctor")
 
-    def __init__(self, firstname, middlename, lastname, dob, gender, phone_number, email, specialty, licence_number, address, city, state, postal_code, country, consultation_fee, rating, verified):
+    def __init__(self, user_id, firstname, middlename, lastname, dob, gender, phone_number, email, specialty, licence_number, address, city, state, postal_code, country, consultation_fee, rating, verified):
         self.id = str(uuid.uuid4().hex[:6].upper())
+        self.user_id = user_id
         self.firstname = firstname
         self.middlename = middlename
         self.lastname = lastname
@@ -707,7 +737,7 @@ class Doctor(Base):
         self.verified = verified
 
     def __repr__(self):
-        return f"({self.id}, {self.firstname}, {self.middlename}, {self.lastname}, {self.dob},{self.gender}, {self.phone_number}, {self.email}, {self.specialty}, {self.licence_number}, {self.address}, {self.city}, {self.state}, {self.postal_code}, {self.country}, {self.consultation_fee}, {self.rating}, {self.verified})"
+        return f"({self.id}, {self.user_id}, {self.firstname}, {self.middlename}, {self.lastname}, {self.dob},{self.gender}, {self.phone_number}, {self.email}, {self.specialty}, {self.licence_number}, {self.address}, {self.city}, {self.state}, {self.postal_code}, {self.country}, {self.consultation_fee}, {self.rating}, {self.verified})"
 
 
 """ GENETIC CONDITION """
@@ -715,27 +745,30 @@ class GeneticCondition(Base):
     __tablename__ = "genetic_conditions"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    patient_id = Column(String, ForeignKey('patients.id'))
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    patient_id = Column(String, ForeignKey('patients.id', ondelete='CASCADE', onupdate='NO ACTION'))
     name = Column(String)
     description = Column(String)
     inheritance_pattern = Column(Text)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self,  patient_id,  name, description,inheritance_pattern):
+    def __init__(self, user_id, patient_id,  name, description,inheritance_pattern):
+        self.user_id = user_id
         self.patient_id = patient_id
         self.name = name
         self.description = description
         self.inheritance_pattern = inheritance_pattern
 
     def __repr__(self):
-        return f"({self.id}, {self.patient_id}, {self.name}, {self.description}, {self.inheritance_pattern})"
+        return f"({self.id}, {self.user_id}, {self.patient_id}, {self.name}, {self.description}, {self.inheritance_pattern})"
 
 """ HOSPITAL """
 class Hospital(Base):
     __tablename__ = "hospitals"
 
     id = Column(String, primary_key=True)
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
     name = Column(String(255))
     address = Column(String(255))
     city = Column(String(255))
@@ -752,8 +785,9 @@ class Hospital(Base):
 
     #user = relationship("User", backref="hospital")
 
-    def __init__(self, name, address, city, state, postal_code, country, email, phone_number, website, rating, verified):
+    def __init__(self, user_id, name, address, city, state, postal_code, country, email, phone_number, website, rating, verified):
         self.id = str(uuid.uuid4().hex[:4].upper())
+        self.user_id = user_id
         self.name = name
         self.address = address
         self.city = city
@@ -767,7 +801,7 @@ class Hospital(Base):
         self.verified = verified
 
     def __repr__(self):
-        return f"({self.id}, {self.name}, {self.address}, {self.city}, {self.state}, {self.postal_code}, {self.country}, {self.email}, {self.phone_number}, {self.website}, {self.rating}, {self.verified})"
+        return f"({self.id}, {self.user_id}, {self.name}, {self.address}, {self.city}, {self.state}, {self.postal_code}, {self.country}, {self.email}, {self.phone_number}, {self.website}, {self.rating}, {self.verified})"
 
 
 session = SessionLocal()
@@ -802,7 +836,8 @@ class Immunization(Base):
     __tablename__ = "immunizations"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    patient_id = Column(String, ForeignKey('patients.id'))
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    patient_id = Column(String, ForeignKey('patients.id', ondelete='CASCADE', onupdate='NO ACTION'))
     administering_provider = Column(String)
     vaccine_name = Column(String(50))
     dose_number = Column(Integer) #change to string
@@ -811,7 +846,8 @@ class Immunization(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, patient_id, administering_provider, vaccine_name, dose_number, date_given, expiration_date):
+    def __init__(self, user_id, patient_id, administering_provider, vaccine_name, dose_number, date_given, expiration_date):
+        self.user_id = user_id
         self.patient_id = patient_id
         self.administering_provider = administering_provider
         self.vaccine_name = vaccine_name
@@ -820,15 +856,16 @@ class Immunization(Base):
         self.expiration_date = expiration_date
 
     def __repr__(self):
-        return f"({self.id}, {self.patient_id}, {self.administering_provider},  {self.vaccine_name}, {self.dose_number}, {self.date_given},{self.expiration_date})"
+        return f"({self.id}, {self.user_id}, {self.patient_id}, {self.administering_provider},  {self.vaccine_name}, {self.dose_number}, {self.date_given},{self.expiration_date})"
 
 """ INSURANCE CLAIMS"""
 class InsuranceClaim(Base):
     __tablename__ = "insurance_claims"
 
     id = Column(String, primary_key=True)
-    patient_id = Column(String, ForeignKey('patients.id'))
-    provider_id = Column(String, ForeignKey('insurance_providers.id'))
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    patient_id = Column(String, ForeignKey('patients.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    provider_id = Column(String, ForeignKey('insurance_providers.id', ondelete='CASCADE', onupdate='NO ACTION'))
     date_of_service = Column(Date)
     procedure_code = Column(String)
     diagnosis_code = Column(String)
@@ -839,8 +876,9 @@ class InsuranceClaim(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, patient_id, provider_id, date_of_service, procedure_code, diagnosis_code, billed_amount, insurance_paid, patient_paid, status):
+    def __init__(self, user_id, patient_id, provider_id, date_of_service, procedure_code, diagnosis_code, billed_amount, insurance_paid, patient_paid, status):
         self.id = str(uuid.uuid4().hex[:6].upper())
+        self.user_id = user_id
         self.patient_id = patient_id
         self.provider_id = provider_id
         self.date_of_service = date_of_service
@@ -852,7 +890,7 @@ class InsuranceClaim(Base):
         self.status = status
 
     def __repr__(self):
-        return f"({self.id}, {self.patient_id}, {self.provider_id}, {self.date_of_service}, {self.procedure_code}, {self.diagnosis_code}, {self.billed_amount}, {self.insurance_paid}, {self.patient_paid}, {self.status})"
+        return f"({self.id}, {self.user_id}, {self.patient_id}, {self.provider_id}, {self.date_of_service}, {self.procedure_code}, {self.diagnosis_code}, {self.billed_amount}, {self.insurance_paid}, {self.patient_paid}, {self.status})"
 
 
 """ INSURANCE PROVIDER """
@@ -860,6 +898,7 @@ class InsuranceProvider(Base):
     __tablename__ = "insurance_providers"
 
     id = Column(String, primary_key=True)
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
     name = Column(String(50))
     type = Column(String)
     licence_number = Column(String)
@@ -878,8 +917,9 @@ class InsuranceProvider(Base):
 
     #user = relationship("User", backref="insurance_provider")
 
-    def __init__(self, name, type, licence_number, address, city, state, postal_code, country, phone_number, email, website, rating, verified):
+    def __init__(self, user_id, name, type, licence_number, address, city, state, postal_code, country, phone_number, email, website, rating, verified):
         self.id = str(uuid.uuid4().hex[:6].upper())
+        self.user_id = user_id
         self.name = name
         self.type = type
         self.licence_number = licence_number
@@ -895,7 +935,7 @@ class InsuranceProvider(Base):
         self.verified = verified
 
     def __repr__(self):
-        return f"({self.id}, {self.name}, {self.type}, {self.licence_number}, {self.address}, {self.city}, {self.state}, {self.postal_code}, {self.country}, {self.phone_number}, {self.email}, {self.website}, {self.rating}, {self.verified})"
+        return f"({self.id}, {self.user_id}, {self.name}, {self.type}, {self.licence_number}, {self.address}, {self.city}, {self.state}, {self.postal_code}, {self.country}, {self.phone_number}, {self.email}, {self.website}, {self.rating}, {self.verified})"
 
 
 session = SessionLocal()
@@ -947,18 +987,20 @@ class InsuranceProviderType(Base):
     __tablename__ = "insurance_provider_types"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
     name = Column(String)
     description = Column(String)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, name, description):
+    def __init__(self, user_id, name, description):
+        self.user_id = user_id
         self.name = name
         self.description = description
 
 
     def __repr__(self):
-        return f"({self.id}, {self.name}, {self.description})"
+        return f"({self.id}, {self.user_id}, {self.name}, {self.description})"
 
 
 session = SessionLocal()
@@ -998,6 +1040,7 @@ class Itstaff(Base):
     __tablename__ = "it_staff"
 
     id = Column(String, primary_key=True)
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
     firstname = Column(String)
     lastname = Column(String)
     dob = Column(Date)
@@ -1013,8 +1056,9 @@ class Itstaff(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, firstname, lastname, dob, gender, phone_number, email, address, city, state, zip_code, country, hospital_id):
+    def __init__(self, user_id, firstname, lastname, dob, gender, phone_number, email, address, city, state, zip_code, country, hospital_id):
         self.id = str(uuid.uuid4().hex[:6].upper())
+        self.user_id = user_id
         self.firstname = firstname
         self.lastname = lastname
         self.dob = dob
@@ -1029,7 +1073,7 @@ class Itstaff(Base):
         self.hospital_id = hospital_id
 
     def __repr__(self):
-        return f"({self.id}, {self.firstname}, {self.lastname}, {self.dob},{self.gender}, {self.phone_number}, {self.email}, {self.address}, {self.city}, {self.state}, {self.zip_code}, {self.country}, {self.hospital_id})"
+        return f"({self.id}, {self.user_id}, {self.firstname}, {self.lastname}, {self.dob},{self.gender}, {self.phone_number}, {self.email}, {self.address}, {self.city}, {self.state}, {self.zip_code}, {self.country}, {self.hospital_id})"
 
 
 """ LAB TECHNICIANS """
@@ -1037,6 +1081,7 @@ class LabTechnician(Base):
     __tablename__ = "lab_technicians"
 
     id = Column(String, primary_key=True)
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
     firstname = Column(String)
     lastname = Column(String)
     dob = Column(Date)
@@ -1052,8 +1097,9 @@ class LabTechnician(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, firstname, lastname, dob, gender, phone_number, email, hospital_id, address, city, state, postal_code, country):
+    def __init__(self, user_id, firstname, lastname, dob, gender, phone_number, email, hospital_id, address, city, state, postal_code, country):
         self.id = str(uuid.uuid4().hex[:6].upper())
+        self.user_id = user_id
         self.firstname = firstname
         self.lastname = lastname
         self.dob = dob
@@ -1068,15 +1114,16 @@ class LabTechnician(Base):
         self.country = country
 
     def __repr__(self):
-        return f"({self.id}, {self.firstname}, {self.lastname}, {self.dob},{self.gender}, {self.phone_number}, {self.email},  {self.hospital_id}, {self.address}, {self.city}, {self.state}, {self.postal_code}, {self.country})"
+        return f"({self.id}, {self.user_id}, {self.firstname}, {self.lastname}, {self.dob},{self.gender}, {self.phone_number}, {self.email},  {self.hospital_id}, {self.address}, {self.city}, {self.state}, {self.postal_code}, {self.country})"
 
 """ LAB TESTS """
 class LabTest(Base):
     __tablename__ = "lab_tests"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    patient_id = Column(String, ForeignKey('patients.id'))
-    lab_technician_id = Column(String, ForeignKey('lab_technicians.id'))
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    patient_id = Column(String, ForeignKey('patients.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    lab_technician_id = Column(String, ForeignKey('lab_technicians.id', ondelete='CASCADE', onupdate='NO ACTION'))
     test_name = Column(String)
     test_date = Column(Date)
     test_description = Column(String)
@@ -1087,7 +1134,8 @@ class LabTest(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     ##updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, patient_id, lab_technician_id,  test_name, test_date, test_description, test_type, test_cost, test_result, comments):
+    def __init__(self, user_id, patient_id, lab_technician_id,  test_name, test_date, test_description, test_type, test_cost, test_result, comments):
+        self.user_id = user_id
         self.patient_id = patient_id
         self.lab_technician_id = lab_technician_id
         self.test_name = test_name
@@ -1099,7 +1147,7 @@ class LabTest(Base):
         self.comments = comments
 
     def __repr__(self):
-        return f"({self.id}, {self.patient_id}, {self.lab_technician_id}, {self.test_name}, {self.test_date},  {self.test_description}, {self.test_type}, {self.test_cost},{self.test_result}, {self.comments})"
+        return f"({self.id}, {self.user_id}, {self.patient_id}, {self.lab_technician_id}, {self.test_name}, {self.test_date},  {self.test_description}, {self.test_type}, {self.test_cost},{self.test_result}, {self.comments})"
 
 
 """ LAB RESULTS """
@@ -1107,27 +1155,30 @@ class LabResult(Base):
     __tablename__ = "lab_results"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    patient_id = Column(String, ForeignKey('patients.id'))
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    patient_id = Column(String, ForeignKey('patients.id', ondelete='CASCADE', onupdate='NO ACTION'))
     test_result = Column(String)
     comments = Column(Text)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, patient_id, test_result, comments):
+    def __init__(self, user_id, patient_id, test_result, comments):
+        self.user_id = user_id
         self.patient_id = patient_id
         self.test_result = test_result
         self.comments = comments
 
     def __repr__(self):
-        return f"({self.id}, {self.patient_id}, {self.test_result}, {self.comments})"
+        return f"({self.id}, {self.user_id}, {self.patient_id}, {self.test_result}, {self.comments})"
 
 """ MEDICATION ALERTS """
 class MedicationAlert(Base):
     __tablename__ = "medication_alerts"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    patient_id = Column(String, ForeignKey('patients.id'))
-    doctor_id = Column(String, ForeignKey('doctors.id'))
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    patient_id = Column(String, ForeignKey('patients.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    doctor_id = Column(String, ForeignKey('doctors.id', ondelete='CASCADE', onupdate='NO ACTION'))
     medication_id = Column(Integer)
     dosage = Column(Text)
     frequency = Column(Text)
@@ -1137,7 +1188,8 @@ class MedicationAlert(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, patient_id,doctor_id, medication_id, dosage, frequency, alert_date, alert_text, status):
+    def __init__(self, user_id, patient_id,doctor_id, medication_id, dosage, frequency, alert_date, alert_text, status):
+        self.user_id = user_id
         self.patient_id = patient_id
         self.doctor_id = doctor_id
         self.medication_id = medication_id
@@ -1148,14 +1200,15 @@ class MedicationAlert(Base):
         self.status = status
 
     def __repr__(self):
-        return f"({self.id}, {self.patient_id}, {self.doctor_id}, {self.medication_id}, {self.dosage}, {self.frequency}, {self.alert_date}, {self.alert_text}, {self.status})"
+        return f"({self.id}, {self.user_id}, {self.patient_id}, {self.doctor_id}, {self.medication_id}, {self.dosage}, {self.frequency}, {self.alert_date}, {self.alert_text}, {self.status})"
 
 """ MEDICAL CONDITION """
 class MedicalCondition(Base):
     __tablename__ = "medical_conditions"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    patient_id = Column(String, ForeignKey('patients.id'))
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    patient_id = Column(String, ForeignKey('patients.id', ondelete='CASCADE', onupdate='NO ACTION'))
     name = Column(String(50))
     description = Column(Text)
     diagnosis_date = Column(Date)
@@ -1163,7 +1216,8 @@ class MedicalCondition(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, patient_id, name, description, diagnosis_date, treatment):
+    def __init__(self, user_id, patient_id, name, description, diagnosis_date, treatment):
+        self.user_id = user_id
         self.patient_id = patient_id
         self.name = name
         self.description = description
@@ -1171,76 +1225,82 @@ class MedicalCondition(Base):
         self.treatment = treatment
 
     def __repr__(self):
-        return f"({self.id}, {self.patient_id}, {self.name}, {self.description}, {self.diagnosis_date}, {self.treatment})"
+        return f"({self.id}, {self.user_id}, {self.patient_id}, {self.name}, {self.description}, {self.diagnosis_date}, {self.treatment})"
 
 """ MEDICAL DEVICES """
 class MedicalDevice(Base):
     __tablename__ = "medical_devices"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    hospital_id = Column(String, ForeignKey('hospitals.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    department_id = Column(Integer, ForeignKey('departments.id', ondelete='CASCADE', onupdate='NO ACTION'))
     name = Column(String)
     manufacturer = Column(String)
     model = Column(String)
     serial_number = Column(String)
-    hospital_id = Column(String, ForeignKey('hospitals.id'))
-    department_id = Column(Integer, ForeignKey('departments.id'))
     last_maintenance = Column(Date)
     next_maintenance = Column(Date)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, name, manufacturer, model, serial_number, hospital_id, department_id, last_maintenance, next_maintenance):
+    def __init__(self, user_id, hospital_id, department_id, name, manufacturer, model, serial_number, last_maintenance, next_maintenance):
+        self.user_id = user_id
+        self.hospital_id = hospital_id
+        self.department_id = department_id
         self.name = name
         self.manufacturer = manufacturer
         self.model = model
         self.serial_number = serial_number
-        self.hospital_id = hospital_id
-        self.department_id = department_id
         self.last_maintenance = last_maintenance
         self.next_maintenance = next_maintenance
 
     def __repr__(self):
-        return f"({self.id}, {self.name}, {self.manufacturer}, {self.model}, {self.serial_number}, {self.hospital_id}, {self.department_id}, {self.last_maintenance}, {self.next_maintenance})"
+        return f"({self.id}, {self.user_id}, {self.hospital_id}, {self.department_id}, {self.name}, {self.manufacturer}, {self.model}, {self.serial_number}, {self.last_maintenance}, {self.next_maintenance})"
 
 """ MEDICAL IMAGES """
 class MedicalImage(Base):
     __tablename__ = "medical_images"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    patient_id = Column(String, ForeignKey('patients.id'))
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    patient_id = Column(String, ForeignKey('patients.id', ondelete='CASCADE', onupdate='NO ACTION'))
     image_type = Column(String)
     image_date = Column(Date)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     ##updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, patient_id, image_type, image_date):
+    def __init__(self, user_id, patient_id, image_type, image_date):
+        self.user_id = user_id
         self.patient_id = patient_id
         self.image_type = image_type
         self.image_date = image_date
 
     def __repr__(self):
-        return f"({self.id}, {self.patient_id}, {self.image_type}, {self.image_date})"
+        return f"({self.id}, {self.user_id}, {self.patient_id}, {self.image_type}, {self.image_date})"
 
 """MEDICAL NOTES """
 class MedicalNote(Base):
     __tablename__ = "medical_notes"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    patient_id = Column(String, ForeignKey('patients.id'))
-    doctor_id = Column(String, ForeignKey('doctors.id'))
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    patient_id = Column(String, ForeignKey('patients.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    doctor_id = Column(String, ForeignKey('doctors.id', ondelete='CASCADE', onupdate='NO ACTION'))
     date = Column(Date)
     note = Column(Text)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, patient_id, doctor_id, date, note):
+    def __init__(self, user_id, patient_id, doctor_id, date, note):
+        self.user_id = user_id
         self.patient_id = patient_id
         self.doctor_id = doctor_id
         self.date = date
         self.note = note
 
     def __repr__(self):
-        return f"({self.id}, {self.patient_id}, {self.doctor_id}, {self.date}, {self.note})"
+        return f"({self.id}, {self.user_id}, {self.patient_id}, {self.doctor_id}, {self.date}, {self.note})"
 
 
 """ MEDICAL PROCEDURES"""
@@ -1248,15 +1308,17 @@ class MedicalProcedure(Base):
     __tablename__ = "medical_procedures"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    patient_id = Column(String, ForeignKey('patients.id'))
-    doctor_id = Column(String, ForeignKey('doctors.id'))
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    patient_id = Column(String, ForeignKey('patients.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    doctor_id = Column(String, ForeignKey('doctors.id', ondelete='CASCADE', onupdate='NO ACTION'))
     name = Column(String)
     date = Column(Date)
     notes = Column(Text)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, patient_id, doctor_id, name, date, notes):
+    def __init__(self, user_id, patient_id, doctor_id, name, date, notes):
+        self.user_id = user_id
         self.patient_id = patient_id
         self.doctor_id = doctor_id
         self.name = name
@@ -1264,7 +1326,7 @@ class MedicalProcedure(Base):
         self.notes = notes
 
     def __repr__(self):
-        return f"({self.id}, {self.patient_id}, {self.doctor_id}, {self.name}, {self.date}, {self.notes})"
+        return f"({self.id}, {self.user_id}, {self.patient_id}, {self.doctor_id}, {self.name}, {self.date}, {self.notes})"
 
 
 """ MEDICATION """
@@ -1272,8 +1334,9 @@ class Medication(Base):
     __tablename__ = "medications"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    patient_id = Column(String, ForeignKey('patients.id'))
-    doctor_id = Column(String, ForeignKey('doctors.id'))
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    patient_id = Column(String, ForeignKey('patients.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    doctor_id = Column(String, ForeignKey('doctors.id', ondelete='CASCADE', onupdate='NO ACTION'))
     name = Column(String)
     description = Column(String)
     route_of_administration = Column(String)  # oral topical intravenous
@@ -1284,7 +1347,8 @@ class Medication(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, patient_id, doctor_id, name, description, route_of_administration, dosage, unit, frequency):
+    def __init__(self, user_id, patient_id, doctor_id, name, description, route_of_administration, dosage, unit, frequency):
+        self.user_id = user_id
         self.patient_id = patient_id
         self.doctor_id = doctor_id
         self.name = name
@@ -1296,13 +1360,14 @@ class Medication(Base):
         
 
     def __repr__(self):
-        return f"({self.id}, {self.patient_id}, {self.doctor_id}, {self.name}, {self.description}, {self.route_of_administration}, {self.dosage}, {self.unit}, {self.frequency})"
+        return f"({self.id}, {self.user_id}, {self.patient_id}, {self.doctor_id}, {self.name}, {self.description}, {self.route_of_administration}, {self.dosage}, {self.unit}, {self.frequency})"
 
 """ NURSE """
 class Nurse(Base):
     __tablename__ = "nurses"
 
     id = Column(String, primary_key=True)
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
     firstname = Column(String)
     lastname = Column(String)
     dob = Column(Date)
@@ -1317,15 +1382,16 @@ class Nurse(Base):
     postal_code = Column(String)
     country = Column(String)
     work_schedule = Column(String)
-    verified = Column(Boolean)
+    verified = Column(Boolean, server_default='FALSE')
     
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
     #user = relationship("User", backref="nurse")
 
-    def __init__(self, firstname, lastname, dob, gender, phone_number, email, licence_number, hospital_id, address, city, state, postal_code, country, work_schedule, verified):
+    def __init__(self, user_id, firstname, lastname, dob, gender, phone_number, email, licence_number, hospital_id, address, city, state, postal_code, country, work_schedule, verified):
         self.id = str(uuid.uuid4().hex[:6].upper())
+        self.user_id = user_id
         self.firstname = firstname
         self.lastname = lastname
         self.dob = dob
@@ -1344,28 +1410,30 @@ class Nurse(Base):
        
 
     def __repr__(self):
-        return f"({self.id}, {self.firstname}, {self.lastname}, {self.dob},{self.gender}, {self.phone_number}, {self.email}, {self.licence_number}, {self.hospital_id}, {self.address}, {self.city}, {self.state}, {self.postal_code}, {self.country}, {self.work_schedule}, {self.verified})"
+        return f"({self.id}, {self.user_id}, {self.firstname}, {self.lastname}, {self.dob},{self.gender}, {self.phone_number}, {self.email}, {self.licence_number}, {self.hospital_id}, {self.address}, {self.city}, {self.state}, {self.postal_code}, {self.country}, {self.work_schedule}, {self.verified})"
 
 """ PATIENT CONSENT"""
 class PatientConsent(Base):
     __tablename__ = "patient_consents"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    patient_id = Column(String, ForeignKey('patients.id'))
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    patient_id = Column(String, ForeignKey('patients.id', ondelete='CASCADE', onupdate='NO ACTION'))
     consent_type = Column(String)  # treatment release of medical information
     consent_date = Column(Date)
     expiration_date = Column(Date)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, patient_id, consent_type, consent_date, expiration_date):
+    def __init__(self, user_id, patient_id, consent_type, consent_date, expiration_date):
+        self.user_id = user_id
         self.patient_id = patient_id
         self.consent_type = consent_type
         self.consent_date = consent_date
         self.expiration_date = expiration_date
 
     def __repr__(self):
-        return f"({self.id}, {self.patient_id}, {self.consent_type}, {self.consent_date}, {self.expiration_date})"
+        return f"({self.id}, {self.user_id}, {self.patient_id}, {self.consent_type}, {self.consent_date}, {self.expiration_date})"
 
 
 """ PATIENT FEEDBACK """
@@ -1373,14 +1441,16 @@ class PatientFeedback(Base):
     __tablename__ = "patient_feedback"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    patient_id = Column(String, ForeignKey('patients.id'))
-    doctor_id = Column(String, ForeignKey('doctors.id'))
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    patient_id = Column(String, ForeignKey('patients.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    doctor_id = Column(String, ForeignKey('doctors.id', ondelete='CASCADE', onupdate='NO ACTION'))
     date = Column(Date)
     text = Column(Text)
     rating = Column(Integer)
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, patient_id, doctor_id, date, text, rating):
+    def __init__(self, user_id, patient_id, doctor_id, date, text, rating):
+        self.user_id = user_id
         self.patient_id = patient_id
         self.doctor_id = doctor_id
         self.date = date
@@ -1388,16 +1458,17 @@ class PatientFeedback(Base):
         self.rating = rating
 
     def __repr__(self):
-        return f"({self.id}, {self.patient_id}, {self.doctor_id}, {self.date}, {self.text}, {self.rating})"
+        return f"({self.id}, {self.user_id}, {self.patient_id}, {self.doctor_id}, {self.date}, {self.text}, {self.rating})"
 
 """ PATIENT VISIT """
 class PatientVisit(Base):
     __tablename__ = "patient_visits"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    patient_id = Column(String, ForeignKey('patients.id'))
-    doctor_id = Column(String, ForeignKey('doctors.id'))
-    appointment_id = Column(Integer, ForeignKey('appointments.id'))
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    patient_id = Column(String, ForeignKey('patients.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    doctor_id = Column(String, ForeignKey('doctors.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    appointment_id = Column(Integer, ForeignKey('appointments.id', ondelete='CASCADE', onupdate='NO ACTION'))
     visit_date = Column(Date)
     chief_complaint = Column(Text)
     diagnosis_id = Column(Integer)
@@ -1408,7 +1479,8 @@ class PatientVisit(Base):
 
     #user = relationship("User", backref="patient")
 
-    def __init__(self, patient_id, doctor_id, appointment_id, visit_date, chief_complaint, diagnosis_id, notes):
+    def __init__(self, user_id, patient_id, doctor_id, appointment_id, visit_date, chief_complaint, diagnosis_id, notes):
+        self.user_id = user_id
         self.patient_id = patient_id
         self.doctor_id = doctor_id
         self.appointment_id = appointment_id
@@ -1418,7 +1490,7 @@ class PatientVisit(Base):
         self.notes = notes
 
     def __repr__(self):
-        return f"({self.id}, {self.patient_id}, {self.doctor_id}, {self.appointment_id}, {self.visit_date}, {self.chief_complaint}, {self.diagnosis_id}, {self.notes})"
+        return f"({self.id}, {self.user_id}, {self.patient_id}, {self.doctor_id}, {self.appointment_id}, {self.visit_date}, {self.chief_complaint}, {self.diagnosis_id}, {self.notes})"
 
 
 """ PATIENT """
@@ -1426,6 +1498,7 @@ class Patient(Base):
     __tablename__ = "patients"
 
     id = Column(String, primary_key=True)
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
     # Personal Information
     firstname = Column(String)
     middlename = Column(String)
@@ -1444,7 +1517,7 @@ class Patient(Base):
     emergency_contact_phone = Column(String(20))
     relationship = Column(String)
     # Insurance Information
-    insurance = Column(Boolean)
+    insurance = Column(Boolean, server_default='FALSE')
     provider_name = Column(String)
     policy_number = Column(String)
     group_number = Column(String)
@@ -1457,8 +1530,9 @@ class Patient(Base):
     #admissions = relationship("Admission", backref="patient")
     #user = relationship("User", backref="patient")
 
-    def __init__(self, firstname, middlename, lastname, dob, gender, phonenumber, email, address, city, state, postal_code, country, emergency_contact_name, emergency_contact_phone, relationship, insurance, provider_name, policy_number, group_number, effective_date, expiration_date):
+    def __init__(self, user_id, firstname, middlename, lastname, dob, gender, phonenumber, email, address, city, state, postal_code, country, emergency_contact_name, emergency_contact_phone, relationship, insurance, provider_name, policy_number, group_number, effective_date, expiration_date):
         self.id = str(uuid.uuid4().hex[:6].upper())
+        self.user_id = user_id
         self.firstname = firstname
         self.middlename = middlename
         self.lastname = lastname
@@ -1482,7 +1556,7 @@ class Patient(Base):
         self.expiration_date = expiration_date
 
     def __repr__(self):
-        return f"({self.id}, {self.firstname}, {self.middlename}, {self.lastname}, {self.dob}, {self.gender}, {self.phonenumber}, {self.email}, {self.address}, {self.city}, {self.state}, {self.postal_code}, {self.country}, {self.emergency_contact_name}, {self.emergency_contact_phone}, {self.relationship}, {self.insurance}, {self.provider_name}, {self.policy_number}, {self.group_number}, {self.effective_date}, {self.expiration_date})"
+        return f"({self.id}, {self.user_id}, {self.firstname}, {self.middlename}, {self.lastname}, {self.dob}, {self.gender}, {self.phonenumber}, {self.email}, {self.address}, {self.city}, {self.state}, {self.postal_code}, {self.country}, {self.emergency_contact_name}, {self.emergency_contact_phone}, {self.relationship}, {self.insurance}, {self.provider_name}, {self.policy_number}, {self.group_number}, {self.effective_date}, {self.expiration_date})"
 
 
 """ PHARMACIST """
@@ -1490,6 +1564,7 @@ class Pharmacist(Base):
     __tablename__ = "pharmacists"
 
     id = Column(String, primary_key=True)
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
     firstname = Column(String)
     lastname = Column(String)
     dob = Column(Date)
@@ -1502,15 +1577,16 @@ class Pharmacist(Base):
     state = Column(String)
     postal_code = Column(String)
     country = Column(String)
-    verified = Column(Boolean)
+    verified = Column(Boolean, server_default='FALSE')
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
 
     #user = relationship("User", backref="pharmacist")
 
-    def __init__(self, firstname, lastname, dob, gender, phone_number, email, licence_number, address, city, state, postal_code, country, verified):
+    def __init__(self, user_id, firstname, lastname, dob, gender, phone_number, email, licence_number, address, city, state, postal_code, country, verified):
         self.id = str(uuid.uuid4().hex[:6].upper())
+        self.user_id = user_id
         self.firstname = firstname
         self.lastname = lastname
         self.dob = dob
@@ -1526,7 +1602,7 @@ class Pharmacist(Base):
         self.verified = verified
 
     def __repr__(self):
-        return f"({self.id}, {self.firstname}, {self.lastname}, {self.dob},{self.gender}, {self.phone_number}, {self.email}, {self.licence_number}, {self.address}, {self.city}, {self.state}, {self.postal_code}, {self.country}, {self.verified})"
+        return f"({self.id}, {self.user_id}, {self.firstname}, {self.lastname}, {self.dob},{self.gender}, {self.phone_number}, {self.email}, {self.licence_number}, {self.address}, {self.city}, {self.state}, {self.postal_code}, {self.country}, {self.verified})"
 
 
 """PRESCRIPTION """
@@ -1534,8 +1610,9 @@ class Prescription(Base):
     __tablename__ = "prescriptions"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    patient_id = Column(String, ForeignKey('patients.id'))
-    doctor_id = Column(String, ForeignKey('doctors.id'))
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    patient_id = Column(String, ForeignKey('patients.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    doctor_id = Column(String, ForeignKey('doctors.id', ondelete='CASCADE', onupdate='NO ACTION'))
     medication = Column(String)
     dosage = Column(String)
     instructions = Column(Text)
@@ -1543,7 +1620,8 @@ class Prescription(Base):
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
 
-    def __init__(self, doctor_id, patient_id, medication, dosage, instructions):
+    def __init__(self, user_id, doctor_id, patient_id, medication, dosage, instructions):
+        self.user_id = user_id
         self.doctor_id = doctor_id
         self.patient_id = patient_id
         self.medication = medication
@@ -1551,7 +1629,7 @@ class Prescription(Base):
         self.instructions = instructions
 
     def __repr__(self):
-        return f"({self.id}, {self.doctor_id}, {self.patient_id}, {self.medication}, {self.dosage}, {self.instructions})"
+        return f"({self.id}, {self.user_id}, {self.doctor_id}, {self.patient_id}, {self.medication}, {self.dosage}, {self.instructions})"
 
 
 """ RECEPTIONISTS """
@@ -1559,6 +1637,7 @@ class Receptionist(Base):
     __tablename__ = "receptionists"
 
     id = Column(String, primary_key=True)
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
     firstname = Column(String)
     lastname = Column(String)
     dob = Column(Date)
@@ -1575,8 +1654,9 @@ class Receptionist(Base):
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
 
-    def __init__(self, firstname, lastname, dob, gender, phone_number, email, address, city, state, zip_code, country, hospital_id):
+    def __init__(self, user_id, firstname, lastname, dob, gender, phone_number, email, address, city, state, zip_code, country, hospital_id):
         self.id = str(uuid.uuid4().hex[:6].upper())
+        self.user_id = user_id
         self.firstname = firstname
         self.lastname = lastname
         self.dob = dob
@@ -1591,7 +1671,7 @@ class Receptionist(Base):
         self.hospital_id = hospital_id
 
     def __repr__(self):
-        return f"({self.id}, {self.firstname}, {self.lastname}, {self.dob},{self.gender}, {self.phone_number}, {self.email}, {self.address}, {self.city}, {self.state}, {self.zip_code}, {self.country}, {self.hospital_id})"
+        return f"({self.id}, {self.user_id}, {self.firstname}, {self.lastname}, {self.dob},{self.gender}, {self.phone_number}, {self.email}, {self.address}, {self.city}, {self.state}, {self.zip_code}, {self.country}, {self.hospital_id})"
 
 
 """ REFERRALS """
@@ -1599,12 +1679,13 @@ class Referral(Base):
     __tablename__ = "referrals"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    referring_patient = Column(String, ForeignKey('patients.id'))
-    referred_patient = Column(String, ForeignKey('patients.id'))
-    referring_doctor = Column(String, ForeignKey('doctors.id'))
-    referred_doctor = Column(String, ForeignKey('doctors.id'))
-    referring_hospital = Column(String, ForeignKey('hospitals.id'))
-    referred_hospital = Column(String, ForeignKey('hospitals.id'))
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    referring_patient = Column(String, ForeignKey('patients.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    referred_patient = Column(String, ForeignKey('patients.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    referring_doctor = Column(String, ForeignKey('doctors.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    referred_doctor = Column(String, ForeignKey('doctors.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    referring_hospital = Column(String, ForeignKey('hospitals.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    referred_hospital = Column(String, ForeignKey('hospitals.id', ondelete='CASCADE', onupdate='NO ACTION'))
     referral_date = Column(Date)
     referral_reason = Column(Text)
     status = Column(String)
@@ -1612,7 +1693,8 @@ class Referral(Base):
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
 
-    def __init__(self, referring_patient, referred_patient, referring_doctor, referred_doctor, referring_hospital, referred_hospital, referral_date, referral_reason, status):
+    def __init__(self, user_id, referring_patient, referred_patient, referring_doctor, referred_doctor, referring_hospital, referred_hospital, referral_date, referral_reason, status):
+        self.user_id = user_id
         self.referring_patient = referring_patient
         self.referred_patient = referred_patient
         self.referring_doctor = referring_doctor
@@ -1624,27 +1706,29 @@ class Referral(Base):
         self.status = status
 
     def __repr__(self):
-        return f"({self.id}, {self.referring_patient}, {self.referred_patient}, {self.referring_doctor}, {self.referred_doctor}, {self.referring_hospital}, {self.referred_hospital}, {self.referral_date}, {self.referral_reason}, {self.status})"
+        return f"({self.id}, {self.user_id}, {self.referring_patient}, {self.referred_patient}, {self.referring_doctor}, {self.referred_doctor}, {self.referring_hospital}, {self.referred_hospital}, {self.referral_date}, {self.referral_reason}, {self.status})"
 
 """ SPECIALTY """
 class Specialty(Base):
     __tablename__ = "specialties"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    doctor_id = Column(String, ForeignKey('doctors.id', ondelete='CASCADE', onupdate='NO ACTION'))
     name = Column(String)
     description = Column(String)
-    doctor_id = Column(String, ForeignKey('doctors.id'))
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
 
-    def __init__(self, name, description, doctor_id):
+    def __init__(self, user_id, doctor_id, name, description):
+        self.user_id = user_id
+        self.doctor_id = doctor_id
         self.name = name
         self.description = description
-        self.doctor_id = doctor_id
 
     def __repr__(self):
-        return f"({self.id}, {self.name}, {self.description}, {self.doctor_id})"
+        return f"({self.id}, {self.user_id}, {self.doctor_id}, {self.name}, {self.description})"
 
 
 session = SessionLocal()
@@ -1719,15 +1803,17 @@ class TimeSlot(Base):
     __tablename__ = 'time_slots'
 
     id = Column(Integer, primary_key=True)
-    doctor_id = Column(String, ForeignKey('doctors.id'))
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    doctor_id = Column(String, ForeignKey('doctors.id', ondelete='CASCADE', onupdate='NO ACTION'))
     appointment_date = Column(Date)
     appointment_start_time = Column(String)
     appointment_end_time = Column(String)
-    availability = Column(Boolean, default=True)
+    availability = Column(Boolean, server_default='TRUE')
     created_at = Column(TIMESTAMP, server_default=func.now())
     updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, doctor_id, appointment_date, appointment_start_time, appointment_end_time, availability ):
+    def __init__(self, user_id, doctor_id, appointment_date, appointment_start_time, appointment_end_time, availability ):
+        self.user_id = user_id
         self.doctor_id = doctor_id
         self.appointment_date = appointment_date
         self.appointment_start_time = appointment_start_time
@@ -1735,7 +1821,7 @@ class TimeSlot(Base):
         self.availability = availability
 
     def __repr__(self):
-        return f"({self.id},  {self.doctor_id}, {self.appointment_date}, {self.appointment_start_time}, {self.appointment_end_time}, {self.availability})"
+        return f"({self.id}, {self.user_id}, {self.doctor_id}, {self.appointment_date}, {self.appointment_start_time}, {self.appointment_end_time}, {self.availability})"
 
 
 
@@ -1763,7 +1849,8 @@ class Vaccination(Base):
     __tablename__ = "vaccinations"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    patient_id = Column(String, ForeignKey('patients.id'))
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    patient_id = Column(String, ForeignKey('patients.id', ondelete='CASCADE', onupdate='NO ACTION'))
     vaccine_name = Column(String)
     administered_by = Column(String)
     administered_at = Column(TIMESTAMP(timezone=True))
@@ -1772,7 +1859,8 @@ class Vaccination(Base):
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
 
-    def __init__(self, patient_id, vaccine_name, administered_by, administered_at, next_dose_due):
+    def __init__(self, user_id, patient_id, vaccine_name, administered_by, administered_at, next_dose_due):
+        self.user_id = user_id
         self.patient_id = patient_id
         self.vaccine_name = vaccine_name
         self.administered_by = administered_by
@@ -1784,8 +1872,9 @@ class VitalSign(Base):
     __tablename__ = "vital_signs"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    patient_id = Column(String, ForeignKey('patients.id'))
-    doctor_id = Column(String, ForeignKey('doctors.id'))
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    patient_id = Column(String, ForeignKey('patients.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    doctor_id = Column(String, ForeignKey('doctors.id', ondelete='CASCADE', onupdate='NO ACTION'))
     heart_rate = Column(Float)
     blood_pressure_systolic = Column(Float)
     blood_pressure_diastolic = Column(Float)
@@ -1799,7 +1888,8 @@ class VitalSign(Base):
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
 
-    def __init__(self, patient_id, doctor_id, heart_rate, blood_pressure_systolic, blood_pressure_diastolic, respiratory_rate, temperature, height, weight, oxygen_saturation, recorded_at):
+    def __init__(self, user_id, patient_id, doctor_id, heart_rate, blood_pressure_systolic, blood_pressure_diastolic, respiratory_rate, temperature, height, weight, oxygen_saturation, recorded_at):
+        self.user_id = user_id
         self.patient_id = patient_id
         self.doctor_id = doctor_id
         self.heart_rate = heart_rate
@@ -1813,14 +1903,15 @@ class VitalSign(Base):
         self.recorded_at = recorded_at
 
     def __repr__(self):
-        return f"({self.id}, {self.patient_id}, {self.doctor_id}, {self.heart_rate}, {self.blood_pressure_systolic}, {self.blood_pressure_diastolic}, {self.respiratory_rate}, {self.temperature}, {self.height}, {self.weight}, {self.oxygen_saturation}, {self.recorded_at})"
+        return f"({self.id}, {self.user_id}, {self.patient_id}, {self.doctor_id}, {self.heart_rate}, {self.blood_pressure_systolic}, {self.blood_pressure_diastolic}, {self.respiratory_rate}, {self.temperature}, {self.height}, {self.weight}, {self.oxygen_saturation}, {self.recorded_at})"
 
 """ WARD """
 class Ward(Base):
     __tablename__ = "wards"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    hospital_id = Column(String, ForeignKey('hospitals.id'))
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    hospital_id = Column(String, ForeignKey('hospitals.id', ondelete='CASCADE', onupdate='NO ACTION'))
     name = Column(String)
     type = Column(String)
     capacity = Column(Integer)
@@ -1828,7 +1919,8 @@ class Ward(Base):
    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
 
-    def __init__(self, hospital_id, name, type, capacity, location ):
+    def __init__(self, user_id, hospital_id, name, type, capacity, location ):
+        self.user_id = user_id
         self.hospital_id = hospital_id
         self.name = name
         self.type = type
@@ -1836,15 +1928,16 @@ class Ward(Base):
         self.location = location
 
     def __repr__(self):
-        return f"({self.id},  {self.hospital_id}, {self.name}, {self.type}, {self.capacity}, {self.location})"
+        return f"({self.id}, {self.user_id}, {self.hospital_id}, {self.name}, {self.type}, {self.capacity}, {self.location})"
 
 """ WORK SCHEDULE """
 class WorkSchedule(Base):
     __tablename__ = "work_schedules"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    doctor_id = Column(String, ForeignKey('doctors.id'))
-    nurse_id = Column(String, ForeignKey('nurses.id'))
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    doctor_id = Column(String, ForeignKey('doctors.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    nurse_id = Column(String, ForeignKey('nurses.id', ondelete='CASCADE', onupdate='NO ACTION'))
     day_of_week = Column(String)
     start_time = Column(DateTime)
     end_time = Column(DateTime)
@@ -1852,7 +1945,8 @@ class WorkSchedule(Base):
    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
 
-    def __init__(self, doctor_id, nurse_id, day_of_week, start_time, end_time):
+    def __init__(self, user_id, doctor_id, nurse_id, day_of_week, start_time, end_time):
+        self.user_id = user_id
         self.doctor_id = doctor_id
         self.nurse_id = nurse_id
         self.day_of_week = day_of_week
@@ -1860,7 +1954,7 @@ class WorkSchedule(Base):
         self.end_time = end_time
 
     def __repr__(self):
-        return f"({self.doctor_id}, {self.nurse_id}, {self.day_of_week}, {self.start_time}, {self.end_time})"
+        return f"({self.user_id}, {self.doctor_id}, {self.nurse_id}, {self.day_of_week}, {self.start_time}, {self.end_time})"
 
 
 # results = session.query(Person).all()
@@ -1869,6 +1963,597 @@ class WorkSchedule(Base):
 # for r in results:
 #   print(r)
 
+"""
+Session = sessionmaker(bind=engine)
+session = SessionLocal()
+user = User(
+    email="dorothyarieda@gmail.com",
+    password="password123"
+)
+session.add(user)
+session.commit()
 
 
+patient = Patient(
+    user_id=user.id,
+    firstname="salome",
+    middlename="nzisa",
+    lastname="amombo",
+    dob=date(2015, 8, 15),
+    gender="male",
+    phonenumber="745369800",
+    email="amombofortune77@gmail.com",
+    address="P.O Box 980",
+    city="Nairobi",
+    state="Kileleshwa",
+    postal_code="00100",
+    country="Kenya",
+    emergency_contact_name="Dennis Okutoyi",
+    emergency_contact_phone="735400400",
+    relationship="son",
+    insurance=False,
+    provider_name="Britam Insurance",
+    policy_number="28930",
+    group_number="34829",
+    effective_date=date(2023, 12, 12),
+    expiration_date=date(2025, 12, 19)
+)
+session.add(patient)
+session.commit()
+
+doctor = Doctor(
+    user_id=user.id,
+    firstname="salome",
+    middlename="nzisa",
+    lastname="amombo",
+    dob=date(2015, 8, 15),
+    gender="male",
+    phone_number="745369800",
+    email="amombofortune77@gmail.com",
+    specialty="Neurosurgeon",
+    licence_number = "5839202",
+    address="P.O Box 980",
+    city="Nairobi",
+    state="Kileleshwa",
+    postal_code="00100",
+    country="Kenya",
+    consultation_fee= 5000,
+    rating=5,
+    verified = True, 
+)
+session.add(doctor)
+session.commit()
+
+hospital = Hospital(
+    user_id=user.id,
+    name="Kibaki Hospital",
+    address="P.O Box 980",
+    city="Nairobi",
+    state="Kileleshwa",
+    postal_code="00100",
+    country="Kenya",
+    email = "info@gmail.com",
+    phone_number= "745689800",
+    website= "kh.co.ke",
+    rating = 5, 
+    verified = True,
+)
+session.add(hospital)
+session.commit()
+
+nurse = Nurse(
+    user_id=user.id,
+    firstname="salome",
+    lastname="amombo",
+    dob=date(2015, 8, 15),
+    gender="male",
+    phone_number="745369800",
+    email="amombofortune77@gmail.com",
+    licence_number = "5839202",
+    hospital_id = hospital.id,
+    address="P.O Box 980",
+    city="Nairobi",
+    state="Kileleshwa",
+    postal_code="00100",
+    country="Kenya",
+    work_schedule= "Mon, Tue, Wed",
+    verified = True, 
+)
+session.add(nurse)
+session.commit()
+
+insurance_provider = InsuranceProvider(
+    user_id=user.id,
+    name="Other",
+    type="Health",
+    licence_number = "89373",
+    address="P.O Box 980",
+    city="Nairobi",
+    state="Kileleshwa",
+    postal_code="00100",
+    country="Kenya",
+    phone_number="745369800",
+    email="amombofortune77@gmail.com",
+    website= "website.co.ke",
+    rating = 5,
+    verified = True, 
+)
+session.add(insurance_provider)
+session.commit()
+
+lab_technician = LabTechnician(
+    user_id=user.id,
+    firstname="salome",
+    lastname="amombo",
+    dob=date(2015, 8, 15),
+    gender="male",
+    phone_number="745369800",
+    email="amombofortune77@gmail.com",
+    hospital_id = hospital.id,
+    address="P.O Box 980",
+    city="Nairobi",
+    state="Kileleshwa",
+    postal_code="00100",
+    country="Kenya",
+)
+session.add(lab_technician)
+session.commit()
+
+pharmacist = Pharmacist(
+    user_id=user.id,
+    firstname="salome",
+    lastname="amombo",
+    dob=date(2015, 8, 15),
+    gender="male",
+    phone_number="745369800",
+    email="amombofortune77@gmail.com",
+    licence_number = "licence_number",
+    address="P.O Box 980",
+    city="Nairobi",
+    state="Kileleshwa",
+    postal_code="00100",
+    country="Kenya",
+    verified=True,
+)
+session.add(pharmacist)
+session.commit()
+
+
+admission = Admission(
+    user_id=user.id,
+    patient_id=patient.id,
+    admission_date=date(2023, 9, 12),
+    admission_time=time(12, 45),
+    discharge_date=date(2023, 10, 12),
+    discharge_time=time(19, 1),
+    reason="Referral",
+    diagnosis="Medical pills",
+    treatment="Surgery",
+    doctor_id= doctor.id,
+)
+session.add(admission)
+session.commit()
+
+
+adverse_reaction = AdverseReaction(
+    user_id=user.id,
+    patient_id=patient.id,
+    reaction_date=date(2023, 9, 12),
+    reaction_time=time(12, 45),
+    reaction_type = "Reaction Type",
+    reaction_details="Reaction happened very fast",
+    medication_name="Ibufofren Painkillers",
+    dosage="Twice a day",
+    severity="Very Severe",
+    treatment="Surgery required"
+)
+session.add(adverse_reaction)
+session.commit()
+
+allergy = Allergy(
+    user_id=user.id,
+    name="Other",
+    patient_id= patient.id,
+)
+session.add(allergy)
+session.commit()
+
+
+appointment = Appointment(
+    user_id=user.id,
+    patient_id=patient.id,
+    doctor_id=doctor.id,
+    type = "Online",
+    date=date(2023, 9, 12),
+    start_time=time(12, 45),
+    end_time=time(12, 45),
+    description="Reaction happened very fast",
+    status="Ibufofren Painkillers",
+
+)
+session.add(appointment)
+session.commit()
+
+appointment_reminder = AppointmentReminder(
+    user_id=user.id,
+    appointment_id = appointment.id,
+    patient_id=patient.id,
+    doctor_id=doctor.id,
+    reminder_date=date(2023, 9, 12),
+    reminder_time=time(12, 45),
+    reminder_type = "Push Notification",
+    status = "Successful",
+)
+session.add(appointment_reminder)
+session.commit()
+
+ward = Ward(
+    user_id=user.id,
+    hospital_id=hospital.id,
+    name="name",
+    type= "type",
+    capacity= "300",
+    location= "location",
+)
+session.add(ward)
+session.commit()
+
+bed = Bed(
+    user_id=user.id,
+    ward = ward.id, #foreignkey
+    bed_no=34,
+    bed_type="Surgery",
+    availability = True,
+    occupied_by = patient.id,
+    assigned_by = user.id,
+ 
+)
+session.add(bed)
+session.commit()
+
+billing = Billing(
+    user_id=user.id,
+    patient_id=patient.id,
+    bill_date=date(2023, 9, 12),
+    amount_due= 3900,
+    amount_paid = 3900,
+    payment_method = "M-Pesa",
+    status = "Successful",
+)
+session.add(billing)
+session.commit()
+
+chronic_condition = ChronicCondition(
+    user_id=user.id,
+    name = "Other",
+    description = "Other",
+    patient_id=patient.id,
+)
+session.add(chronic_condition)
+session.commit()
+
+country = Country(
+    user_id=user.id,
+    name="Seychelles",
+    code= 299,
+  
+)
+session.add(country)
+session.commit()
+
+department = Department(
+    user_id=user.id,
+    name="Other",
+    description= "description",
+    hospital_id=hospital.id,
+    doctor_id=doctor.id,
+    nurse_id=nurse.id,
+  
+)
+session.add(department)
+session.commit()
+
+diagnosis = Diagnosis(
+    user_id=user.id,
+    patient_id=patient.id,
+    doctor_id=doctor.id,
+    hospital_id=hospital.id,
+    disease = "disease",
+    diagnosis = "diagnosis",
+    date=date(2023, 9, 12),
+    notes = "Push Notification",
+)
+session.add(diagnosis)
+session.commit()
+
+disease = Disease(
+    user_id=user.id,
+    patient_id=patient.id,
+    name = "disease",
+    description = "diagnosis",
+    symptoms = "symptoms",
+    treatment = "Push Notification",
+    prevention = "Push Notification",
+)
+session.add(disease)
+session.commit()
+
+genetic_condition = GeneticCondition(
+    user_id=user.id,
+    patient_id=patient.id,
+    name = "disease",
+    description = "diagnosis",
+    inheritance_pattern = "inheritance_pattern",
+)
+session.add(genetic_condition)
+session.commit()
+
+immunization = Immunization(
+    user_id=user.id,
+    patient_id=patient.id,
+    administering_provider="administering_provider",
+    vaccine_name="vaccine_name",
+    dose_number = "239",
+    date_given=date(2023, 9, 12),
+    expiration_date=date(2023, 9, 12),
+)
+session.add(immunization)
+session.commit()
+
+insurance_claim = InsuranceClaim(
+    user_id=user.id,
+    patient_id=patient.id,
+    provider_id=insurance_provider.id,
+    date_of_service=date(2023, 9, 12),
+    procedure_code="procedure_code",
+    diagnosis_code="diagnosis_code",
+    billed_amount = "2390",
+    insurance_paid = "390",
+    patient_paid = "4000",
+    status = "pending",
+)
+session.add(insurance_claim)
+session.commit()
+
+lab_test = LabTest(
+    user_id=user.id,
+    patient_id=patient.id,
+    lab_technician_id=lab_technician.id,
+    test_name="test_name",
+    test_date=date(2023, 9, 12),
+    test_description="test_description",
+    test_type = "test_type",
+    test_cost = "390",
+    test_result = "test_result",
+    comments = "comments",
+)
+session.add(lab_test)
+session.commit()
+
+lab_result = LabResult(
+    user_id=user.id,
+    patient_id=patient.id,
+    test_result = "test_result",
+    comments = "comments",
+)
+session.add(lab_result)
+session.commit()
+
+medication_alert = MedicationAlert(
+    user_id=user.id,
+    patient_id=patient.id,
+    doctor_id=doctor.id,
+    medication_id="2890",
+    dosage = "dosage",
+    frequency = "frequency",
+    alert_date=date(2023, 9, 12),
+    alert_text="alert_text",
+    status = "status",
+   
+)
+session.add(medication_alert)
+session.commit()
+
+medical_condition = MedicalCondition(
+    user_id=user.id,
+    patient_id=patient.id,
+    name="name",
+    description="description",
+    diagnosis_date=date(2023, 9, 12),
+    treatment="treatment",
+   
+)
+session.add(medical_condition)
+session.commit()
+
+medical_device = MedicalDevice(
+    user_id=user.id,
+    name="name",
+    manufacturer="manufacturer",
+    model ="model",
+    serial_number="serial_number",
+    hospital_id=hospital.id,
+    department_id = department.id,
+    last_maintenance=date(2023, 9, 12),
+    next_maintenance=date(2023, 9, 12),
+   
+)
+session.add(medical_device)
+session.commit()
+
+medical_image = MedicalImage(
+    user_id=user.id,
+    patient_id=patient.id,
+    image_type="image_type",
+    image_date=date(2023, 9, 12),
+   
+)
+session.add(medical_image)
+session.commit()
+
+medical_note = MedicalNote(
+    user_id=user.id,
+    patient_id=patient.id,
+    doctor_id=doctor.id,
+    date=date(2023, 9, 12),
+    note="note",
+   
+)
+session.add(medical_image)
+session.commit()
+
+medical_procedure = MedicalProcedure(
+    user_id=user.id,
+    patient_id=patient.id,
+    doctor_id=doctor.id,
+    name="name",
+    date=date(2023, 9, 12),
+    notes="notes",
+   
+)
+session.add(medical_procedure)
+session.commit()
+
+medication = Medication(
+    user_id=user.id,
+    patient_id=patient.id,
+    doctor_id=doctor.id,
+    name="name",
+    description="description",
+    route_of_administration="route_of_administration",
+    dosage="dosage",
+    unit="unit",
+    frequency="frequency",
+   
+)
+session.add(medication)
+session.commit()
+
+patient_consent = PatientConsent(
+    user_id=user.id,
+    patient_id=patient.id,
+    consent_type = "Full consent",
+    consent_date=date(2023, 9, 12),
+    expiration_date=date(2023, 9, 12),
+
+)
+session.add(patient_consent)
+session.commit()
+
+patient_feedback = PatientFeedback(
+    user_id=user.id,
+    patient_id=patient.id,
+    doctor_id=doctor.id,
+    date=date(2023, 9, 12),
+    text = "Text",
+    rating="5",
+
+)
+session.add(patient_feedback)
+session.commit()
+
+patient_visit = PatientVisit(
+    user_id=user.id,
+    patient_id=patient.id,
+    doctor_id=doctor.id,
+    appointment_id= appointment.id,
+    visit_date=date(2023, 9, 12),
+    chief_complaint = "chief_complaint",
+    diagnosis_id= "34",
+    notes="notes",
+
+)
+session.add(patient_visit)
+session.commit()
+
+prescription = Prescription(
+    user_id=user.id,
+    doctor_id=doctor.id,
+    patient_id=patient.id,
+    medication= "medication",
+    dosage = "dosage",
+    instructions= "instructions",
+
+)
+session.add(prescription)
+session.commit()
+
+referral = Referral(
+    user_id=user.id,
+    referring_patient=patient.id,
+    referred_patient=patient.id,
+    referring_doctor=doctor.id,
+    referred_doctor=doctor.id,
+    referring_hospital=hospital.id,
+    referred_hospital=hospital.id,
+    referral_date=date(2023, 9, 12),
+    referral_reason = "referral_reason",
+    status="status",
+
+)
+session.add(referral)
+session.commit()
+
+specialty = Specialty(
+    user_id=user.id,
+    name="Cardiologist",
+    description="Other",
+    doctor_id= doctor.id,
+)
+session.add(specialty)
+session.commit()
+
+time_slot = TimeSlot(
+    user_id=user.id,
+    doctor_id=doctor.id,
+    appointment_date=date(2015, 8, 15),
+    appointment_start_time = time(12, 25),
+    appointment_end_time = time(13, 25),
+    availability = True, 
+)
+session.add(time_slot)
+session.commit()
+
+vaccination = Vaccination(
+    user_id=user.id,
+    patient_id=patient.id,
+    vaccine_name="vaccine_name",
+    administered_by= "administered_by",
+    administered_at=datetime(2023, 9, 9, 12, 0, 0),
+    next_dose_due= date(2023, 9, 12),
+)
+session.add(vaccination)
+session.commit()
+
+vital_sign = VitalSign(
+    user_id=user.id,
+    patient_id=patient.id,
+    doctor_id=doctor.id,
+    heart_rate="300",
+    blood_pressure_systolic= "300",
+    blood_pressure_diastolic= "300",
+    respiratory_rate= "300",
+    temperature= "300",
+    height= "300",
+    weight= "300",
+    oxygen_saturation= "300",
+    recorded_at=datetime(2023, 9, 9, 12, 0, 0),
+)
+session.add(vital_sign)
+session.commit()
+
+
+
+work_schedule = WorkSchedule(
+    user_id=user.id,
+    doctor_id=doctor.id,
+    nurse_id=nurse.id,
+    day_of_week="day_of_week",
+    start_time= datetime(2023, 9, 9, 12, 0, 0),
+    end_time= datetime(2023, 9, 9, 12, 0, 0),
+)
+session.add(work_schedule)
+session.commit()
+session.close()
+"""
 

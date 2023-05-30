@@ -21,7 +21,7 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_pharmacist(pharmacist: schemas.PharmacistCreate, db: Session = Depends(get_db),
                       current_user: int = Depends(oauth2.get_current_user)):
-    pharmacist = models.Pharmacist(**pharmacist.dict())
+    pharmacist = models.Pharmacist(user_id= current_user.id, **pharmacist.dict())
     db.add(pharmacist)
     db.commit()
     db.refresh(pharmacist)
@@ -66,6 +66,10 @@ def update_pharmacist(id: str, updated_pharmacist: schemas.PharmacistCreate, db:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Pharmacist with id: {id} does not exist")
 
+    if pharmacist.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
+
     pharmacist_query.update(
         updated_pharmacist.dict(), synchronize_session=False)
     db.commit()
@@ -77,13 +81,20 @@ def update_pharmacist(id: str, updated_pharmacist: schemas.PharmacistCreate, db:
 def delete_pharmacist(id: str, db: Session = Depends(get_db),
                       current_user: int = Depends(oauth2.get_current_user)):
 
-    pharmacist = db.query(models.Pharmacist).filter(
+    pharmacist_query = db.query(models.Pharmacist).filter(
         models.Pharmacist.id == id)
+    
+    pharmacist = pharmacist_query.first()
 
-    if pharmacist.first() == None:
+
+    if pharmacist == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Pharmacist with id: {id} does not exist")
+    
+    if pharmacist.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Not authorized to perform requested action")
 
-    pharmacist.delete(synchronize_session=False)
+    pharmacist_query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

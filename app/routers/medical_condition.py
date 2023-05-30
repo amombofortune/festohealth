@@ -16,11 +16,9 @@ router = APIRouter(
 
 """ MEDICAL CONDITION APIs """
 # Create medical condition
-
-
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_medical_condition(medical_condition: schemas.MedicalConditionCreate, db: Session = Depends(get_db),
-                             user_id: int = Depends(oauth2.get_current_user)):
+                             current_user: int = Depends(oauth2.get_current_user)):
     new_medical_condition = models.MedicalCondition(**medical_condition.dict())
     db.add(new_medical_condition)
     db.commit()
@@ -32,7 +30,7 @@ def create_medical_condition(medical_condition: schemas.MedicalConditionCreate, 
 
 @router.get("/{id}", response_model=schemas.MedicalConditionResponse)
 def get_medical_condition(id: int, db: Session = Depends(get_db),
-                          user_id: int = Depends(oauth2.get_current_user)):
+                          current_user: int = Depends(oauth2.get_current_user)):
     medical_condition = db.query(models.MedicalCondition).filter(
         models.MedicalCondition.id == id).first()
 
@@ -46,7 +44,7 @@ def get_medical_condition(id: int, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.MedicalConditionResponse])
 def get_medical_condition(db: Session = Depends(get_db),
-                          user_id: int = Depends(oauth2.get_current_user)):
+                          current_user: int = Depends(oauth2.get_current_user)):
     medical_condition = db.query(models.MedicalCondition).all()
     return medical_condition
 
@@ -55,7 +53,7 @@ def get_medical_condition(db: Session = Depends(get_db),
 
 @router.put("/{id}", response_model=schemas.MedicalConditionResponse)
 def update_medical_condition(id: int, updated_medical_condition: schemas.MedicalConditionCreate, db: Session = Depends(get_db),
-                             user_id: int = Depends(oauth2.get_current_user)):
+                             current_user: int = Depends(oauth2.get_current_user)):
 
     medical_condition_query = db.query(models.MedicalCondition).filter(
         models.MedicalCondition.id == id)
@@ -75,7 +73,7 @@ def update_medical_condition(id: int, updated_medical_condition: schemas.Medical
 # Delete medical condition
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_medical_condition(id: int, db: Session = Depends(get_db),
-                             user_id: int = Depends(oauth2.get_current_user)):
+                             current_user: int = Depends(oauth2.get_current_user)):
 
     medical_condition = db.query(models.MedicalCondition).filter(
         models.MedicalCondition.id == id)

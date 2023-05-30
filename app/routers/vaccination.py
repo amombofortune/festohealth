@@ -20,7 +20,7 @@ router = APIRouter(
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_vaccination(vaccination: schemas.VaccinationCreate, db: Session = Depends(get_db),
-                       user_id: int = Depends(oauth2.get_current_user)):
+                       current_user: int = Depends(oauth2.get_current_user)):
     vaccination = models.Vaccination(**vaccination.dict())
     db.add(vaccination)
     db.commit()
@@ -32,7 +32,7 @@ def create_vaccination(vaccination: schemas.VaccinationCreate, db: Session = Dep
 
 @router.get("/{id}", response_model=schemas.VaccinationResponse)
 def get_vaccination(id: int, db: Session = Depends(get_db),
-                    user_id: int = Depends(oauth2.get_current_user)):
+                    current_user: int = Depends(oauth2.get_current_user)):
     vaccination = db.query(models.Vaccination).filter(
         models.Vaccination.id == id).first()
 
@@ -46,7 +46,7 @@ def get_vaccination(id: int, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.VaccinationResponse])
 def get_vaccination(db: Session = Depends(get_db),
-                    user_id: int = Depends(oauth2.get_current_user)):
+                    current_user: int = Depends(oauth2.get_current_user)):
     vaccination = db.query(models.Vaccination).all()
     return vaccination
 
@@ -55,7 +55,7 @@ def get_vaccination(db: Session = Depends(get_db),
 
 @router.put("/{id}", response_model=schemas.VaccinationResponse)
 def update_vaccination(id: int, updated_vaccination: schemas.VaccinationCreate, db: Session = Depends(get_db),
-                       user_id: int = Depends(oauth2.get_current_user)):
+                       current_user: int = Depends(oauth2.get_current_user)):
 
     vaccination_query = db.query(models.Vaccination).filter(
         models.Vaccination.id == id)
@@ -75,7 +75,7 @@ def update_vaccination(id: int, updated_vaccination: schemas.VaccinationCreate, 
 # Delete vaccination
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_vaccination(id: int, db: Session = Depends(get_db),
-                       user_id: int = Depends(oauth2.get_current_user)):
+                       current_user: int = Depends(oauth2.get_current_user)):
 
     vaccination = db.query(models.Vaccination).filter(
         models.Vaccination.id == id)

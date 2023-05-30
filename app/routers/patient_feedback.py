@@ -21,7 +21,7 @@ router = APIRouter(
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_patient_feedback(patient_feedback: schemas.PatientFeedbackCreate, db: Session = Depends(get_db),
-                             user_id: int = Depends(oauth2.get_current_user)):
+                             current_user: int = Depends(oauth2.get_current_user)):
     patient_feedback = models.PatientFeedback(**patient_feedback.dict())
     db.add(patient_feedback)
     db.commit()
@@ -33,7 +33,7 @@ def create_patient_feedback(patient_feedback: schemas.PatientFeedbackCreate, db:
 
 @router.get("/{id}", response_model=schemas.PatientFeedbackResponse)
 def get_patient_feedback(id: int, db: Session = Depends(get_db),
-                         user_id: int = Depends(oauth2.get_current_user)):
+                         current_user: int = Depends(oauth2.get_current_user)):
     patient_feedback = db.query(models.PatientFeedback).filter(
         models.PatientFeedback.id == id).first()
 
@@ -47,7 +47,7 @@ def get_patient_feedback(id: int, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.PatientFeedbackResponse])
 def get_patient_feedback(db: Session = Depends(get_db),
-                         user_id: int = Depends(oauth2.get_current_user)):
+                         current_user: int = Depends(oauth2.get_current_user)):
     patient_feedback = db.query(models.PatientFeedback).all()
     return patient_feedback
 
@@ -56,7 +56,7 @@ def get_patient_feedback(db: Session = Depends(get_db),
 
 @router.put("/{id}", response_model=schemas.PatientFeedbackResponse)
 def update_patient_feedback(id: int, updated_patient_feedback: schemas.PatientFeedbackCreate, db: Session = Depends(get_db),
-                            user_id: int = Depends(oauth2.get_current_user)):
+                            current_user: int = Depends(oauth2.get_current_user)):
 
     patient_feedback_query = db.query(models.PatientFeedback).filter(
         models.PatientFeedback.id == id)
@@ -76,7 +76,7 @@ def update_patient_feedback(id: int, updated_patient_feedback: schemas.PatientFe
 # Delete patient feedback
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_patient_feedback(id: int, db: Session = Depends(get_db),
-                            user_id: int = Depends(oauth2.get_current_user)):
+                            current_user: int = Depends(oauth2.get_current_user)):
 
     patient_feedback = db.query(models.PatientFeedback).filter(
         models.PatientFeedback.id == id)

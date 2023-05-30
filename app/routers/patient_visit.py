@@ -20,7 +20,7 @@ router = APIRouter(
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_patient_visit(patient_visit: schemas.PatientVisitCreate, db: Session = Depends(get_db),
-                         user_id: int = Depends(oauth2.get_current_user)):
+                         current_user: int = Depends(oauth2.get_current_user)):
     patient_visit = models.PatientVisit(**patient_visit.dict())
     db.add(patient_visit)
     db.commit()
@@ -32,7 +32,7 @@ def create_patient_visit(patient_visit: schemas.PatientVisitCreate, db: Session 
 
 @router.get("/{id}", response_model=schemas.PatientVisitResponse)
 def get_patient_visit(id: int, db: Session = Depends(get_db),
-                      user_id: int = Depends(oauth2.get_current_user)):
+                      current_user: int = Depends(oauth2.get_current_user)):
     patient_visit = db.query(models.PatientVisit).filter(
         models.PatientVisit.id == id).first()
 
@@ -46,7 +46,7 @@ def get_patient_visit(id: int, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.PatientVisitResponse])
 def get_patient_visit(db: Session = Depends(get_db),
-                      user_id: int = Depends(oauth2.get_current_user)):
+                      current_user: int = Depends(oauth2.get_current_user)):
     patient_visit = db.query(models.PatientVisit).all()
     return patient_visit
 
@@ -55,7 +55,7 @@ def get_patient_visit(db: Session = Depends(get_db),
 
 @router.put("/{id}", response_model=schemas.PatientVisitResponse)
 def update_patient_visit(id: int, updated_patient_visit: schemas.PatientVisitCreate, db: Session = Depends(get_db),
-                         user_id: int = Depends(oauth2.get_current_user)):
+                         current_user: int = Depends(oauth2.get_current_user)):
 
     patient_visit_query = db.query(models.PatientVisit).filter(
         models.PatientVisit.id == id)
@@ -75,7 +75,7 @@ def update_patient_visit(id: int, updated_patient_visit: schemas.PatientVisitCre
 # Delete patient visit
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_patient_visit(id: int, db: Session = Depends(get_db),
-                         user_id: int = Depends(oauth2.get_current_user)):
+                         current_user: int = Depends(oauth2.get_current_user)):
 
     patient_visit = db.query(models.PatientVisit).filter(
         models.PatientVisit.id == id)

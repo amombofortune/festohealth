@@ -21,7 +21,7 @@ router = APIRouter(
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_medication(medication: schemas.MedicationCreate, db: Session = Depends(get_db),
-                      user_id: int = Depends(oauth2.get_current_user)):
+                      current_user: int = Depends(oauth2.get_current_user)):
     new_medication = models.Medication(**medication.dict())
     db.add(new_medication)
     db.commit()
@@ -33,7 +33,7 @@ def create_medication(medication: schemas.MedicationCreate, db: Session = Depend
 
 @router.get("/{id}", response_model=schemas.MedicationResponse)
 def get_medication(id: int, db: Session = Depends(get_db),
-                   user_id: int = Depends(oauth2.get_current_user)):
+                   current_user: int = Depends(oauth2.get_current_user)):
     medication = db.query(models.Medication).filter(
         models.Medication.id == id).first()
 
@@ -47,7 +47,7 @@ def get_medication(id: int, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.MedicationResponse])
 def get_medication(db: Session = Depends(get_db),
-                   user_id: int = Depends(oauth2.get_current_user)):
+                   current_user: int = Depends(oauth2.get_current_user)):
     medication = db.query(models.Medication).all()
     return medication
 
@@ -56,7 +56,7 @@ def get_medication(db: Session = Depends(get_db),
 
 @router.put("/{id}", response_model=schemas.MedicationResponse)
 def update_medication(id: int, updated_medication: schemas.MedicationCreate, db: Session = Depends(get_db),
-                      user_id: int = Depends(oauth2.get_current_user)):
+                      current_user: int = Depends(oauth2.get_current_user)):
 
     medication_query = db.query(models.Medication).filter(
         models.Medication.id == id)
@@ -76,7 +76,7 @@ def update_medication(id: int, updated_medication: schemas.MedicationCreate, db:
 # Delete medication
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_medication(id: int, db: Session = Depends(get_db),
-                      user_id: int = Depends(oauth2.get_current_user)):
+                      current_user: int = Depends(oauth2.get_current_user)):
 
     medication = db.query(models.Medication).filter(models.Medication.id == id)
 

@@ -20,7 +20,7 @@ router = APIRouter(
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_medical_procedure(medical_procedure: schemas.MedicalProcedureCreate, db: Session = Depends(get_db),
-                             user_id: int = Depends(oauth2.get_current_user)):
+                             current_user: int = Depends(oauth2.get_current_user)):
     new_medical_procedure = models.MedicalProcedure(**medical_procedure.dict())
     db.add(new_medical_procedure)
     db.commit()
@@ -32,7 +32,7 @@ def create_medical_procedure(medical_procedure: schemas.MedicalProcedureCreate, 
 
 @router.get("/{id}", response_model=schemas.MedicalProcedureResponse)
 def get_medical_procedure(id: int, db: Session = Depends(get_db),
-                          user_id: int = Depends(oauth2.get_current_user)):
+                          current_user: int = Depends(oauth2.get_current_user)):
     medical_procedure = db.query(models.MedicalProcedure).filter(
         models.MedicalProcedure.id == id).first()
 
@@ -46,7 +46,7 @@ def get_medical_procedure(id: int, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.MedicalProcedureResponse])
 def get_medical_procedure(db: Session = Depends(get_db),
-                          user_id: int = Depends(oauth2.get_current_user)):
+                          current_user: int = Depends(oauth2.get_current_user)):
     medical_procedures = db.query(models.MedicalProcedure).all()
     return medical_procedures
 
@@ -55,7 +55,7 @@ def get_medical_procedure(db: Session = Depends(get_db),
 
 @router.put("/{id}", response_model=schemas.MedicalProcedureResponse)
 def update_medical_procedure(id: int, updated_medical_procedure: schemas.MedicalProcedureCreate, db: Session = Depends(get_db),
-                             user_id: int = Depends(oauth2.get_current_user)):
+                             current_user: int = Depends(oauth2.get_current_user)):
 
     medical_procedure_query = db.query(models.MedicalProcedure).filter(
         models.MedicalProcedure.id == id)
@@ -75,7 +75,7 @@ def update_medical_procedure(id: int, updated_medical_procedure: schemas.Medical
 # Delete medical procedure
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_medical_procedure(id: int, db: Session = Depends(get_db),
-                             user_id: int = Depends(oauth2.get_current_user)):
+                             current_user: int = Depends(oauth2.get_current_user)):
 
     medical_procedure = db.query(models.MedicalProcedure).filter(
         models.MedicalProcedure.id == id)

@@ -31,7 +31,7 @@ def create_adverse_reaction(adverse_reaction: schemas.AdverseReactionCreate, db:
 
 @router.get("/{id}", response_model=schemas.AdverseReactionResponse)
 def get_one_adverse_reaction(id: int, db: Session = Depends(get_db),
-                             user_id: int = Depends(oauth2.get_current_user)):
+                             current_user: int = Depends(oauth2.get_current_user)):
     adverse_reaction = db.query(models.AdverseReaction).filter(
         models.AdverseReaction.id == id).first()
 
@@ -45,7 +45,7 @@ def get_one_adverse_reaction(id: int, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.AdverseReactionResponse])
 def get_adverse_reactions(db: Session = Depends(get_db),
-                          user_id: int = Depends(oauth2.get_current_user)):
+                          current_user: int = Depends(oauth2.get_current_user)):
     adverse_reactions = db.query(models.AdverseReaction).all()
     return adverse_reactions
 
@@ -54,7 +54,7 @@ def get_adverse_reactions(db: Session = Depends(get_db),
 
 @router.put("/{id}", response_model=schemas.AdverseReactionResponse)
 def update_adverse_reaction(id: int, updated_adverse_reaction: schemas.AdverseReactionCreate, db: Session = Depends(get_db),
-                            user_id: int = Depends(oauth2.get_current_user)):
+                            current_user: int = Depends(oauth2.get_current_user)):
 
     adverse_reaction_query = db.query(models.AdverseReaction).filter(
         models.AdverseReaction.id == id)
@@ -74,7 +74,7 @@ def update_adverse_reaction(id: int, updated_adverse_reaction: schemas.AdverseRe
 # Delete Adverse Reaction
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_adverse_reaction(id: int, db: Session = Depends(get_db),
-                            user_id: int = Depends(oauth2.get_current_user)):
+                            current_user: int = Depends(oauth2.get_current_user)):
 
     adverse_reaction = db.query(models.AdverseReaction).filter(models.AdverseReaction.id == id)
 

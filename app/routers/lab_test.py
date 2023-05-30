@@ -16,11 +16,9 @@ router = APIRouter(
 
 """ LAB TEST APIs """
 # Create lab test
-
-
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_lab_test(lab_test: schemas.LabTestCreate, db: Session = Depends(get_db),
-                    user_id: int = Depends(oauth2.get_current_user)):
+                    current_user: int = Depends(oauth2.get_current_user)):
     new_lab_test = models.LabTest(**lab_test.dict())
     db.add(new_lab_test)
     db.commit()
@@ -32,7 +30,7 @@ def create_lab_test(lab_test: schemas.LabTestCreate, db: Session = Depends(get_d
 
 @router.get("/{id}", response_model=schemas.LabTestResponse)
 def get_lab_test(id: int, db: Session = Depends(get_db),
-                 user_id: int = Depends(oauth2.get_current_user)):
+                 current_user: int = Depends(oauth2.get_current_user)):
     lab_test = db.query(models.LabTest).filter(models.LabTest.id == id).first()
 
     if not lab_test:
@@ -45,7 +43,7 @@ def get_lab_test(id: int, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.LabTestResponse])
 def get_lab_tests(db: Session = Depends(get_db),
-                  user_id: int = Depends(oauth2.get_current_user)):
+                  current_user: int = Depends(oauth2.get_current_user)):
     lab_tests = db.query(models.LabTest).all()
     return lab_tests
 
@@ -54,7 +52,7 @@ def get_lab_tests(db: Session = Depends(get_db),
 
 @router.put("/{id}", response_model=schemas.LabTestResponse)
 def update_lab_test(id: int, updated_lab_test: schemas.LabTestCreate, db: Session = Depends(get_db),
-                    user_id: int = Depends(oauth2.get_current_user)):
+                    current_user: int = Depends(oauth2.get_current_user)):
 
     lab_test_query = db.query(models.LabTest).filter(models.LabTest.id == id)
 
@@ -72,7 +70,7 @@ def update_lab_test(id: int, updated_lab_test: schemas.LabTestCreate, db: Sessio
 # Delete lab test
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_lab_test(id: int, db: Session = Depends(get_db),
-                    user_id: int = Depends(oauth2.get_current_user)):
+                    current_user: int = Depends(oauth2.get_current_user)):
 
     lab_test = db.query(models.LabTest).filter(models.LabTest.id == id)
 

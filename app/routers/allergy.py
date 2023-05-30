@@ -18,7 +18,7 @@ router = APIRouter(
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_allergy(allergy: schemas.AllergyCreate, db: Session = Depends(get_db),
-                   user_id: int = Depends(oauth2.get_current_user)):
+                   current_user: int = Depends(oauth2.get_current_user)):
     new_allergy = models.Allergy(**allergy.dict())
     db.add(new_allergy)
     db.commit()
@@ -30,7 +30,7 @@ def create_allergy(allergy: schemas.AllergyCreate, db: Session = Depends(get_db)
 
 @router.get("/{id}", response_model=schemas.AllergyResponse)
 def get_one_allergy(id: int, db: Session = Depends(get_db),
-                    user_id: int = Depends(oauth2.get_current_user)):
+                    current_user: int = Depends(oauth2.get_current_user)):
     allergy = db.query(models.Allergy).filter(models.Allergy.id == id).first()
 
     if not allergy:
@@ -43,7 +43,7 @@ def get_one_allergy(id: int, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.AllergyResponse])
 def get_allergy(db: Session = Depends(get_db),
-                user_id: int = Depends(oauth2.get_current_user)):
+                current_user: int = Depends(oauth2.get_current_user)):
     allergy = db.query(models.Allergy).all()
     return allergy
 
@@ -52,7 +52,7 @@ def get_allergy(db: Session = Depends(get_db),
 
 @router.put("/{id}", response_model=schemas.AllergyResponse)
 def update_allergy(id: int, updated_allergy: schemas.AllergyCreate, db: Session = Depends(get_db),
-                   user_id: int = Depends(oauth2.get_current_user)):
+                   current_user: int = Depends(oauth2.get_current_user)):
 
     allergy_query = db.query(models.Allergy).filter(models.Allergy.id == id)
 
@@ -70,7 +70,7 @@ def update_allergy(id: int, updated_allergy: schemas.AllergyCreate, db: Session 
 # Delete Allergy
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_allergy(id: int, db: Session = Depends(get_db),
-                   user_id: int = Depends(oauth2.get_current_user)):
+                   current_user: int = Depends(oauth2.get_current_user)):
 
     allergy = db.query(models.Allergy).filter(models.Allergy.id == id)
 

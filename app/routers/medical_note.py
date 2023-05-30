@@ -16,11 +16,9 @@ router = APIRouter(
 
 """ MEDICAL NOTES APIs """
 # Create medical notes
-
-
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_medical_note(medical_note: schemas.MedicalNoteCreate, db: Session = Depends(get_db),
-                        user_id: int = Depends(oauth2.get_current_user)):
+                        current_user: int = Depends(oauth2.get_current_user)):
     new_medical_note = models.MedicalNote(**medical_note.dict())
     db.add(new_medical_note)
     db.commit()
@@ -32,7 +30,7 @@ def create_medical_note(medical_note: schemas.MedicalNoteCreate, db: Session = D
 
 @router.get("/{id}", response_model=schemas.MedicalNoteResponse)
 def get_medical_note(id: int, db: Session = Depends(get_db),
-                     user_id: int = Depends(oauth2.get_current_user)):
+                     current_user: int = Depends(oauth2.get_current_user)):
     medical_note = db.query(models.MedicalNote).filter(
         models.MedicalNote.id == id).first()
 
@@ -46,7 +44,7 @@ def get_medical_note(id: int, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.MedicalNoteResponse])
 def get_medical_note(db: Session = Depends(get_db),
-                     user_id: int = Depends(oauth2.get_current_user)):
+                     current_user: int = Depends(oauth2.get_current_user)):
     medical_notes = db.query(models.MedicalNote).all()
     return medical_notes
 
@@ -55,7 +53,7 @@ def get_medical_note(db: Session = Depends(get_db),
 
 @router.put("/{id}", response_model=schemas.MedicalNoteResponse)
 def update_medical_note(id: int, updated_medical_note: schemas.MedicalNoteCreate, db: Session = Depends(get_db),
-                        user_id: int = Depends(oauth2.get_current_user)):
+                        current_user: int = Depends(oauth2.get_current_user)):
 
     medical_note_query = db.query(models.MedicalNote).filter(
         models.MedicalNote.id == id)
@@ -75,7 +73,7 @@ def update_medical_note(id: int, updated_medical_note: schemas.MedicalNoteCreate
 # Delete medical note
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_medical_note(id: int, db: Session = Depends(get_db),
-                        user_id: int = Depends(oauth2.get_current_user)):
+                        current_user: int = Depends(oauth2.get_current_user)):
 
     medical_note = db.query(models.MedicalNote).filter(
         models.MedicalNote.id == id)

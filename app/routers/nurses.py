@@ -20,7 +20,7 @@ router = APIRouter(
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_nurse(nurse: schemas.NurseCreate, db: Session = Depends(get_db),
-                 user_id: int = Depends(oauth2.get_current_user)):
+                 current_user: int = Depends(oauth2.get_current_user)):
     new_nurse = models.Nurse(**nurse.dict())
     db.add(new_nurse)
     db.commit()
@@ -32,7 +32,7 @@ def create_nurse(nurse: schemas.NurseCreate, db: Session = Depends(get_db),
 
 @router.get("/{id}", response_model=schemas.NurseResponse)
 def get_nurse(id: str, db: Session = Depends(get_db),
-              user_id: int = Depends(oauth2.get_current_user)):
+              current_user: int = Depends(oauth2.get_current_user)):
     nurse = db.query(models.Nurse).filter(
         models.Nurse.id == id).first()
 
@@ -46,7 +46,7 @@ def get_nurse(id: str, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.NurseResponse])
 def get_nurse(db: Session = Depends(get_db),
-              user_id: int = Depends(oauth2.get_current_user)):
+              current_user: int = Depends(oauth2.get_current_user)):
     nurse = db.query(models.Nurse).all()
     return nurse
 
@@ -55,7 +55,7 @@ def get_nurse(db: Session = Depends(get_db),
 
 @router.put("/{id}", response_model=schemas.NurseResponse)
 def update_nurse(id: str, updated_nurse: schemas.NurseCreate, db: Session = Depends(get_db),
-                 user_id: int = Depends(oauth2.get_current_user)):
+                 current_user: int = Depends(oauth2.get_current_user)):
 
     nurse_query = db.query(models.Nurse).filter(
         models.Nurse.id == id)
@@ -75,7 +75,7 @@ def update_nurse(id: str, updated_nurse: schemas.NurseCreate, db: Session = Depe
 # Delete nurse
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_nurse(id: str, db: Session = Depends(get_db),
-                 user_id: int = Depends(oauth2.get_current_user)):
+                 current_user: int = Depends(oauth2.get_current_user)):
 
     nurse = db.query(models.Nurse).filter(models.Nurse.id == id)
 

@@ -16,11 +16,9 @@ router = APIRouter(
 
 """ DEPARTMENT APIs"""
 # Create Department
-
-
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_department(department: schemas.DepartmentCreate, db: Session = Depends(get_db),
-                      user_id: int = Depends(oauth2.get_current_user)):
+                      current_user: int = Depends(oauth2.get_current_user)):
     new_department = models.Department(**department.dict())
     db.add(new_department)
     db.commit()
@@ -32,7 +30,7 @@ def create_department(department: schemas.DepartmentCreate, db: Session = Depend
 
 @router.get("/{id}", response_model=schemas.DepartmentResponse)
 def get_department(id: int, db: Session = Depends(get_db),
-                   user_id: int = Depends(oauth2.get_current_user)):
+                   current_user: int = Depends(oauth2.get_current_user)):
     department = db.query(models.Department).filter(
         models.Department.id == id).first()
 
@@ -46,7 +44,7 @@ def get_department(id: int, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.DepartmentResponse])
 def get_department(db: Session = Depends(get_db),
-                   user_id: int = Depends(oauth2.get_current_user)):
+                   current_user: int = Depends(oauth2.get_current_user)):
     department = db.query(models.Department).all()
     return department
 
@@ -55,7 +53,7 @@ def get_department(db: Session = Depends(get_db),
 
 @router.put("/{id}", response_model=schemas.DepartmentResponse)
 def update_department(id: int, updated_department: schemas.DepartmentCreate, db: Session = Depends(get_db),
-                      user_id: int = Depends(oauth2.get_current_user)):
+                      current_user: int = Depends(oauth2.get_current_user)):
 
     department_query = db.query(models.Department).filter(
         models.Department.id == id)
@@ -75,7 +73,7 @@ def update_department(id: int, updated_department: schemas.DepartmentCreate, db:
 # Delete Department
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_department(id: int, db: Session = Depends(get_db),
-                      user_id: int = Depends(oauth2.get_current_user)):
+                      current_user: int = Depends(oauth2.get_current_user)):
 
     department = db.query(models.Department).filter(models.Department.id == id)
 

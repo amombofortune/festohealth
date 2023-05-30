@@ -20,7 +20,7 @@ router = APIRouter(
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_referral(referral: schemas.ReferralCreate, db: Session = Depends(get_db),
-                    user_id: int = Depends(oauth2.get_current_user)):
+                    current_user: int = Depends(oauth2.get_current_user)):
     referral = models.Referral(**referral.dict())
     db.add(referral)
     db.commit()
@@ -32,7 +32,7 @@ def create_referral(referral: schemas.ReferralCreate, db: Session = Depends(get_
 
 @router.get("/{id}", response_model=schemas.ReferralResponse)
 def get_referral(id: int, db: Session = Depends(get_db),
-                 user_id: int = Depends(oauth2.get_current_user)):
+                 current_user: int = Depends(oauth2.get_current_user)):
     referral = db.query(models.Referral).filter(
         models.Referral.id == id).first()
 
@@ -46,7 +46,7 @@ def get_referral(id: int, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.ReferralResponse])
 def get_referrals(db: Session = Depends(get_db),
-                  user_id: int = Depends(oauth2.get_current_user)):
+                  current_user: int = Depends(oauth2.get_current_user)):
     referrals = db.query(models.Referral).all()
     return referrals
 
@@ -55,7 +55,7 @@ def get_referrals(db: Session = Depends(get_db),
 
 @router.put("/{id}", response_model=schemas.ReferralResponse)
 def update_referral(id: int, updated_referral: schemas.ReferralCreate, db: Session = Depends(get_db),
-                    user_id: int = Depends(oauth2.get_current_user)):
+                    current_user: int = Depends(oauth2.get_current_user)):
 
     referral_query = db.query(models.Referral).filter(models.Referral.id == id)
 
@@ -73,7 +73,7 @@ def update_referral(id: int, updated_referral: schemas.ReferralCreate, db: Sessi
 # Delete referral
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_referral(id: int, db: Session = Depends(get_db),
-                    user_id: int = Depends(oauth2.get_current_user)):
+                    current_user: int = Depends(oauth2.get_current_user)):
 
     referral = db.query(models.Referral).filter(models.Referral.id == id)
 

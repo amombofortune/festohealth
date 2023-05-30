@@ -16,11 +16,9 @@ router = APIRouter(
 
 """ MEDICAL DEVICES APIs """
 # Create medical device
-
-
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_medical_device(medical_device: schemas.MedicalDeviceCreate, db: Session = Depends(get_db),
-                          user_id: int = Depends(oauth2.get_current_user)):
+                          current_user: int = Depends(oauth2.get_current_user)):
     new_medical_device = models.MedicalDevice(**medical_device.dict())
     db.add(new_medical_device)
     db.commit()
@@ -28,11 +26,9 @@ def create_medical_device(medical_device: schemas.MedicalDeviceCreate, db: Sessi
     return new_medical_device
 
 # Read one medical device
-
-
 @router.get("/{id}", response_model=schemas.MedicalDeviceResponse)
 def get_medical_device(id: int, db: Session = Depends(get_db),
-                       user_id: int = Depends(oauth2.get_current_user)):
+                       current_user: int = Depends(oauth2.get_current_user)):
     medical_device = db.query(models.MedicalDevice).filter(
         models.MedicalDevice.id == id).first()
 
@@ -46,7 +42,7 @@ def get_medical_device(id: int, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.MedicalDeviceResponse])
 def get_medical_device(db: Session = Depends(get_db),
-                       user_id: int = Depends(oauth2.get_current_user)):
+                       current_user: int = Depends(oauth2.get_current_user)):
     medical_device = db.query(models.MedicalDevice).all()
     return medical_device
 
@@ -55,7 +51,7 @@ def get_medical_device(db: Session = Depends(get_db),
 
 @router.put("/{id}", response_model=schemas.MedicalDeviceResponse)
 def update_medical_device(id: int, updated_medical_device: schemas.MedicalDeviceCreate, db: Session = Depends(get_db),
-                          user_id: int = Depends(oauth2.get_current_user)):
+                          current_user: int = Depends(oauth2.get_current_user)):
 
     medical_device_query = db.query(models.MedicalDevice).filter(
         models.MedicalDevice.id == id)
@@ -75,7 +71,7 @@ def update_medical_device(id: int, updated_medical_device: schemas.MedicalDevice
 # Delete medical device
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_medical_device(id: int, db: Session = Depends(get_db),
-                          user_id: int = Depends(oauth2.get_current_user)):
+                          current_user: int = Depends(oauth2.get_current_user)):
 
     medical_device = db.query(models.MedicalDevice).filter(
         models.MedicalDevice.id == id)

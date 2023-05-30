@@ -17,10 +17,9 @@ router = APIRouter(
 """ INSURANCE PROVIDER APIs """
 # Create insurance providers
 
-
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_insurance_provider(insurance_provider: schemas.InsuranceProviderCreate, db: Session = Depends(get_db),
-                             user_id: int = Depends(oauth2.get_current_user)):
+                             current_user: int = Depends(oauth2.get_current_user)):
     new_insurance_provider = models.InsuranceProvider(
         **insurance_provider.dict())
     db.add(new_insurance_provider)
@@ -33,7 +32,7 @@ def create_insurance_provider(insurance_provider: schemas.InsuranceProviderCreat
 
 @router.get("/{id}", response_model=schemas.InsuranceProviderResponse)
 def get_insurance_provider(id: str, db: Session = Depends(get_db),
-                           user_id: int = Depends(oauth2.get_current_user)):
+                           current_user: int = Depends(oauth2.get_current_user)):
     insurance_provider = db.query(models.InsuranceProvider).filter(
         models.InsuranceProvider.id == id).first()
 
@@ -47,7 +46,7 @@ def get_insurance_provider(id: str, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.InsuranceProviderResponse])
 def get_insurance_provider(db: Session = Depends(get_db),
-                           user_id: int = Depends(oauth2.get_current_user)):
+                           current_user: int = Depends(oauth2.get_current_user)):
     insurance_provider = db.query(models.InsuranceProvider).all()
     return insurance_provider
 
@@ -56,7 +55,7 @@ def get_insurance_provider(db: Session = Depends(get_db),
 
 @router.put("/{id}", response_model=schemas.InsuranceProviderResponse)
 def update_insurance_provider(id: str, updated_insurance_company: schemas.InsuranceProviderCreate, db: Session = Depends(get_db),
-                              user_id: int = Depends(oauth2.get_current_user)):
+                              current_user: int = Depends(oauth2.get_current_user)):
 
     insurance_provider_query = db.query(models.InsuranceProvider).filter(
         models.InsuranceProvider.id == id)
@@ -76,7 +75,7 @@ def update_insurance_provider(id: str, updated_insurance_company: schemas.Insura
 # Delete insurance provider
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_insurance_provider(id: str, db: Session = Depends(get_db),
-                              user_id: int = Depends(oauth2.get_current_user)):
+                              current_user: int = Depends(oauth2.get_current_user)):
 
     insurance_provider = db.query(models.InsuranceProvider).filter(
         models.InsuranceProvider.id == id)

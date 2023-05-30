@@ -17,11 +17,9 @@ router = APIRouter(
 
 """ VITAL SIGN APIs """
 # Create vital sign
-
-
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_vital_sign(vital_sign: schemas.VitalSignCreate, db: Session = Depends(get_db),
-                      user_id: int = Depends(oauth2.get_current_user)):
+                      current_user: int = Depends(oauth2.get_current_user)):
     vital_sign = models.VitalSign(**vital_sign.dict())
     db.add(vital_sign)
     db.commit()
@@ -29,11 +27,9 @@ def create_vital_sign(vital_sign: schemas.VitalSignCreate, db: Session = Depends
     return vital_sign
 
 # Read single vital sign
-
-
 @router.get("/{id}", response_model=schemas.VitalSignResponse)
 def get_vital_sign(id: int, db: Session = Depends(get_db),
-                   user_id: int = Depends(oauth2.get_current_user)):
+                   current_user: int = Depends(oauth2.get_current_user)):
     vital_sign = db.query(models.VitalSign).filter(
         models.VitalSign.id == id).first()
 
@@ -47,7 +43,7 @@ def get_vital_sign(id: int, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.VitalSignResponse])
 def get_vital_sign(db: Session = Depends(get_db),
-                   user_id: int = Depends(oauth2.get_current_user)):
+                   current_user: int = Depends(oauth2.get_current_user)):
     vital_sign = db.query(models.VitalSign).all()
     return vital_sign
 
@@ -56,7 +52,7 @@ def get_vital_sign(db: Session = Depends(get_db),
 
 @router.put("/{id}", response_model=schemas.VitalSignResponse)
 def update_vital_sign(id: int, updated_vital_sign: schemas.VitalSignCreate, db: Session = Depends(get_db),
-                      user_id: int = Depends(oauth2.get_current_user)):
+                      current_user: int = Depends(oauth2.get_current_user)):
 
     vital_sign_query = db.query(models.VitalSign).filter(
         models.VitalSign.id == id)
@@ -76,7 +72,7 @@ def update_vital_sign(id: int, updated_vital_sign: schemas.VitalSignCreate, db: 
 # Delete vaccination
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_vital_sign(id: int, db: Session = Depends(get_db),
-                      user_id: int = Depends(oauth2.get_current_user)):
+                      current_user: int = Depends(oauth2.get_current_user)):
 
     vital_sign = db.query(models.VitalSign).filter(models.VitalSign.id == id)
 

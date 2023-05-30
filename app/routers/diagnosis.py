@@ -19,7 +19,7 @@ router = APIRouter(
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_diagnosis(diagnosis: schemas.DiagnosisCreate, db: Session = Depends(get_db),
-                     user_id: int = Depends(oauth2.get_current_user)):
+                     current_user: int = Depends(oauth2.get_current_user)):
     new_diagnosis = models.Diagnosis(**diagnosis.dict())
     db.add(new_diagnosis)
     db.commit()
@@ -31,7 +31,7 @@ def create_diagnosis(diagnosis: schemas.DiagnosisCreate, db: Session = Depends(g
 
 @router.get("/{id}", response_model=schemas.DiagnosisResponse)
 def get_diagnosis(id: int, db: Session = Depends(get_db),
-                  user_id: int = Depends(oauth2.get_current_user)):
+                  current_user: int = Depends(oauth2.get_current_user)):
     diagnosis = db.query(models.Diagnosis).filter(
         models.Diagnosis.id == id).first()
 
@@ -45,7 +45,7 @@ def get_diagnosis(id: int, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.DiagnosisResponse])
 def get_diagnosis(db: Session = Depends(get_db),
-                  user_id: int = Depends(oauth2.get_current_user)):
+                  current_user: int = Depends(oauth2.get_current_user)):
     diagnosis = db.query(models.Diagnosis).all()
     return diagnosis
 
@@ -54,7 +54,7 @@ def get_diagnosis(db: Session = Depends(get_db),
 
 @router.put("/{id}", response_model=schemas.DiagnosisResponse)
 def update_diagnosis(id: int, updated_diagnosis: schemas.DiagnosisCreate, db: Session = Depends(get_db),
-                     user_id: int = Depends(oauth2.get_current_user)):
+                     current_user: int = Depends(oauth2.get_current_user)):
 
     diagnosis_query = db.query(models.Diagnosis).filter(
         models.Diagnosis.id == id)
@@ -73,7 +73,7 @@ def update_diagnosis(id: int, updated_diagnosis: schemas.DiagnosisCreate, db: Se
 # Delete diagnosis
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_diagnosis(id: int, db: Session = Depends(get_db),
-                     user_id: int = Depends(oauth2.get_current_user)):
+                     current_user: int = Depends(oauth2.get_current_user)):
 
     diagnosis = db.query(models.Diagnosis).filter(models.Diagnosis.id == id)
 

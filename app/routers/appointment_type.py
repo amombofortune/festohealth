@@ -19,7 +19,7 @@ router = APIRouter(
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_appointment_type(appointment_type: schemas.AppointmentTypeCreate, db: Session = Depends(get_db),
-                             user_id: int = Depends(oauth2.get_current_user)):
+                             current_user: int = Depends(oauth2.get_current_user)):
     new_appointment_type = models.AppointmentType(**appointment_type.dict())
     db.add(new_appointment_type)
     db.commit()
@@ -31,7 +31,7 @@ def create_appointment_type(appointment_type: schemas.AppointmentTypeCreate, db:
 
 @router.get("/{id}", response_model=schemas.AppointmentTypeResponse)
 def get_single_appointment_type(id: int, db: Session = Depends(get_db),
-                                user_id: int = Depends(oauth2.get_current_user)):
+                                current_user: int = Depends(oauth2.get_current_user)):
     appointment_type = db.query(models.AppointmentType).filter(
         models.AppointmentType.id == id).first()
 
@@ -45,7 +45,7 @@ def get_single_appointment_type(id: int, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.AppointmentTypeResponse])
 def get_appointment_type(db: Session = Depends(get_db),
-                         user_id: int = Depends(oauth2.get_current_user)):
+                         current_user: int = Depends(oauth2.get_current_user)):
     appointment_type = db.query(models.AppointmentType).all()
     return appointment_type
 
@@ -54,7 +54,7 @@ def get_appointment_type(db: Session = Depends(get_db),
 
 @router.put("/{id}", response_model=schemas.AppointmentTypeResponse)
 def update_appointment_type(id: int, updated_appointment_type: schemas.AppointmentTypeCreate, db: Session = Depends(get_db),
-                            user_id: int = Depends(oauth2.get_current_user)):
+                            current_user: int = Depends(oauth2.get_current_user)):
 
     appointment_type_query = db.query(models.AppointmentType).filter(
         models.AppointmentType.id == id)
@@ -74,7 +74,7 @@ def update_appointment_type(id: int, updated_appointment_type: schemas.Appointme
 # Delete Appointment type
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_appointment_type(id: int, db: Session = Depends(get_db),
-                            user_id: int = Depends(oauth2.get_current_user)):
+                            current_user: int = Depends(oauth2.get_current_user)):
 
     appointment_type = db.query(models.AppointmentType).filter(
         models.AppointmentType.id == id)

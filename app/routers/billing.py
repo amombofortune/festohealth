@@ -19,7 +19,7 @@ router = APIRouter(
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_billing(billing: schemas.BillingCreate, db: Session = Depends(get_db),
-                   user_id: int = Depends(oauth2.get_current_user)):
+                   current_user: int = Depends(oauth2.get_current_user)):
     new_billing = models.Billing(**billing.dict())
     db.add(new_billing)
     db.commit()
@@ -31,7 +31,7 @@ def create_billing(billing: schemas.BillingCreate, db: Session = Depends(get_db)
 
 @router.get("/{id}", response_model=schemas.BillingResponse)
 def get_billing(id: int, db: Session = Depends(get_db),
-                user_id: int = Depends(oauth2.get_current_user)):
+                current_user: int = Depends(oauth2.get_current_user)):
     billing = db.query(models.Billing).filter(models.Billing.id == id).first()
 
     if not billing:
@@ -44,7 +44,7 @@ def get_billing(id: int, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.BillingResponse])
 def get_billing(db: Session = Depends(get_db),
-                user_id: int = Depends(oauth2.get_current_user)):
+                current_user: int = Depends(oauth2.get_current_user)):
     billing = db.query(models.Billing).all()
     return billing
 
@@ -53,7 +53,7 @@ def get_billing(db: Session = Depends(get_db),
 
 @router.put("/{id}", response_model=schemas.BillingResponse)
 def update_billing(id: int, updated_billing: schemas.BillingCreate, db: Session = Depends(get_db),
-                   user_id: int = Depends(oauth2.get_current_user)):
+                   current_user: int = Depends(oauth2.get_current_user)):
 
     billing_query = db.query(models.Billing).filter(models.Billing.id == id)
 
@@ -71,7 +71,7 @@ def update_billing(id: int, updated_billing: schemas.BillingCreate, db: Session 
 # Delete Billing
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_bill(id: int, db: Session = Depends(get_db),
-                user_id: int = Depends(oauth2.get_current_user)):
+                current_user: int = Depends(oauth2.get_current_user)):
 
     billing = db.query(models.Billing).filter(models.Billing.id == id)
 

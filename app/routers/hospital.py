@@ -20,7 +20,7 @@ router = APIRouter(
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_hospital(hospital: schemas.HospitalCreate, db: Session = Depends(get_db),
-                    user_id: int = Depends(oauth2.get_current_user)):
+                    current_user: int = Depends(oauth2.get_current_user)):
     new_hospital = models.Hospital(**hospital.dict())
     db.add(new_hospital)
     db.commit()
@@ -32,7 +32,7 @@ def create_hospital(hospital: schemas.HospitalCreate, db: Session = Depends(get_
 
 @router.get("/{id}", response_model=schemas.HospitalResponse)
 def get_hospital(id: str, db: Session = Depends(get_db),
-                 user_id: int = Depends(oauth2.get_current_user)):
+                 current_user: int = Depends(oauth2.get_current_user)):
     hospital = db.query(models.Hospital).filter(
         models.Hospital.id == id).first()
 
@@ -46,7 +46,7 @@ def get_hospital(id: str, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.HospitalResponse])
 def get_hospital(db: Session = Depends(get_db),
-                 user_id: int = Depends(oauth2.get_current_user)):
+                 current_user: int = Depends(oauth2.get_current_user)):
     hospital = db.query(models.Hospital).all()
     return hospital
 
@@ -55,7 +55,7 @@ def get_hospital(db: Session = Depends(get_db),
 
 @router.put("/{id}", response_model=schemas.HospitalResponse)
 def update_hospital(id: str, updated_hospital: schemas.HospitalCreate, db: Session = Depends(get_db),
-                    user_id: int = Depends(oauth2.get_current_user)):
+                    current_user: int = Depends(oauth2.get_current_user)):
 
     hospital_query = db.query(models.Hospital).filter(models.Hospital.id == id)
 
@@ -73,7 +73,7 @@ def update_hospital(id: str, updated_hospital: schemas.HospitalCreate, db: Sessi
 # Delete hospital
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_hospital(id: str, db: Session = Depends(get_db),
-                    user_id: int = Depends(oauth2.get_current_user)):
+                    current_user: int = Depends(oauth2.get_current_user)):
 
     hospital = db.query(models.Hospital).filter(models.Hospital.id == id)
 

@@ -30,7 +30,7 @@ def create_adverse_reaction_type(adverse_reaction_type: schemas.AdverseReactionT
 
 @router.get("/{id}", response_model=schemas.AdverseReactionTypeResponse)
 def get_one_adverse_reaction_type(id: int, db: Session = Depends(get_db),
-                                  user_id: int = Depends(oauth2.get_current_user)):
+                                  current_user: int = Depends(oauth2.get_current_user)):
     adverse_reaction_type = db.query(models.AdverseReactionType).filter(
         models.AdverseReactionType.id == id).first()
 
@@ -44,7 +44,7 @@ def get_one_adverse_reaction_type(id: int, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.AdverseReactionTypeResponse])
 def get_adverse_reaction_types(db: Session = Depends(get_db),
-                               user_id: int = Depends(oauth2.get_current_user)):
+                               current_user: int = Depends(oauth2.get_current_user)):
     adverse_reaction_types = db.query(models.AdverseReactionType).all()
     return adverse_reaction_types
 
@@ -53,7 +53,7 @@ def get_adverse_reaction_types(db: Session = Depends(get_db),
 
 @router.put("/{id}", response_model=schemas.AdverseReactionTypeResponse)
 def update_adverse_reaction_type(id: int, updated_adverse_reaction_type: schemas.AdverseReactionTypeCreate, db: Session = Depends(get_db),
-                                 user_id: int = Depends(oauth2.get_current_user)):
+                                 current_user: int = Depends(oauth2.get_current_user)):
 
     adverse_reaction_type_query = db.query(models.AdverseReactionType).filter(
         models.AdverseReactionType.id == id)
@@ -73,7 +73,7 @@ def update_adverse_reaction_type(id: int, updated_adverse_reaction_type: schemas
 # Delete Adverse Reaction Type
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_adverse_reaction_type(id: int, db: Session = Depends(get_db),
-                                 user_id: int = Depends(oauth2.get_current_user)):
+                                 current_user: int = Depends(oauth2.get_current_user)):
 
     adverse_reaction_type = db.query(models.AdverseReactionType).filter(
         models.AdverseReactionType.id == id)

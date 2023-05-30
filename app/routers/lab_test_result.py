@@ -16,11 +16,9 @@ router = APIRouter(
 
 """ LAB TEST RESULT APIs """
 # Create lab test result
-
-
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_lab_result(lab_result: schemas.LabResultCreate, db: Session = Depends(get_db),
-                      user_id: int = Depends(oauth2.get_current_user)):
+                      current_user: int = Depends(oauth2.get_current_user)):
     new_lab_result = models.LabResult(**lab_result.dict())
     db.add(new_lab_result)
     db.commit()
@@ -32,7 +30,7 @@ def create_lab_result(lab_result: schemas.LabResultCreate, db: Session = Depends
 
 @router.get("/{id}", response_model=schemas.LabResultResponse)
 def get_lab_result(id: int, db: Session = Depends(get_db),
-                   user_id: int = Depends(oauth2.get_current_user)):
+                   current_user: int = Depends(oauth2.get_current_user)):
     lab_result = db.query(models.LabResult).filter(
         models.LabResult.id == id).first()
 
@@ -46,7 +44,7 @@ def get_lab_result(id: int, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.LabResultResponse])
 def get_lab_result(db: Session = Depends(get_db),
-                   user_id: int = Depends(oauth2.get_current_user)):
+                   current_user: int = Depends(oauth2.get_current_user)):
     lab_results = db.query(models.LabResult).all()
     return lab_results
 
@@ -55,7 +53,7 @@ def get_lab_result(db: Session = Depends(get_db),
 
 @router.put("/{id}", response_model=schemas.LabResultResponse)
 def update_lab_result(id: int, updated_lab_result: schemas.LabResultCreate, db: Session = Depends(get_db),
-                      user_id: int = Depends(oauth2.get_current_user)):
+                      current_user: int = Depends(oauth2.get_current_user)):
 
     lab_result_query = db.query(models.LabResult).filter(
         models.LabResult.id == id)
@@ -75,7 +73,7 @@ def update_lab_result(id: int, updated_lab_result: schemas.LabResultCreate, db: 
 # Delete lab test result
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_lab_result(id: int, db: Session = Depends(get_db),
-                      user_id: int = Depends(oauth2.get_current_user)):
+                      current_user: int = Depends(oauth2.get_current_user)):
 
     lab_result = db.query(models.LabResult).filter(
         models.LabResult.id == id)

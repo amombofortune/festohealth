@@ -16,11 +16,9 @@ router = APIRouter(
 
 """ PATIENT CONSENT APIs """
 # Create patient consent
-
-
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_patient_consent(patient_consent: schemas.PatientConsentCreate, db: Session = Depends(get_db),
-                           user_id: int = Depends(oauth2.get_current_user)):
+                           current_user: int = Depends(oauth2.get_current_user)):
     patient_consent = models.PatientConsent(**patient_consent.dict())
     db.add(patient_consent)
     db.commit()
@@ -32,7 +30,7 @@ def create_patient_consent(patient_consent: schemas.PatientConsentCreate, db: Se
 
 @router.get("/{id}", response_model=schemas.PatientConsentResponse)
 def get_patient_consent(id: int, db: Session = Depends(get_db),
-                        user_id: int = Depends(oauth2.get_current_user)):
+                        current_user: int = Depends(oauth2.get_current_user)):
     patient_consent = db.query(models.PatientConsent).filter(
         models.PatientConsent.id == id).first()
 
@@ -46,7 +44,7 @@ def get_patient_consent(id: int, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.PatientConsentResponse])
 def get_patient_consent(db: Session = Depends(get_db),
-                        user_id: int = Depends(oauth2.get_current_user)):
+                        current_user: int = Depends(oauth2.get_current_user)):
     patient_consent = db.query(models.PatientConsent).all()
     return patient_consent
 
@@ -55,7 +53,7 @@ def get_patient_consent(db: Session = Depends(get_db),
 
 @router.put("/{id}", response_model=schemas.PatientConsentResponse)
 def update_patient_consent(id: int, updated_patient_consent: schemas.PatientConsentCreate, db: Session = Depends(get_db),
-                           user_id: int = Depends(oauth2.get_current_user)):
+                           current_user: int = Depends(oauth2.get_current_user)):
 
     patient_consent_query = db.query(models.PatientConsent).filter(
         models.PatientConsent.id == id)
@@ -75,7 +73,7 @@ def update_patient_consent(id: int, updated_patient_consent: schemas.PatientCons
 # Delete patient consent
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_patient_consent(id: int, db: Session = Depends(get_db),
-                           user_id: int = Depends(oauth2.get_current_user)):
+                           current_user: int = Depends(oauth2.get_current_user)):
 
     patient_consent = db.query(models.PatientConsent).filter(
         models.PatientConsent.id == id)

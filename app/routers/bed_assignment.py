@@ -17,7 +17,7 @@ router = APIRouter(
 # Create Bed assignment
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_bed_assignment(bed_assignment: schemas.BedAssignmentCreate, db: Session = Depends(get_db),
-                          user_id: int = Depends(oauth2.get_current_user)):
+                          current_user: int = Depends(oauth2.get_current_user)):
     new_bed_assignment = models.BedAssignment(**bed_assignment.dict())
     db.add(new_bed_assignment)
     db.commit()
@@ -29,7 +29,7 @@ def create_bed_assignment(bed_assignment: schemas.BedAssignmentCreate, db: Sessi
 
 @router.get("/{id}", response_model=schemas.BedAssignmentResponse)
 def get_bed_assignment(id: int, db: Session = Depends(get_db),
-                       user_id: int = Depends(oauth2.get_current_user)):
+                       current_user: int = Depends(oauth2.get_current_user)):
     bed_assignment = db.query(models.BedAssignment).filter(
         models.BedAssignment.id == id).first()
 
@@ -43,7 +43,7 @@ def get_bed_assignment(id: int, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.BedAssignmentResponse])
 def get_bed_assignment(db: Session = Depends(get_db),
-                       user_id: int = Depends(oauth2.get_current_user)):
+                       current_user: int = Depends(oauth2.get_current_user)):
     bed_assignment = db.query(models.BedAssignment).all()
     return bed_assignment
 
@@ -52,7 +52,7 @@ def get_bed_assignment(db: Session = Depends(get_db),
 
 @router.put("/{id}", response_model=schemas.BedAssignmentResponse)
 def update_bed_assignment(id: int, updated_bed_assignment: schemas.BedAssignmentCreate, db: Session = Depends(get_db),
-                          user_id: int = Depends(oauth2.get_current_user)):
+                          current_user: int = Depends(oauth2.get_current_user)):
 
     bed_assignment_query = db.query(models.BedAssignment).filter(
         models.BedAssignment.id == id)
@@ -72,7 +72,7 @@ def update_bed_assignment(id: int, updated_bed_assignment: schemas.BedAssignment
 # Delete Bed Assignment
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_bed(id: int, db: Session = Depends(get_db),
-               user_id: int = Depends(oauth2.get_current_user)):
+               current_user: int = Depends(oauth2.get_current_user)):
 
     bed_assignment = db.query(models.BedAssignment).filter(
         models.BedAssignment.id == id)

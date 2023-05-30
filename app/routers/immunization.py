@@ -19,7 +19,7 @@ router = APIRouter(
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_immunization(immunization: schemas.ImmunizationCreate, db: Session = Depends(get_db),
-                        user_id: int = Depends(oauth2.get_current_user)):
+                        current_user: int = Depends(oauth2.get_current_user)):
     new_immunization = models.Immunization(**immunization.dict())
     db.add(new_immunization)
     db.commit()
@@ -31,7 +31,7 @@ def create_immunization(immunization: schemas.ImmunizationCreate, db: Session = 
 
 @router.get("/{id}", response_model=schemas.ImmunizationResponse)
 def get_immunization(id: int, db: Session = Depends(get_db),
-                     user_id: int = Depends(oauth2.get_current_user)):
+                     current_user: int = Depends(oauth2.get_current_user)):
     immunization = db.query(models.Immunization).filter(
         models.Immunization.id == id).first()
 
@@ -45,7 +45,7 @@ def get_immunization(id: int, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.ImmunizationResponse])
 def get_immunization(db: Session = Depends(get_db),
-                     user_id: int = Depends(oauth2.get_current_user)):
+                     current_user: int = Depends(oauth2.get_current_user)):
     immunization = db.query(models.Immunization).all()
     return immunization
 
@@ -54,7 +54,7 @@ def get_immunization(db: Session = Depends(get_db),
 
 @router.put("/{id}", response_model=schemas.ImmunizationResponse)
 def update_immunization(id: int, updated_immunization: schemas.ImmunizationCreate, db: Session = Depends(get_db),
-                        user_id: int = Depends(oauth2.get_current_user)):
+                        current_user: int = Depends(oauth2.get_current_user)):
 
     immunization_query = db.query(models.Immunization).filter(
         models.Immunization.id == id)
@@ -74,7 +74,7 @@ def update_immunization(id: int, updated_immunization: schemas.ImmunizationCreat
 # Delete immunization
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_immunization(id: int, db: Session = Depends(get_db),
-                        user_id: int = Depends(oauth2.get_current_user)):
+                        current_user: int = Depends(oauth2.get_current_user)):
 
     immunization = db.query(models.Immunization).filter(
         models.Immunization.id == id)

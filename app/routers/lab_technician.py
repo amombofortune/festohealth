@@ -16,11 +16,9 @@ router = APIRouter(
 
 """ LAB TECHNICIAN APIs """
 # Create lab technician
-
-
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_lab_technician(lab_technician: schemas.LabTechnicianCreate, db: Session = Depends(get_db),
-                          user_id: int = Depends(oauth2.get_current_user)):
+                          current_user: int = Depends(oauth2.get_current_user)):
     new_lab_technician = models.LabTechnician(**lab_technician.dict())
     db.add(new_lab_technician)
     db.commit()
@@ -32,7 +30,7 @@ def create_lab_technician(lab_technician: schemas.LabTechnicianCreate, db: Sessi
 
 @router.get("/{id}", response_model=schemas.LabTechnicianResponse)
 def get_lab_technician(id: str, db: Session = Depends(get_db),
-                       user_id: int = Depends(oauth2.get_current_user)):
+                       current_user: int = Depends(oauth2.get_current_user)):
     lab_technician = db.query(models.LabTechnician).filter(
         models.LabTechnician.id == id).first()
 
@@ -46,7 +44,7 @@ def get_lab_technician(id: str, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.LabTechnicianResponse])
 def get_lab_technicians(db: Session = Depends(get_db),
-                        user_id: int = Depends(oauth2.get_current_user)):
+                        current_user: int = Depends(oauth2.get_current_user)):
     lab_technicians = db.query(models.LabTechnician).all()
     return lab_technicians
 
@@ -55,7 +53,7 @@ def get_lab_technicians(db: Session = Depends(get_db),
 
 @router.put("/{id}", response_model=schemas.LabTechnicianResponse)
 def update_lab_technician(id: str, updated_lab_technician: schemas.LabTechnicianCreate, db: Session = Depends(get_db),
-                          user_id: int = Depends(oauth2.get_current_user)):
+                          current_user: int = Depends(oauth2.get_current_user)):
 
     lab_technician_query = db.query(models.LabTechnician).filter(
         models.LabTechnician.id == id)
@@ -75,7 +73,7 @@ def update_lab_technician(id: str, updated_lab_technician: schemas.LabTechnician
 # Delete lab test
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_lab_technician(id: str, db: Session = Depends(get_db),
-                          user_id: int = Depends(oauth2.get_current_user)):
+                          current_user: int = Depends(oauth2.get_current_user)):
 
     lab_technician = db.query(models.LabTechnician).filter(
         models.LabTechnician.id == id)

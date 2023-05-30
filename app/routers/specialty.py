@@ -16,11 +16,9 @@ router = APIRouter(
 
 """ SPECIALTY APIs"""
 # Create specialty
-
-
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_specialty(specialty: schemas.SpecialtyCreate, db: Session = Depends(get_db),
-                     user_id: int = Depends(oauth2.get_current_user)):
+                     current_user: int = Depends(oauth2.get_current_user)):
     specialty = models.Specialty(**specialty.dict())
     db.add(specialty)
     db.commit()
@@ -32,7 +30,7 @@ def create_specialty(specialty: schemas.SpecialtyCreate, db: Session = Depends(g
 
 @router.get("/{id}", response_model=schemas.SpecialtyResponse)
 def get_specialty(id: int, db: Session = Depends(get_db),
-                  user_id: int = Depends(oauth2.get_current_user)):
+                  current_user: int = Depends(oauth2.get_current_user)):
     specialty = db.query(models.Specialty).filter(models.Specialty.id == id).first()
 
     if not specialty:
@@ -45,7 +43,7 @@ def get_specialty(id: int, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.SpecialtyResponse])
 def get_specialty(db: Session = Depends(get_db),
-                  user_id: int = Depends(oauth2.get_current_user)):
+                  current_user: int = Depends(oauth2.get_current_user)):
     specialty = db.query(models.Specialty).all()
     return specialty
 
@@ -54,7 +52,7 @@ def get_specialty(db: Session = Depends(get_db),
 
 @router.put("/{id}", response_model=schemas.SpecialtyResponse)
 def update_specialty(id: int, updated_specialty: schemas.SpecialtyCreate, db: Session = Depends(get_db),
-                     user_id: int = Depends(oauth2.get_current_user)):
+                     current_user: int = Depends(oauth2.get_current_user)):
 
     specialty_query = db.query(models.Specialty).filter(models.Specialty.id == id)
 
@@ -73,7 +71,7 @@ def update_specialty(id: int, updated_specialty: schemas.SpecialtyCreate, db: Se
 # Delete specialty
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_specialty(id: int, db: Session = Depends(get_db),
-                     user_id: int = Depends(oauth2.get_current_user)):
+                     current_user: int = Depends(oauth2.get_current_user)):
 
     specialty = db.query(models.Specialty).filter(models.Specialty.id == id)
 

@@ -18,7 +18,7 @@ router = APIRouter(
 # Create time slot 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_time_slot(time_slot: schemas.TimeSlotCreate, db: Session = Depends(get_db),
-                     user_id: int = Depends(oauth2.get_current_user)):
+                     current_user: int = Depends(oauth2.get_current_user)):
     time_slot = models.TimeSlot(**time_slot.dict())
     db.add(time_slot)
     db.commit()
@@ -30,7 +30,7 @@ def create_time_slot(time_slot: schemas.TimeSlotCreate, db: Session = Depends(ge
 
 @router.get("/{id}", response_model=schemas.TimeSlotResponse)
 def get_time_slot(id: int, db: Session = Depends(get_db),
-                  user_id: int = Depends(oauth2.get_current_user)):
+                  current_user: int = Depends(oauth2.get_current_user)):
     time_slot = db.query(models.TimeSlot).filter(models.TimeSlot.id == id).first()
 
     if not time_slot:
@@ -43,7 +43,7 @@ def get_time_slot(id: int, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.TimeSlotResponse])
 def get_time_slot(db: Session = Depends(get_db),
-                  user_id: int = Depends(oauth2.get_current_user)):
+                  current_user: int = Depends(oauth2.get_current_user)):
     time_slot = db.query(models.TimeSlot).all()
     return time_slot
 
@@ -52,7 +52,7 @@ def get_time_slot(db: Session = Depends(get_db),
 
 @router.put("/{id}", response_model=schemas.TimeSlotResponse)
 def update_time_slot(id: str, updated_time_slot: schemas.TimeSlotCreate, db: Session = Depends(get_db),
-                     user_id: int = Depends(oauth2.get_current_user)):
+                     current_user: int = Depends(oauth2.get_current_user)):
 
     time_slot_query = db.query(models.TimeSlot).filter(models.TimeSlot.id == id)
 
@@ -71,7 +71,7 @@ def update_time_slot(id: str, updated_time_slot: schemas.TimeSlotCreate, db: Ses
 # Delete time slot
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_time_slot(id: int, db: Session = Depends(get_db),
-                     user_id: int = Depends(oauth2.get_current_user)):
+                     current_user: int = Depends(oauth2.get_current_user)):
 
     time_slot = db.query(models.TimeSlot).filter(models.TimeSlot.id == id)
 

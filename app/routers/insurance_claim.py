@@ -20,7 +20,7 @@ router = APIRouter(
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_insurance_claim(insurance_claim: schemas.InsuranceClaimCreate, db: Session = Depends(get_db),
-                           user_id: int = Depends(oauth2.get_current_user)):
+                           current_user: int = Depends(oauth2.get_current_user)):
     new_insurance_claim = models.InsuranceClaim(**insurance_claim.dict())
     db.add(new_insurance_claim)
     db.commit()
@@ -32,7 +32,7 @@ def create_insurance_claim(insurance_claim: schemas.InsuranceClaimCreate, db: Se
 
 @router.get("/{id}", response_model=schemas.InsuranceClaimResponse)
 def get_insurance_claim(id: str, db: Session = Depends(get_db),
-                        user_id: int = Depends(oauth2.get_current_user)):
+                        current_user: int = Depends(oauth2.get_current_user)):
     insurance_claim = db.query(models.InsuranceClaim).filter(
         models.InsuranceClaim.id == id).first()
 
@@ -46,7 +46,7 @@ def get_insurance_claim(id: str, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.InsuranceClaimResponse])
 def get_insurance_claim(db: Session = Depends(get_db),
-                        user_id: int = Depends(oauth2.get_current_user)):
+                        current_user: int = Depends(oauth2.get_current_user)):
     insurance_claim = db.query(models.InsuranceClaim).all()
     return insurance_claim
 
@@ -55,7 +55,7 @@ def get_insurance_claim(db: Session = Depends(get_db),
 
 @router.put("/{id}", response_model=schemas.InsuranceClaimResponse)
 def update_insurance_claim(id: str, updated_insurance_claim: schemas.InsuranceClaimCreate, db: Session = Depends(get_db),
-                           user_id: int = Depends(oauth2.get_current_user)):
+                           current_user: int = Depends(oauth2.get_current_user)):
 
     insurance_claim_query = db.query(models.InsuranceClaim).filter(
         models.InsuranceClaim.id == id)
@@ -75,7 +75,7 @@ def update_insurance_claim(id: str, updated_insurance_claim: schemas.InsuranceCl
 # Delete insurance claim
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_insurance_claim(id: str, db: Session = Depends(get_db),
-                           user_id: int = Depends(oauth2.get_current_user)):
+                           current_user: int = Depends(oauth2.get_current_user)):
 
     insurance_claim = db.query(models.InsuranceClaim).filter(
         models.InsuranceClaim.id == id)

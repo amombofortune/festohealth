@@ -19,7 +19,7 @@ router = APIRouter(
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_doctor(doctor: schemas.DoctorCreate, db: Session = Depends(get_db),
-                  user_id: int = Depends(oauth2.get_current_user)):
+                  current_user: int = Depends(oauth2.get_current_user)):
     new_doctor = models.Doctor(**doctor.dict())
     db.add(new_doctor)
     db.commit()
@@ -31,7 +31,7 @@ def create_doctor(doctor: schemas.DoctorCreate, db: Session = Depends(get_db),
 
 @router.get("/{id}", response_model=schemas.DoctorResponse)
 def get_doctor(id: str, db: Session = Depends(get_db),
-               user_id: int = Depends(oauth2.get_current_user)):
+               current_user: int = Depends(oauth2.get_current_user)):
     doctor = db.query(models.Doctor).filter(models.Doctor.id == id).first()
 
     if not doctor:
@@ -44,7 +44,7 @@ def get_doctor(id: str, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.DoctorResponse])
 def get_doctor(db: Session = Depends(get_db),
-               user_id: int = Depends(oauth2.get_current_user)):
+               current_user: int = Depends(oauth2.get_current_user)):
     doctor = db.query(models.Doctor).all()
     return doctor
 
@@ -53,7 +53,7 @@ def get_doctor(db: Session = Depends(get_db),
 
 @router.put("/{id}", response_model=schemas.DoctorResponse)
 def update_doctor(id: str, updated_doctor: schemas.DoctorCreate, db: Session = Depends(get_db),
-                  user_id: int = Depends(oauth2.get_current_user)):
+                  current_user: int = Depends(oauth2.get_current_user)):
 
     doctor_query = db.query(models.Doctor).filter(models.Doctor.id == id)
 
@@ -71,7 +71,7 @@ def update_doctor(id: str, updated_doctor: schemas.DoctorCreate, db: Session = D
 # Delete doctor
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_doctor(id: str, db: Session = Depends(get_db),
-                  user_id: int = Depends(oauth2.get_current_user)):
+                  current_user: int = Depends(oauth2.get_current_user)):
 
     doctor = db.query(models.Doctor).filter(models.Doctor.id == id)
 

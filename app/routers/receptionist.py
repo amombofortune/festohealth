@@ -20,7 +20,7 @@ router = APIRouter(
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_receptionist(receptionist: schemas.ReceptionistCreate, db: Session = Depends(get_db),
-                         user_id: int = Depends(oauth2.get_current_user)):
+                         current_user: int = Depends(oauth2.get_current_user)):
     receptionist = models.Receptionist(**receptionist.dict())
     db.add(receptionist)
     db.commit()
@@ -32,7 +32,7 @@ def create_receptionist(receptionist: schemas.ReceptionistCreate, db: Session = 
 
 @router.get("/{id}", response_model=schemas.ReceptionistResponse)
 def get_receptionist(id: str, db: Session = Depends(get_db),
-                     user_id: int = Depends(oauth2.get_current_user)):
+                     current_user: int = Depends(oauth2.get_current_user)):
     receptionist = db.query(models.Receptionist).filter(
         models.Receptionist.id == id).first()
 
@@ -46,7 +46,7 @@ def get_receptionist(id: str, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.ReceptionistResponse])
 def get_receptionist(db: Session = Depends(get_db),
-                     user_id: int = Depends(oauth2.get_current_user)):
+                     current_user: int = Depends(oauth2.get_current_user)):
     receptionist = db.query(models.Receptionist).all()
     return receptionist
 
@@ -55,7 +55,7 @@ def get_receptionist(db: Session = Depends(get_db),
 
 @router.put("/{id}", response_model=schemas.ReceptionistResponse)
 def update_receptionist(id: str, updated_receptionist: schemas.ReceptionistCreate, db: Session = Depends(get_db),
-                        user_id: int = Depends(oauth2.get_current_user)):
+                        current_user: int = Depends(oauth2.get_current_user)):
 
     receptionist_query = db.query(models.Receptionist).filter(
         models.Receptionist.id == id)
@@ -75,7 +75,7 @@ def update_receptionist(id: str, updated_receptionist: schemas.ReceptionistCreat
 # Delete receptionist
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_receptionist(id: str, db: Session = Depends(get_db),
-                        user_id: int = Depends(oauth2.get_current_user)):
+                        current_user: int = Depends(oauth2.get_current_user)):
 
     receptionist = db.query(models.Receptionist).filter(
         models.Receptionist.id == id)

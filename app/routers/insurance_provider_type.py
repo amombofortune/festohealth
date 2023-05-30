@@ -17,11 +17,9 @@ router = APIRouter(
 
 """ INSURANCE PROVIDER TYPE APIs """
 # Create insurance provider type
-
-
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_insurance_provider_type(insurance_provider_type: schemas.InsuranceProviderTypeCreate, db: Session = Depends(get_db),
-                                   user_id: int = Depends(oauth2.get_current_user)):
+                                   current_user: int = Depends(oauth2.get_current_user)):
     new_insurance_provider_type = models.InsuranceProviderType(
         **insurance_provider_type.dict())
     db.add(new_insurance_provider_type)
@@ -30,11 +28,9 @@ def create_insurance_provider_type(insurance_provider_type: schemas.InsurancePro
     return new_insurance_provider_type
 
 # Read one insurance provider type
-
-
 @router.get("/{id}", response_model=schemas.InsuranceProviderTypeResponse)
 def get_insurance_provider_type(id: int, db: Session = Depends(get_db),
-                                user_id: int = Depends(oauth2.get_current_user)):
+                                current_user: int = Depends(oauth2.get_current_user)):
     insurance_provider_type = db.query(models.InsuranceProviderType).filter(
         models.InsuranceProviderType.id == id).first()
 
@@ -48,7 +44,7 @@ def get_insurance_provider_type(id: int, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.InsuranceProviderTypeResponse])
 def get_insurance_provider_type(db: Session = Depends(get_db),
-                                user_id: int = Depends(oauth2.get_current_user)):
+                                current_user: int = Depends(oauth2.get_current_user)):
     insurance_provider_type = db.query(models.InsuranceProviderType).all()
     return insurance_provider_type
 
@@ -57,7 +53,7 @@ def get_insurance_provider_type(db: Session = Depends(get_db),
 
 @router.put("/{id}", response_model=schemas.InsuranceProviderTypeResponse)
 def update_insurance_provider_type(id: int, updated_insurance_provider_type: schemas.InsuranceProviderTypeCreate, db: Session = Depends(get_db),
-                                   user_id: int = Depends(oauth2.get_current_user)):
+                                   current_user: int = Depends(oauth2.get_current_user)):
 
     insurance_provider_type_query = db.query(models.InsuranceProviderType).filter(
         models.InsuranceProviderType.id == id)
@@ -77,7 +73,7 @@ def update_insurance_provider_type(id: int, updated_insurance_provider_type: sch
 # Delete insurance provider
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_insurance_provider_type(id: int, db: Session = Depends(get_db),
-                                   user_id: int = Depends(oauth2.get_current_user)):
+                                   current_user: int = Depends(oauth2.get_current_user)):
 
     insurance_provider_type = db.query(models.InsuranceProviderType).filter(
         models.InsuranceProviderType.id == id)

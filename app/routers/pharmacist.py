@@ -20,7 +20,7 @@ router = APIRouter(
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_pharmacist(pharmacist: schemas.PharmacistCreate, db: Session = Depends(get_db),
-                      user_id: int = Depends(oauth2.get_current_user)):
+                      current_user: int = Depends(oauth2.get_current_user)):
     pharmacist = models.Pharmacist(**pharmacist.dict())
     db.add(pharmacist)
     db.commit()
@@ -32,7 +32,7 @@ def create_pharmacist(pharmacist: schemas.PharmacistCreate, db: Session = Depend
 
 @router.get("/{id}", response_model=schemas.PharmacistResponse)
 def get_pharmacist(id: str, db: Session = Depends(get_db),
-                   user_id: int = Depends(oauth2.get_current_user)):
+                   current_user: int = Depends(oauth2.get_current_user)):
     pharmacist = db.query(models.Pharmacist).filter(
         models.Pharmacist.id == id).first()
 
@@ -46,7 +46,7 @@ def get_pharmacist(id: str, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.PharmacistResponse])
 def get_pharmacist(db: Session = Depends(get_db),
-                   user_id: int = Depends(oauth2.get_current_user)):
+                   current_user: int = Depends(oauth2.get_current_user)):
     pharmacist = db.query(models.Pharmacist).all()
     return pharmacist
 
@@ -55,7 +55,7 @@ def get_pharmacist(db: Session = Depends(get_db),
 
 @router.put("/{id}", response_model=schemas.PharmacistResponse)
 def update_pharmacist(id: str, updated_pharmacist: schemas.PharmacistCreate, db: Session = Depends(get_db),
-                      user_id: int = Depends(oauth2.get_current_user)):
+                      current_user: int = Depends(oauth2.get_current_user)):
 
     pharmacist_query = db.query(models.Pharmacist).filter(
         models.Pharmacist.id == id)
@@ -75,7 +75,7 @@ def update_pharmacist(id: str, updated_pharmacist: schemas.PharmacistCreate, db:
 # Delete pharmacist
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_pharmacist(id: str, db: Session = Depends(get_db),
-                      user_id: int = Depends(oauth2.get_current_user)):
+                      current_user: int = Depends(oauth2.get_current_user)):
 
     pharmacist = db.query(models.Pharmacist).filter(
         models.Pharmacist.id == id)

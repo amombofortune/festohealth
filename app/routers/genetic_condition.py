@@ -20,7 +20,7 @@ router = APIRouter(
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_genetic_condition(genetic_condition: schemas.GeneticConditionCreate, db: Session = Depends(get_db),
-                             user_id: int = Depends(oauth2.get_current_user)):
+                             current_user: int = Depends(oauth2.get_current_user)):
     new_genetic_condition = models.GeneticCondition(**genetic_condition.dict())
     db.add(new_genetic_condition)
     db.commit()
@@ -32,7 +32,7 @@ def create_genetic_condition(genetic_condition: schemas.GeneticConditionCreate, 
 
 @router.get("/{id}", response_model=schemas.GeneticConditionResponse)
 def get_genetic_condition(id: int, db: Session = Depends(get_db),
-                          user_id: int = Depends(oauth2.get_current_user)):
+                          current_user: int = Depends(oauth2.get_current_user)):
     genetic_condition = db.query(models.GeneticCondition).filter(
         models.GeneticCondition.id == id).first()
 
@@ -46,7 +46,7 @@ def get_genetic_condition(id: int, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.GeneticConditionResponse])
 def get_genetic_condition(db: Session = Depends(get_db),
-                          user_id: int = Depends(oauth2.get_current_user)):
+                          current_user: int = Depends(oauth2.get_current_user)):
     genetic_condition = db.query(models.GeneticCondition).all()
     return genetic_condition
 
@@ -55,7 +55,7 @@ def get_genetic_condition(db: Session = Depends(get_db),
 
 @router.put("/{id}", response_model=schemas.GeneticConditionResponse)
 def update_genetic_condition(id: int, updated_genetic_condition: schemas.GeneticConditionCreate, db: Session = Depends(get_db),
-                             user_id: int = Depends(oauth2.get_current_user)):
+                             current_user: int = Depends(oauth2.get_current_user)):
 
     genetic_condition_query = db.query(models.GeneticCondition).filter(
         models.GeneticCondition.id == id)
@@ -75,7 +75,7 @@ def update_genetic_condition(id: int, updated_genetic_condition: schemas.Genetic
 # Delete genetic condition
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_genetic_condition(id: int, db: Session = Depends(get_db),
-                             user_id: int = Depends(oauth2.get_current_user)):
+                             current_user: int = Depends(oauth2.get_current_user)):
 
     genetic_condition = db.query(models.GeneticCondition).filter(
         models.GeneticCondition.id == id)

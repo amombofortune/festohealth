@@ -14,12 +14,10 @@ router = APIRouter(
 
 """ ADMISSION API """
 # Create Admission
-
-
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_admission(admission: schemas.AdmissionCreate, db: Session = Depends(get_db),
-                      user_id: int = Depends(oauth2.get_current_user)):
-    print(user_id)
+                      current_user: int = Depends(oauth2.get_current_user)):
+    print(current_user.email)
     new_admission = models.Admission(**admission.dict())
     db.add(new_admission)
     db.commit()
@@ -27,11 +25,9 @@ def create_admission(admission: schemas.AdmissionCreate, db: Session = Depends(g
     return new_admission
 
 # Read One Admission
-
-
 @router.get("/{id}", response_model=schemas.AdmissionResponse)
 def get_one_admission(id: int, db: Session = Depends(get_db),
-                      user_id: int = Depends(oauth2.get_current_user)):
+                      current_user: int = Depends(oauth2.get_current_user)):
     admission = db.query(models.Admission).filter(
         models.Admission.id == id).first()
 
@@ -41,20 +37,17 @@ def get_one_admission(id: int, db: Session = Depends(get_db),
     return admission
 
 # Read All Admission
-
-
 @router.get("/", response_model=List[schemas.AdmissionResponse])
 def get_admission(db: Session = Depends(get_db),
-                  user_id: int = Depends(oauth2.get_current_user)):
+                  current_user: int = Depends(oauth2.get_current_user)):
+    print(current_user.email)
     admission = db.query(models.Admission).all()
     return admission
 
 # Update Admission
-
-
 @router.put("/{id}", response_model=schemas.AdmissionResponse)
 def update_admission(id: int, updated_admission: schemas.AdmissionCreate, db: Session = Depends(get_db),
-                     user_id: int = Depends(oauth2.get_current_user)):
+                     current_user: int = Depends(oauth2.get_current_user)):
 
     admission_query = db.query(models.Admission).filter(
         models.Admission.id == id)
@@ -73,7 +66,7 @@ def update_admission(id: int, updated_admission: schemas.AdmissionCreate, db: Se
 # Delete Admission
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_admission(id: int, db: Session = Depends(get_db),
-                     user_id: int = Depends(oauth2.get_current_user)):
+                     current_user: int = Depends(oauth2.get_current_user)):
 
     admission = db.query(models.Admission).filter(models.Admission.id == id)
 

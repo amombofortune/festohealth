@@ -16,11 +16,9 @@ router = APIRouter(
 
 """ PRESCRIPTION """
 # Create prescription
-
-
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_prescription(prescription: schemas.PrescriptionCreate, db: Session = Depends(get_db),
-                        user_id: int = Depends(oauth2.get_current_user)):
+                        current_user: int = Depends(oauth2.get_current_user)):
     prescription = models.Prescription(**prescription.dict())
     db.add(prescription)
     db.commit()
@@ -32,7 +30,7 @@ def create_prescription(prescription: schemas.PrescriptionCreate, db: Session = 
 
 @router.get("/{id}", response_model=schemas.PrescriptionResponse)
 def get_prescription(id: int, db: Session = Depends(get_db),
-                     user_id: int = Depends(oauth2.get_current_user)):
+                     current_user: int = Depends(oauth2.get_current_user)):
     prescription = db.query(models.Prescription).filter(
         models.Prescription.id == id).first()
 
@@ -46,7 +44,7 @@ def get_prescription(id: int, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.PrescriptionResponse])
 def get_prescription(db: Session = Depends(get_db),
-                     user_id: int = Depends(oauth2.get_current_user)):
+                     current_user: int = Depends(oauth2.get_current_user)):
     prescriptions = db.query(models.Prescription).all()
     return prescriptions
 
@@ -55,7 +53,7 @@ def get_prescription(db: Session = Depends(get_db),
 
 @router.put("/{id}", response_model=schemas.PrescriptionResponse)
 def update_prescription(id: int, updated_prescription: schemas.PrescriptionCreate, db: Session = Depends(get_db),
-                        user_id: int = Depends(oauth2.get_current_user)):
+                        current_user: int = Depends(oauth2.get_current_user)):
 
     prescription_query = db.query(models.Prescription).filter(
         models.Prescription.id == id)
@@ -75,7 +73,7 @@ def update_prescription(id: int, updated_prescription: schemas.PrescriptionCreat
 # Delete prescription
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_prescription(id: int, db: Session = Depends(get_db),
-                        user_id: int = Depends(oauth2.get_current_user)):
+                        current_user: int = Depends(oauth2.get_current_user)):
 
     prescription = db.query(models.Prescription).filter(
         models.Prescription.id == id)

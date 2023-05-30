@@ -46,7 +46,7 @@ def get_one_adverse_reaction(id: int, db: Session = Depends(get_db),
 @router.get("/", response_model=List[schemas.AdverseReactionResponse])
 def get_adverse_reactions(db: Session = Depends(get_db),
                           current_user: int = Depends(oauth2.get_current_user)):
-    adverse_reactions = db.query(models.AdverseReaction).all()
+    adverse_reactions = db.query(models.AdverseReaction).filter(models.AdverseReaction.user_id == current_user.id).all() #return for that user only
     return adverse_reactions
 
 # Update Adverse Reaction

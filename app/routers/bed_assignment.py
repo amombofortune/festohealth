@@ -44,7 +44,7 @@ def get_bed_assignment(id: int, db: Session = Depends(get_db),
 @router.get("/", response_model=List[schemas.BedAssignmentResponse])
 def get_bed_assignment(db: Session = Depends(get_db),
                        current_user: int = Depends(oauth2.get_current_user)):
-    bed_assignment = db.query(models.BedAssignment).all()
+    bed_assignment = db.query(models.BedAssignment).filter(models.BedAssignment.user_id == current_user.id).all()
     return bed_assignment
 
 # Update Bed Assignment

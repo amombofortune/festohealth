@@ -46,7 +46,7 @@ def get_chronic_condition(id: int, db: Session = Depends(get_db),
 @router.get("/", response_model=List[schemas.ChronicConditionResponse])
 def get_chronic_conditions(db: Session = Depends(get_db),
                            current_user: int = Depends(oauth2.get_current_user)):
-    chronic_condition = db.query(models.ChronicCondition).all()
+    chronic_condition = db.query(models.ChronicCondition).filter(models.ChronicCondition.user_id == current_user.id).all()
     return chronic_condition
 
 # Update chronic condition

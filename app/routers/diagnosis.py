@@ -46,7 +46,7 @@ def get_diagnosis(id: int, db: Session = Depends(get_db),
 @router.get("/", response_model=List[schemas.DiagnosisResponse])
 def get_diagnosis(db: Session = Depends(get_db),
                   current_user: int = Depends(oauth2.get_current_user)):
-    diagnosis = db.query(models.Diagnosis).all()
+    diagnosis = db.query(models.Diagnosis).filter(models.Diagnosis.user_id == current_user.id).all()
     return diagnosis
 
 # Update diagnosis

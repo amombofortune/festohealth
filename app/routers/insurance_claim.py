@@ -47,7 +47,7 @@ def get_insurance_claim(id: str, db: Session = Depends(get_db),
 @router.get("/", response_model=List[schemas.InsuranceClaimResponse])
 def get_insurance_claim(db: Session = Depends(get_db),
                         current_user: int = Depends(oauth2.get_current_user)):
-    insurance_claim = db.query(models.InsuranceClaim).all()
+    insurance_claim = db.query(models.InsuranceClaim).filter(models.InsuranceClaim.user_id == current_user.id).all()
     return insurance_claim
 
 # Update insurance claim

@@ -45,7 +45,7 @@ def get_single_appointment(id: int, db: Session = Depends(get_db),
 @router.get("/", response_model=List[schemas.AppointmentResponse])
 def get_appointment(db: Session = Depends(get_db),
                     current_user: int = Depends(oauth2.get_current_user)):
-    appointment = db.query(models.Appointment).all()
+    appointment = db.query(models.Appointment).filter(models.Appointment.user_id == current_user.id).all()
     return appointment
 
 # Update Appointment

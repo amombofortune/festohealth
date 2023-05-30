@@ -47,7 +47,7 @@ def get_genetic_condition(id: int, db: Session = Depends(get_db),
 @router.get("/", response_model=List[schemas.GeneticConditionResponse])
 def get_genetic_condition(db: Session = Depends(get_db),
                           current_user: int = Depends(oauth2.get_current_user)):
-    genetic_condition = db.query(models.GeneticCondition).all()
+    genetic_condition = db.query(models.GeneticCondition).filter(models.GeneticCondition.user_id == current_user.id).all()
     return genetic_condition
 
 # Update genetic condition

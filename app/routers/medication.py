@@ -48,7 +48,7 @@ def get_medication(id: int, db: Session = Depends(get_db),
 @router.get("/", response_model=List[schemas.MedicationResponse])
 def get_medication(db: Session = Depends(get_db),
                    current_user: int = Depends(oauth2.get_current_user)):
-    medication = db.query(models.Medication).all()
+    medication = db.query(models.Medication).filter(models.Medication.user_id == current_user.id).all()
     return medication
 
 # Update medication

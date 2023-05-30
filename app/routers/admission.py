@@ -41,7 +41,7 @@ def get_one_admission(id: int, db: Session = Depends(get_db),
 def get_admission(db: Session = Depends(get_db),
                   current_user: int = Depends(oauth2.get_current_user)):
     print(current_user.email)
-    admission = db.query(models.Admission).all()
+    admission = db.query(models.Admission).filter(models.Admission.user_id == current_user.id).all()
     return admission
 
 # Update Admission

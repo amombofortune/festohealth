@@ -45,7 +45,7 @@ def get_bed(id: int, db: Session = Depends(get_db),
 @router.get("/", response_model=List[schemas.BedResponse])
 def get_beds(db: Session = Depends(get_db),
              current_user: int = Depends(oauth2.get_current_user)):
-    bed = db.query(models.Bed).all()
+    bed = db.query(models.Bed).filter(models.Bed.user_id == current_user.id).all()
     return bed
 
 # Update Bed

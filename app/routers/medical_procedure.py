@@ -47,7 +47,7 @@ def get_medical_procedure(id: int, db: Session = Depends(get_db),
 @router.get("/", response_model=List[schemas.MedicalProcedureResponse])
 def get_medical_procedure(db: Session = Depends(get_db),
                           current_user: int = Depends(oauth2.get_current_user)):
-    medical_procedures = db.query(models.MedicalProcedure).all()
+    medical_procedures = db.query(models.MedicalProcedure).filter(models.MedicalProcedure.user_id == current_user.id).all()
     return medical_procedures
 
 # Update medical procedure

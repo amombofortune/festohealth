@@ -45,7 +45,7 @@ def get_medical_alert(id: int, db: Session = Depends(get_db),
 @router.get("/", response_model=List[schemas.MedicationAlertResponse])
 def get_medical_alerts(db: Session = Depends(get_db),
                        current_user: int = Depends(oauth2.get_current_user)):
-    medical_alerts = db.query(models.MedicationAlert).all()
+    medical_alerts = db.query(models.MedicationAlert).filter(models.MedicationAlert.user_id == current_user.id).all()
     return medical_alerts
 
 # Update medical alerts

@@ -44,7 +44,7 @@ def get_one_allergy(id: int, db: Session = Depends(get_db),
 @router.get("/", response_model=List[schemas.AllergyResponse])
 def get_allergy(db: Session = Depends(get_db),
                 current_user: int = Depends(oauth2.get_current_user)):
-    allergy = db.query(models.Allergy).all()
+    allergy = db.query(models.Allergy).filter(models.Allergy.user_id == current_user.id).all()
     return allergy
 
 # Update Allergy

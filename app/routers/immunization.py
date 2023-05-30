@@ -46,7 +46,7 @@ def get_immunization(id: int, db: Session = Depends(get_db),
 @router.get("/", response_model=List[schemas.ImmunizationResponse])
 def get_immunization(db: Session = Depends(get_db),
                      current_user: int = Depends(oauth2.get_current_user)):
-    immunization = db.query(models.Immunization).all()
+    immunization = db.query(models.Immunization).filter(models.Immunization.user_id == current_user.id).all()
     return immunization
 
 # Update immunization

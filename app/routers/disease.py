@@ -44,7 +44,7 @@ def get_disease(id: int, db: Session = Depends(get_db),
 @router.get("/", response_model=List[schemas.DiseaseResponse])
 def get_disease(db: Session = Depends(get_db),
                 current_user: int = Depends(oauth2.get_current_user)):
-    disease = db.query(models.Disease).all()
+    disease = db.query(models.Disease).filter(models.Disease.user_id == current_user.id).all()
     return disease
 
 # Update disease

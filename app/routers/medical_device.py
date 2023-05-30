@@ -43,7 +43,7 @@ def get_medical_device(id: int, db: Session = Depends(get_db),
 @router.get("/", response_model=List[schemas.MedicalDeviceResponse])
 def get_medical_device(db: Session = Depends(get_db),
                        current_user: int = Depends(oauth2.get_current_user)):
-    medical_device = db.query(models.MedicalDevice).all()
+    medical_device = db.query(models.MedicalDevice).filter(models.MedicalDevice.user_id == current_user.id).all()
     return medical_device
 
 # Update medical device

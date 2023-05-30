@@ -47,7 +47,7 @@ def get_single_appointment_reminder(id: int, db: Session = Depends(get_db),
 @router.get("/", response_model=List[schemas.AppointmentReminderResponse])
 def get_appointment_reminders(db: Session = Depends(get_db),
                               current_user: int = Depends(oauth2.get_current_user)):
-    appointment_reminder = db.query(models.AppointmentReminder).all()
+    appointment_reminder = db.query(models.AppointmentReminder).filter(models.AppointmentReminder.user_id == current_user.id).all()
     return appointment_reminder
 
 # Update Appointment Reminder

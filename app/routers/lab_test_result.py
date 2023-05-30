@@ -45,7 +45,7 @@ def get_lab_result(id: int, db: Session = Depends(get_db),
 @router.get("/", response_model=List[schemas.LabResultResponse])
 def get_lab_result(db: Session = Depends(get_db),
                    current_user: int = Depends(oauth2.get_current_user)):
-    lab_results = db.query(models.LabResult).all()
+    lab_results = db.query(models.LabResult).filter(models.LabResult.user_id == current_user.id).all()
     return lab_results
 
 # Update lab tests result

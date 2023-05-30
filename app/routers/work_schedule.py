@@ -46,7 +46,7 @@ def get_work_schedule(id: int, db: Session = Depends(get_db),
 @router.get("/", response_model=List[schemas.WorkScheduleResponse])
 def get_work_schedule(db: Session = Depends(get_db),
                       current_user: int = Depends(oauth2.get_current_user)):
-    work_schedule = db.query(models.WorkSchedule).all()
+    work_schedule = db.query(models.WorkSchedule).filter(models.WorkSchedule.user_id == current_user.id).all()
     return work_schedule
 
 # Update work schedule

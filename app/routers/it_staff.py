@@ -48,7 +48,7 @@ def get_it_staff(id: str, db: Session = Depends(get_db),
 @router.get("/", response_model=List[schemas.ItstaffResponse])
 def get_it_staff(db: Session = Depends(get_db),
                  current_user: int = Depends(oauth2.get_current_user)):
-    it_staff = db.query(models.Itstaff).all()
+    it_staff = db.query(models.Itstaff).filter(models.Itstaff.user_id == current_user.id).all()
     return it_staff
 
 # Update IT Staff

@@ -44,7 +44,7 @@ def get_vital_sign(id: int, db: Session = Depends(get_db),
 @router.get("/", response_model=List[schemas.VitalSignResponse])
 def get_vital_sign(db: Session = Depends(get_db),
                    current_user: int = Depends(oauth2.get_current_user)):
-    vital_sign = db.query(models.VitalSign).all()
+    vital_sign = db.query(models.VitalSign).filter(models.VitalSign.user_id == current_user.id).all()
     return vital_sign
 
 # Update vaccination

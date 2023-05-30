@@ -45,7 +45,7 @@ def get_lab_technician(id: str, db: Session = Depends(get_db),
 @router.get("/", response_model=List[schemas.LabTechnicianResponse])
 def get_lab_technicians(db: Session = Depends(get_db),
                         current_user: int = Depends(oauth2.get_current_user)):
-    lab_technicians = db.query(models.LabTechnician).all()
+    lab_technicians = db.query(models.LabTechnician).filter(models.LabTechnician.user_id == current_user.id).all()
     return lab_technicians
 
 # Update lab tests

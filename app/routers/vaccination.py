@@ -47,7 +47,7 @@ def get_vaccination(id: int, db: Session = Depends(get_db),
 @router.get("/", response_model=List[schemas.VaccinationResponse])
 def get_vaccination(db: Session = Depends(get_db),
                     current_user: int = Depends(oauth2.get_current_user)):
-    vaccination = db.query(models.Vaccination).all()
+    vaccination = db.query(models.Vaccination).filter(models.Vaccination.user_id == current_user.id).all()
     return vaccination
 
 # Update vaccination

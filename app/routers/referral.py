@@ -47,7 +47,7 @@ def get_referral(id: int, db: Session = Depends(get_db),
 @router.get("/", response_model=List[schemas.ReferralResponse])
 def get_referrals(db: Session = Depends(get_db),
                   current_user: int = Depends(oauth2.get_current_user)):
-    referrals = db.query(models.Referral).all()
+    referrals = db.query(models.Referral).filter(models.Referral.user_id == current_user.id).all()
     return referrals
 
 # Update referrals

@@ -45,7 +45,7 @@ def get_medical_image(id: int, db: Session = Depends(get_db),
 @router.get("/", response_model=List[schemas.MedicalImageResponse])
 def get_medical_images(db: Session = Depends(get_db),
                        current_user: int = Depends(oauth2.get_current_user)):
-    medical_images = db.query(models.MedicalImage).all()
+    medical_images = db.query(models.MedicalImage).filter(models.MedicalImage.user_id == current_user.id).all()
     return medical_images
 
 # Update medical images

@@ -44,7 +44,7 @@ def get_time_slot(id: int, db: Session = Depends(get_db),
 @router.get("/", response_model=List[schemas.TimeSlotResponse])
 def get_time_slot(db: Session = Depends(get_db),
                   current_user: int = Depends(oauth2.get_current_user)):
-    time_slot = db.query(models.TimeSlot).all()
+    time_slot = db.query(models.TimeSlot).filter(models.TimeSlot.user_id == current_user.id).all()
     return time_slot
 
 # Update time slot

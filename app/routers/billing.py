@@ -45,7 +45,7 @@ def get_billing(id: int, db: Session = Depends(get_db),
 @router.get("/", response_model=List[schemas.BillingResponse])
 def get_billing(db: Session = Depends(get_db),
                 current_user: int = Depends(oauth2.get_current_user)):
-    billing = db.query(models.Billing).all()
+    billing = db.query(models.Billing).filter(models.Billing.user_id == current_user.id).all()
     return billing
 
 # Update Billing

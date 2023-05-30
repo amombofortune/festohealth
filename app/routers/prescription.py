@@ -45,7 +45,7 @@ def get_prescription(id: int, db: Session = Depends(get_db),
 @router.get("/", response_model=List[schemas.PrescriptionResponse])
 def get_prescription(db: Session = Depends(get_db),
                      current_user: int = Depends(oauth2.get_current_user)):
-    prescriptions = db.query(models.Prescription).all()
+    prescriptions = db.query(models.Prescription).filter(models.Prescription.user_id == current_user.id).all()
     return prescriptions
 
 # Update prescription

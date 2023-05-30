@@ -47,7 +47,7 @@ def get_patient_visit(id: int, db: Session = Depends(get_db),
 @router.get("/", response_model=List[schemas.PatientVisitResponse])
 def get_patient_visit(db: Session = Depends(get_db),
                       current_user: int = Depends(oauth2.get_current_user)):
-    patient_visit = db.query(models.PatientVisit).all()
+    patient_visit = db.query(models.PatientVisit).filter(models.PatientVisit.user_id == current_user.id).all()
     return patient_visit
 
 # Update patient visit

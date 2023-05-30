@@ -15,36 +15,81 @@ const AppointmentEdit = ({ selectedRow }) => {
   const {
     patient_id,
     doctor_id,
-    appointment_type,
-    appointment_date,
-    appointment_start_time,
-    appointment_end_time,
+    type,
+    date,
+    start_time,
+    end_time,
     description,
     status,
   } = selectedRow;
 
   const [patientID, setPatientID] = useState(patient_id);
   const [doctorID, setDoctorID] = useState(doctor_id);
-  const [appointmentType, setAppointmentType] = useState(appointment_type);
-  const [appointmentDate, setAppointmentDate] = useState(appointment_date);
-  const [appointmentStartTime, setAppointmentStartTime] = useState(
-    appointment_start_time
-  );
-  const [appointmentEndTime, setAppointmentEndTime] =
-    useState(appointment_end_time);
+  const [appointmentType, setAppointmentType] = useState(type);
+  const [appointmentDate, setAppointmentDate] = useState(date);
+  const [startTime, setStartTime] = useState(start_time);
+  const [endTime, setEndTime] = useState(end_time);
   const [descriptionValue, setDescriptionValue] = useState(description);
   const [statusValue, setStatusValue] = useState(status);
   const [appointmentTypeDB, setAppointmentTypeDB] = useState([]);
+
+  const [selectedStartTime, setSelectedStartTime] = useState(null);
+  const [selectedEndTime, setSelectedEndTime] = useState(null);
+
+  const generateTimeSlots = (start, end, interval) => {
+    const startTime = new Date(`01/01/2023  08:00 AM`);
+    const endTime = new Date(`01/01/2023  05:00 PM`);
+
+    const timeSlots = [];
+    let currentTime = startTime;
+
+    while (currentTime <= endTime) {
+      const startTimeString = currentTime.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "numeric",
+        hour12: true,
+      });
+      currentTime.setMinutes(currentTime.getMinutes() + interval);
+      const endTimeString = currentTime.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "numeric",
+        hour12: true,
+      });
+
+      const timeSlot = `${startTimeString} - ${endTimeString}`;
+      timeSlots.push(timeSlot);
+    }
+
+    return timeSlots;
+  };
+
+  useEffect(() => {
+    setStartTime(start_time);
+    setEndTime(end_time);
+    setSelectedStartTime(start_time);
+    setSelectedEndTime(end_time);
+  }, [start_time, end_time]);
+
+  const interval = 60;
+  const availableTimeSlots = generateTimeSlots(start_time, end_time, interval);
+
+  function chunkArray(array, chunkSize) {
+    const chunks = [];
+    for (let i = 0; i < array.length; i += chunkSize) {
+      chunks.push(array.slice(i, i + chunkSize));
+    }
+    return chunks;
+  }
 
   //Update record
   const handleUpdate = async () => {
     const appointmentData = {
       patient_id: patientID,
       doctor_id: doctorID,
-      appointment_type: appointmentType,
-      appointment_date: appointmentDate,
-      appointment_start_time: appointmentStartTime,
-      appointment_end_time: appointmentEndTime,
+      type: appointmentType,
+      date: appointmentDate,
+      start_time: selectedStartTime || startTime,
+      end_time: selectedEndTime || endTime,
       description: descriptionValue,
       status: statusValue,
     };
@@ -96,7 +141,7 @@ const AppointmentEdit = ({ selectedRow }) => {
                 label="Patient ID"
                 placeholder="Enter Patient ID"
                 variant="outlined"
-                type="number"
+                type="text"
                 value={patientID}
                 onChange={(event) => {
                   setPatientID(event.target.value);
@@ -110,7 +155,7 @@ const AppointmentEdit = ({ selectedRow }) => {
                 label="Doctor ID"
                 placeholder="Enter Doctor ID"
                 variant="outlined"
-                type="number"
+                type="text"
                 value={doctorID}
                 onChange={(event) => {
                   setDoctorID(event.target.value);
@@ -153,33 +198,53 @@ const AppointmentEdit = ({ selectedRow }) => {
                 required
               ></TextField>
             </Grid>
-            <Grid xs={12} sm={6} item>
-              <TextField
-                //label="Start Time"
-                helperText="Enter Appointment Start Time"
-                variant="outlined"
-                type="time"
-                value={appointmentStartTime}
-                onChange={(event) => {
-                  setAppointmentStartTime(event.target.value);
-                }}
-                fullWidth
-                required
-              ></TextField>
-            </Grid>
-            <Grid xs={12} sm={6} item>
-              <TextField
-                //label="End Time"
-                helperText="Enter Appointment End Time"
-                variant="outlined"
-                type="time"
-                value={appointmentEndTime}
-                onChange={(event) => {
-                  setAppointmentEndTime(event.target.value);
-                }}
-                fullWidth
-                required
-              ></TextField>
+            <h5>Available Time Slots</h5>
+            <Grid xs={12} item>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                {chunkArray(availableTimeSlots, 2).map((row, rowIndex) => (
+                  <div key={rowIndex} style={{ display: "flex" }}>
+                    {row.map((time) => {
+                      const [startTime, endTime] = time.split(" - ");
+                      const isSelected =
+                        startTime === selectedStartTime &&
+                        endTime === selectedEndTime;
+
+                      return (
+                        <div
+                          key={time}
+                          style={{
+                            border: isSelected
+                              ? "2px solid #6439ff"
+                              : "1px solid gray",
+                            borderRadius: "10px",
+                            padding: "5px",
+                            margin: "5px",
+                            flex: 1,
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            cursor: "pointer",
+                            color: isSelected ? "#6439ff" : "#2C2C2C",
+                          }}
+                          onClick={() => {
+                            if (isSelected) {
+                              // Deselect if already selected
+                              setSelectedStartTime(null);
+                              setSelectedEndTime(null);
+                            } else {
+                              // Select the time slot
+                              setSelectedStartTime(startTime);
+                              setSelectedEndTime(endTime);
+                            }
+                          }}
+                        >
+                          {time}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
             </Grid>
             <Grid xs={12} item>
               <TextField

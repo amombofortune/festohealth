@@ -33,7 +33,7 @@ const SideBar = () => {
           </Link>
 
           <p className="title">USERS</p>
-          <Link to="/doctor" style={{ textDecoration: "none" }}>
+          <Link to="/doctor_one" style={{ textDecoration: "none" }}>
             <li>
               <PeopleOutlineIcon className="icon" />
               <span>Doctors</span>
@@ -96,13 +96,13 @@ const SideBar = () => {
             </li>
           </Link>
           <p className="title">THIRD PARTIES</p>
-          <Link to="/insurance_provider" style={{ textDecoration: "none" }}>
+          <Link to="/insurance_provider_one" style={{ textDecoration: "none" }}>
             <li>
               <HowToRegIcon className="icon" />
               <span>Insurance Providers</span>
             </li>
           </Link>
-          <Link to="/hospital" style={{ textDecoration: "none" }}>
+          <Link to="/hospital_one" style={{ textDecoration: "none" }}>
             <li>
               <TaskIcon className="icon" />
               <span>Hospitals</span>

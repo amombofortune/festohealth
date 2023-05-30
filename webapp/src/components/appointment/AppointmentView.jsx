@@ -7,10 +7,10 @@ const AppointmentView = ({ selectedRow }) => {
   const {
     patient_id,
     doctor_id,
-    appointment_type,
-    appointment_date,
-    appointment_start_time,
-    appointment_end_time,
+    type,
+    date,
+    start_time,
+    end_time,
     description,
     status,
   } = selectedRow;
@@ -38,23 +38,14 @@ const AppointmentView = ({ selectedRow }) => {
               <Typography variant="body1">Doctor ID: {doctor_id}</Typography>
             </Grid>
             <Grid xs={12} sm={6} item>
-              <Typography variant="body1">
-                Appointment Type: {appointment_type}
-              </Typography>
+              <Typography variant="body1">Appointment Type: {type}</Typography>
+            </Grid>
+            <Grid xs={12} sm={6} item>
+              <Typography variant="body1">Appointment Date: {date}</Typography>
             </Grid>
             <Grid xs={12} sm={6} item>
               <Typography variant="body1">
-                Appointment Date: {appointment_date}
-              </Typography>
-            </Grid>
-            <Grid xs={12} sm={6} item>
-              <Typography variant="body1">
-                Appointment Start Time: {appointment_start_time}
-              </Typography>
-            </Grid>
-            <Grid xs={12} sm={6} item>
-              <Typography variant="body1">
-                Appointment End Time: {appointment_end_time}
+                Appointment Time: {start_time + " to " + end_time}
               </Typography>
             </Grid>
             <Grid xs={12} sm={6} item>

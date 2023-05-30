@@ -15,6 +15,7 @@ const InsuranceProviderEdit = ({ selectedRow }) => {
   const {
     name,
     type,
+    licence_number,
     address,
     city,
     state,
@@ -23,10 +24,13 @@ const InsuranceProviderEdit = ({ selectedRow }) => {
     phone_number,
     email,
     website,
+    rating,
+    verified,
   } = selectedRow;
 
   const [nameValue, setName] = useState(name);
   const [typeValue, setType] = useState(type);
+  const [licenceNumber, setLicenceNumber] = useState(licence_number);
   const [addressValue, setAddress] = useState(address);
   const [cityValue, setCity] = useState(city);
   const [stateValue, setState] = useState(state);
@@ -35,6 +39,8 @@ const InsuranceProviderEdit = ({ selectedRow }) => {
   const [phoneNumber, setPhoneNumber] = useState(phone_number);
   const [emailValue, setEmail] = useState(email);
   const [websiteValue, setWebsite] = useState(website);
+  const [ratingValue, setRating] = useState(rating);
+  const [verifiedValue, setVerified] = useState(verified);
 
   const [countryDB, setCountryDB] = useState([]);
   const [providerTypeDB, setProviderTypeDB] = useState([]);
@@ -44,6 +50,7 @@ const InsuranceProviderEdit = ({ selectedRow }) => {
     const appointmentData = {
       name: nameValue,
       type: typeValue,
+      licence_number: licenceNumber,
       address: addressValue,
       city: cityValue,
       state: stateValue,
@@ -52,6 +59,8 @@ const InsuranceProviderEdit = ({ selectedRow }) => {
       phone_number: phoneNumber,
       email: emailValue,
       website: websiteValue,
+      rating: ratingValue,
+      verified: verifiedValue,
     };
 
     try {
@@ -138,6 +147,19 @@ const InsuranceProviderEdit = ({ selectedRow }) => {
                   </MenuItem>
                 ))}
               </TextField>
+            </Grid>
+            <Grid xs={12} item>
+              <TextField
+                label="Licence Number"
+                placeholder="Enter Licence Number"
+                variant="outlined"
+                type="text"
+                value={licenceNumber}
+                onChange={(event) => {
+                  setLicenceNumber(event.target.value);
+                }}
+                fullWidth
+              ></TextField>
             </Grid>
             <Grid xs={12} item>
               <TextField
@@ -245,6 +267,32 @@ const InsuranceProviderEdit = ({ selectedRow }) => {
                 value={websiteValue}
                 onChange={(event) => {
                   setWebsite(event.target.value);
+                }}
+                fullWidth
+              ></TextField>
+            </Grid>
+            <Grid xs={12} sm={6} item>
+              <TextField
+                label="Rating"
+                placeholder="Enter Rating"
+                variant="outlined"
+                type="number"
+                value={ratingValue}
+                onChange={(event) => {
+                  setRating(event.target.value);
+                }}
+                fullWidth
+              ></TextField>
+            </Grid>
+            <Grid xs={12} sm={6} item>
+              <TextField
+                label="Verified"
+                placeholder="Enter Verified"
+                variant="outlined"
+                type="text"
+                value={verifiedValue}
+                onChange={(event) => {
+                  setVerified(event.target.value);
                 }}
                 fullWidth
               ></TextField>

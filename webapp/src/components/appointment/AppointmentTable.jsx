@@ -43,13 +43,13 @@ export default function AppointmentTable() {
       editable: true,
     },
     {
-      field: "appointment_type",
+      field: "type",
       headerName: "Appointment Type",
       width: 160,
       editable: true,
     },
     {
-      field: "appointment_date",
+      field: "date",
       headerName: "Appointment Date",
       description: "This column has a value getter and is not sortable.",
       sortable: true,
@@ -57,13 +57,13 @@ export default function AppointmentTable() {
       width: 150,
     },
     {
-      field: "appointment_start_time",
+      field: "start_time",
       headerName: "Appointment Start Time",
       width: 170,
       editable: true,
     },
     {
-      field: "appointment_end_time",
+      field: "end_time",
       headerName: "Appointment End Time",
       width: 160,
       editable: true,

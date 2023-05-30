@@ -16,11 +16,14 @@ import Department from "./components/department/Department";
 import Diagnosis from "./components/diagnosis/Diagnosis";
 import Disease from "./components/disease/Disease";
 import Doctor from "./components/doctor/Doctor";
+import DoctorOneComplete from "./components/doctor/DoctorOneComplete";
 import GeneticCondition from "./components/genetic_condition/GeneticCondition";
 import Hospital from "./components/hospital/Hospital";
+import HospitalOneComplete from "./components/hospital/HospitalOneComplete";
 import Immunization from "./components/immunization/Immunization";
 import InsuranceClaim from "./components/insurance_claim/InsuranceClaim";
 import InsuranceProvider from "./components/insurance_provider/InsuranceProvider";
+import InsuranceProviderComplete from "./components/insurance_provider/InsuranceProviderComplete";
 import LabResult from "./components/lab_result/LabResult";
 import LabTest from "./components/lab_test/LabTest";
 import MedicalCondition from "./components/medical_condition/MedicalCondition";
@@ -36,6 +39,8 @@ import PatientFeedback from "./components/patient_feedback/PatientFeedback";
 import PatientVisit from "./components/patient_visit/PatientVisit";
 import Prescription from "./components/prescription/Prescription";
 import Referral from "./components/referral/Referral";
+import TimeSlot from "./components/time_slots/TimeSlotForm";
+import DoctorTimeSlot from "./components/time_slots/DoctorTimeSlot";
 import Vaccination from "./components/vaccination/Vaccination";
 import VitalSign from "./components/vital_sign/VitalSign";
 import Ward from "./components/ward/Ward";
@@ -54,6 +59,8 @@ import { productInputs, userInputs } from "./formSource";
 import Complete from "./components/trial/Complete";
 import AppointmentEdit from "./components/appointment/AppointmentEdit";
 import Nurse from "./components/nurse/Nurse";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   return (
@@ -75,11 +82,17 @@ function App() {
           <Route path="/country" element={<Country />} />
           <Route path="/department" element={<Department />} />
           <Route path="/doctor" element={<Doctor />} />
+          <Route path="/doctor_one" element={<DoctorOneComplete />} />
           <Route path="/genetic_condition" element={<GeneticCondition />} />
           <Route path="/hospital" element={<Hospital />} />
+          <Route path="/hospital_one" element={<HospitalOneComplete />} />
           <Route path="/immunization" element={<Immunization />} />
           <Route path="/insurance_claim" element={<InsuranceClaim />} />
           <Route path="/insurance_provider" element={<InsuranceProvider />} />
+          <Route
+            path="/insurance_provider_one"
+            element={<InsuranceProviderComplete />}
+          />
           <Route path="/lab_result" element={<LabResult />} />
           <Route path="/lab_test" element={<LabTest />} />
           <Route path="/medical_condition" element={<MedicalCondition />} />
@@ -96,10 +109,12 @@ function App() {
           <Route path="/patient_visit" element={<PatientVisit />} />
           <Route path="/prescription" element={<Prescription />} />
           <Route path="/referral" element={<Referral />} />
+          <Route path="/time_slot" element={<TimeSlot />} />
           <Route path="/vaccination" element={<Vaccination />} />
           <Route path="/vital_sign" element={<VitalSign />} />
           <Route path="/ward" element={<Ward />} />
           <Route path="/trial" element={<Trial />} />
+          <Route path="/doctor_time_slot" element={<DoctorTimeSlot />} />
 
           <Route path="/appointment" element={<Appointment />} />
           <Route path="/appointmentedit" element={<AppointmentEdit />} />
@@ -133,6 +148,7 @@ function App() {
             <Route path="/navbar" element={<NavBar />} />
           </Route>
         </Routes>
+        <ToastContainer />
       </BrowserRouter>
     </div>
   );

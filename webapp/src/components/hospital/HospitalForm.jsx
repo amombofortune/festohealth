@@ -15,11 +15,13 @@ const HospitalForm = () => {
   const [address, setAddress] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
-  const [zip_code, setZipCode] = useState("");
+  const [postal_code, setPostalCode] = useState("");
   const [country, setCountry] = useState("");
+  const [email, setEmail] = useState("");
   const [phone_number, setPhoneNumber] = useState("");
   const [website, setWebsite] = useState("");
   const [rating, setRating] = useState("");
+  const [verified, setVerified] = useState(false);
 
   const [countryDB, setCountryDB] = useState([]);
 
@@ -33,11 +35,13 @@ const HospitalForm = () => {
         address,
         city,
         state,
-        zip_code,
+        postal_code,
         country,
+        email,
         phone_number,
         website,
         rating,
+        verified,
       })
       .then((res) => {
         window.location.reload(true);
@@ -128,13 +132,13 @@ const HospitalForm = () => {
             </Grid>
             <Grid xs={12} sm={6} item>
               <TextField
-                label="Zip Code"
-                placeholder="Enter Zip Code"
+                label="Postal Code"
+                placeholder="Enter Postal Code"
                 variant="outlined"
                 type="text"
-                value={zip_code}
+                value={postal_code}
                 onChange={(event) => {
-                  setZipCode(event.target.value);
+                  setPostalCode(event.target.value);
                 }}
                 fullWidth
               ></TextField>
@@ -159,6 +163,20 @@ const HospitalForm = () => {
                   </MenuItem>
                 ))}
               </TextField>
+            </Grid>
+            <Grid xs={12} sm={6} item>
+              <TextField
+                label="Email"
+                helperText="Enter Email"
+                variant="outlined"
+                type="email"
+                value={email}
+                onChange={(event) => {
+                  setEmail(event.target.value);
+                }}
+                fullWidth
+                required
+              ></TextField>
             </Grid>
 
             <Grid xs={12} sm={6} item>
@@ -198,6 +216,20 @@ const HospitalForm = () => {
                 value={rating}
                 onChange={(event) => {
                   setRating(event.target.value);
+                }}
+                fullWidth
+                required
+              ></TextField>
+            </Grid>
+            <Grid xs={12} sm={6} item>
+              <TextField
+                label="Verified"
+                helperText="Enter Verified"
+                variant="outlined"
+                type="text"
+                value={verified}
+                onChange={(event) => {
+                  setVerified(event.target.value);
                 }}
                 fullWidth
                 required

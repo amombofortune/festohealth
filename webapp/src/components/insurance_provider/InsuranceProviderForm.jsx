@@ -13,6 +13,7 @@ import "./InsuranceProvider.scss";
 const InsuranceProviderForm = () => {
   const [name, setName] = useState("");
   const [type, setType] = useState("");
+  const [licence_number, setLicenceNumber] = useState("");
   const [address, setAddress] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
@@ -21,6 +22,8 @@ const InsuranceProviderForm = () => {
   const [phone_number, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
   const [website, setWebsite] = useState("");
+  const [rating, setRating] = useState("");
+  const [verified, setVerified] = useState(false);
 
   const [countryDB, setCountryDB] = useState([]);
   const [providerTypeDB, setProviderTypeDB] = useState([]);
@@ -33,6 +36,7 @@ const InsuranceProviderForm = () => {
       .post("http://127.0.0.1:8000/insurance_provider", {
         name,
         type,
+        licence_number,
         address,
         city,
         state,
@@ -41,6 +45,8 @@ const InsuranceProviderForm = () => {
         phone_number,
         email,
         website,
+        rating,
+        verified,
       })
       .then((res) => {
         window.location.reload(true);
@@ -110,8 +116,6 @@ const InsuranceProviderForm = () => {
                 select
                 label="Select Type"
                 value={type}
-                //defaultValue="In-person"
-                //helperText="Please select appointment type"
                 onChange={(event) => {
                   setType(event.target.value);
                 }}
@@ -123,6 +127,19 @@ const InsuranceProviderForm = () => {
                   </MenuItem>
                 ))}
               </TextField>
+            </Grid>
+            <Grid xs={12} item>
+              <TextField
+                label="Licence Number"
+                placeholder="Enter Licence Number"
+                variant="outlined"
+                type="text"
+                value={licence_number}
+                onChange={(event) => {
+                  setLicenceNumber(event.target.value);
+                }}
+                fullWidth
+              ></TextField>
             </Grid>
             <Grid xs={12} item>
               <TextField
@@ -232,6 +249,32 @@ const InsuranceProviderForm = () => {
                 value={website}
                 onChange={(event) => {
                   setWebsite(event.target.value);
+                }}
+                fullWidth
+              ></TextField>
+            </Grid>
+            <Grid xs={12} sm={6} item>
+              <TextField
+                label="Rating"
+                placeholder="Enter Rating"
+                variant="outlined"
+                type="number"
+                value={rating}
+                onChange={(event) => {
+                  setRating(event.target.value);
+                }}
+                fullWidth
+              ></TextField>
+            </Grid>
+            <Grid xs={12} sm={6} item>
+              <TextField
+                label="Verified"
+                placeholder="Enter Verified"
+                variant="outlined"
+                type="text"
+                value={verified}
+                onChange={(event) => {
+                  setVerified(event.target.value);
                 }}
                 fullWidth
               ></TextField>

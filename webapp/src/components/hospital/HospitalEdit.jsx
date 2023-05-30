@@ -17,22 +17,26 @@ const HospitalEdit = ({ selectedRow }) => {
     address,
     city,
     state,
-    zip_code,
+    postal_code,
     country,
+    email,
     phone_number,
     website,
     rating,
+    verified,
   } = selectedRow;
 
   const [nameValue, setName] = useState(name);
   const [addressValue, setAddress] = useState(address);
   const [cityValue, setCity] = useState(city);
   const [stateValue, setState] = useState(state);
-  const [zipCode, setZipCode] = useState(zip_code);
+  const [postalCode, setPostalCode] = useState(postal_code);
   const [countryValue, setCountry] = useState(country);
+  const [emailValue, setEmail] = useState(email);
   const [phoneNumber, setPhoneNumber] = useState(phone_number);
   const [websiteValue, setWebsite] = useState(website);
   const [ratingValue, setRating] = useState(rating);
+  const [verifiedValue, setVerified] = useState(verified);
 
   const [countryDB, setCountryDB] = useState([]);
 
@@ -43,11 +47,13 @@ const HospitalEdit = ({ selectedRow }) => {
       address: addressValue,
       city: cityValue,
       state: stateValue,
-      zip_code: zipCode,
+      postal_code: postalCode,
       country: countryValue,
+      email: emailValue,
       phone_number: phoneNumber,
       website: websiteValue,
       rating: ratingValue,
+      verified: verifiedValue,
     };
 
     try {
@@ -147,13 +153,13 @@ const HospitalEdit = ({ selectedRow }) => {
             </Grid>
             <Grid xs={12} sm={6} item>
               <TextField
-                label="Zip Code"
-                placeholder="Enter Zip Code"
+                label="Postal Code"
+                placeholder="Enter Postal Code"
                 variant="outlined"
                 type="text"
-                value={zipCode}
+                value={postalCode}
                 onChange={(event) => {
-                  setZipCode(event.target.value);
+                  setPostalCode(event.target.value);
                 }}
                 fullWidth
               ></TextField>
@@ -178,6 +184,21 @@ const HospitalEdit = ({ selectedRow }) => {
                   </MenuItem>
                 ))}
               </TextField>
+            </Grid>
+
+            <Grid xs={12} sm={6} item>
+              <TextField
+                label="Email"
+                helperText="Enter Email"
+                variant="outlined"
+                type="email"
+                value={emailValue}
+                onChange={(event) => {
+                  setEmail(event.target.value);
+                }}
+                fullWidth
+                required
+              ></TextField>
             </Grid>
 
             <Grid xs={12} sm={6} item>
@@ -217,6 +238,20 @@ const HospitalEdit = ({ selectedRow }) => {
                 value={ratingValue}
                 onChange={(event) => {
                   setRating(event.target.value);
+                }}
+                fullWidth
+                required
+              ></TextField>
+            </Grid>
+            <Grid xs={12} sm={6} item>
+              <TextField
+                label="Verified"
+                helperText="Enter Verified"
+                variant="outlined"
+                type="text"
+                value={verifiedValue}
+                onChange={(event) => {
+                  setVerified(event.target.value);
                 }}
                 fullWidth
                 required

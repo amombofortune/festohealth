@@ -57,14 +57,20 @@ export default function HospitalTable() {
       editable: true,
     },
     {
-      field: "zip_code",
-      headerName: "Zip Code",
+      field: "postal_code",
+      headerName: "Postal Code",
       width: 100,
       editable: true,
     },
     {
       field: "country",
       headerName: "Country",
+      width: 100,
+      editable: true,
+    },
+    {
+      field: "email",
+      headerName: "Email",
       width: 100,
       editable: true,
     },
@@ -83,6 +89,12 @@ export default function HospitalTable() {
     {
       field: "rating",
       headerName: "Rating",
+      width: 150,
+      editable: true,
+    },
+    {
+      field: "verified",
+      headerName: "Verified",
       width: 150,
       editable: true,
     },

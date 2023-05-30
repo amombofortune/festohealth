@@ -39,7 +39,7 @@ const Trial = () => {
 
   useEffect(() => {
     axios
-      .get("http://127.0.0.1:8000/doctor")
+      .get("http://127.0.0.1:8000/hospital")
       .then((res) => {
         console.log("Getting from database...", res.data);
         setData(res.data);
@@ -48,12 +48,8 @@ const Trial = () => {
   }, []);
 
   // Filter the data based on the search query
-  const filteredData = data.filter(
-    (item) =>
-      item.firstname.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.middlename.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.lastname.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.specialty.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredData = data.filter((item) =>
+    item.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleSort = (column) => {
@@ -72,13 +68,9 @@ const Trial = () => {
   const sortedData = filteredData.sort((a, b) => {
     // Compare the values based on the sort column
     if (sortColumn === "name") {
-      const nameA = `${a.firstname} ${a.middlename} ${a.lastname}`;
-      const nameB = `${b.firstname} ${b.middlename} ${b.lastname}`;
-      return nameA.localeCompare(nameB);
-    } else if (sortColumn === "specialty") {
-      return a.specialty.localeCompare(b.specialty);
-    } else if (sortColumn === "consultation_fee") {
-      return a.consultation_fee - b.consultation_fee;
+      return a.name.localeCompare(b.name);
+    } else if (sortColumn === "country") {
+      return a.country.localeCompare(b.country);
     } else if (sortColumn === "rating") {
       return a.rating - b.rating;
     } else if (sortColumn === "verified") {
@@ -101,7 +93,7 @@ const Trial = () => {
     <div className="user-table-container">
       <div className="user-table">
         <div className="table-title">
-          Doctors
+          Hospitals
           <div className="search">
             <input
               type="text"
@@ -134,23 +126,11 @@ const Trial = () => {
                       )}
                     </TableCell>
                     <TableCell
-                      onClick={() => handleSort("specialty")}
+                      onClick={() => handleSort("country")}
                       className="sticky-header"
                     >
-                      Specialty{" "}
-                      {sortColumn === "specialty" && sortDirection === "asc" ? (
-                        <ArrowDropUpIcon />
-                      ) : (
-                        <ArrowDropDownIcon />
-                      )}
-                    </TableCell>
-                    <TableCell
-                      onClick={() => handleSort("consultation_fee")}
-                      className="sticky-header"
-                    >
-                      Consultation Fee{" "}
-                      {sortColumn === "consultation_fee" &&
-                      sortDirection === "asc" ? (
+                      Country{" "}
+                      {sortColumn === "country" && sortDirection === "asc" ? (
                         <ArrowDropUpIcon />
                       ) : (
                         <ArrowDropDownIcon />

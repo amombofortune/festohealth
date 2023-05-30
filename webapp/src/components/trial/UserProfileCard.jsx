@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Modal from "@mui/material/Modal";
-import { Button } from "@mui/material";
+import { Button, Card } from "@mui/material";
 import Box from "@mui/material/Box";
 import AppointmentForm from "../appointment/AppointmentForm";
 import VerifiedIcon from "@mui/icons-material/Verified";
@@ -20,21 +20,36 @@ const modalStyle = {
   maxWidth: "95%",
   maxHeight: "95%",
   overflow: "auto",
-  width: "1000px",
+  width: "900px",
+};
+
+const viewModalStyle = {
+  position: "fixed",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  backgroundColor: "white",
+  border: "1px solid gray",
+  borderRadius: "20px",
+  padding: "10px",
+  boxShadow: "0px 0px 5px gray",
+  maxWidth: "100%",
+  maxHeight: "100%",
+  overflow: "auto",
+  width: "600px",
 };
 
 const UserProfileCard = ({ item }) => {
   const {
-    firstname,
-    middlename,
-    lastname,
-    gender,
-    phone_number,
-    email,
-    specialty,
+    name,
+    address,
     city,
+    state,
+    postal_code,
     country,
-    consultation_fee,
+    email,
+    phone_number,
+    website,
     rating,
     verified,
   } = item;
@@ -67,17 +82,15 @@ const UserProfileCard = ({ item }) => {
       </div>
       <div className="user-card-details">
         <h4 style={{ display: "flex", alignItems: "center" }}>
-          {`Dr. ${firstname} ${middlename} ${lastname}`}
+          {name}
           {verified && (
             <VerifiedIcon
               style={{ color: "blue", fontSize: "1.1em", marginLeft: "0.2em" }}
             />
           )}
         </h4>
-        <p>{specialty}</p>
-        <p style={{ color: "green", fontWeight: "bold" }}>
-          Ksh {consultation_fee}
-        </p>
+        <p>{phone_number}</p>
+        <p>{website}</p>
         <Rating name="read-only" value={rating} size="small" readOnly />
       </div>
       <div className="button-group">
@@ -88,40 +101,87 @@ const UserProfileCard = ({ item }) => {
           Book Appointment
         </button>
       </div>
-      <div>
+      <div className="user-modal">
         <Modal open={open} onClose={handleClose}>
-          <Box style={modalStyle}>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <h2>Doctor Profile</h2>
-              <Button variant="contained" onClick={handleClose}>
+          <Card style={viewModalStyle}>
+            <div className="user-modal-container">
+              <h2 style={{ fontSize: "25px", color: "gray" }}>
+                Hospital Profile
+              </h2>
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={handleClose}
+                style={{ color: "#6439ff" }}
+              >
                 Close
               </Button>
-            </Box>
-            <Box sx={{ width: "100%" }}>
-              <p>Name: {`${firstname} ${middlename} ${lastname}`}</p>
-              <p>Gender: {gender}</p>
-              <p>Contact Number: {phone_number}</p>
-              <p>Email: {email}</p>
-              <p>Specialty: {specialty}</p>
-              <p>Location: {city + ", " + country}</p>
-            </Box>
-          </Box>
+            </div>
+            <div className="information-container">
+              <div className="image-container">
+                <div>
+                  <div className="image-container-wrapper">
+                    <img
+                      src="https://images.pexels.com/photos/941693/pexels-photo-941693.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500"
+                      alt="User Profile"
+                      className="profile-img"
+                    />
+                  </div>
+                </div>
+                <div className="name-specialty-container">
+                  <div>
+                    <p
+                      style={{
+                        color: "gray",
+                        fontWeight: "bold",
+                        marginBottom: "5px",
+                      }}
+                    >
+                      {name}
+                    </p>
+                    <p
+                      style={{
+                        color: "#6439ff",
+                      }}
+                    >
+                      {phone_number}
+                    </p>
+                  </div>
+                </div>
+                <div className="user-info">
+                  <div>
+                    <h3 style={{ fontSize: "16px" }}>Hospital Information</h3>
+                    <p className="text">Email: {email}</p>
+                    <p className="text">Phone Number: {phone_number}</p>
+                    <p className="text">Website: {website}</p>
+                    <p className="text">
+                      Location:{" "}
+                      {address +
+                        ", " +
+                        city +
+                        ", " +
+                        state +
+                        ", " +
+                        postal_code +
+                        ", " +
+                        country}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Card>
         </Modal>
       </div>
       <div>
         <Modal open={openForm} onClose={handleCloseForm}>
-          <Box style={modalStyle}>
+          <Box style={modalStyle} className="scrollbar-style">
             <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
               <Button variant="contained" onClick={handleCloseForm}>
                 Close
               </Button>
             </Box>
+
             <Box sx={{ width: "100%" }}>
               <AppointmentForm />
             </Box>

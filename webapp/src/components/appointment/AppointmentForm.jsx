@@ -13,27 +13,36 @@ import "./appointment.scss";
 const AppointmentForm = () => {
   const [patient_id, setPatientID] = useState("");
   const [doctor_id, setDoctorID] = useState("");
-  const [appointment_type, setAppointmentType] = useState("");
-  const [appointment_date, setAppointmentDate] = useState("");
-  const [appointment_start_time, setAppointmentStartTime] = useState("");
-  const [appointment_end_time, setAppointmentEndTime] = useState("");
+  const [type, setAppointmentType] = useState("");
+  const [date, setAppointmentDate] = useState("");
+  const [start_time, setStartTime] = useState("08:00 AM");
+  const [end_time, setEndTime] = useState("05:00 PM");
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState("");
-
+  const [selectedStartTime, setSelectedStartTime] = useState(null);
+  const [selectedEndTime, setSelectedEndTime] = useState(null);
   const [appointmentTypeDB, setAppointmentTypeDB] = useState([]);
 
   //Post data to database
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    setStartTime(start_time);
+    setEndTime(end_time);
+
+    console.log("Doctor ID:", doctor_id);
+    console.log("Date:", date);
+    console.log("Start Time:", start_time);
+    console.log("End Time:", end_time);
+
     await axios
       .post("http://127.0.0.1:8000/appointment", {
         patient_id,
         doctor_id,
-        appointment_type,
-        appointment_date,
-        appointment_start_time,
-        appointment_end_time,
+        type,
+        date,
+        start_time: selectedStartTime,
+        end_time: selectedEndTime,
         description,
         status,
       })
@@ -57,6 +66,46 @@ const AppointmentForm = () => {
       })
       .catch((err) => console.log(err));
   }, []);
+
+  const generateTimeSlots = (start, end, interval) => {
+    const startTime = new Date(`01/01/2023 ${start}`);
+    const endTime = new Date(`01/01/2023 ${end}`);
+
+    const timeSlots = [];
+    let currentTime = startTime;
+
+    while (currentTime <= endTime) {
+      const startTimeString = currentTime.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "numeric",
+        hour12: true,
+      });
+      currentTime.setMinutes(currentTime.getMinutes() + interval);
+      const endTimeString = currentTime.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "numeric",
+        hour12: true,
+      });
+
+      const timeSlot = `${startTimeString} - ${endTimeString}`;
+      timeSlots.push(timeSlot);
+    }
+
+    return timeSlots;
+  };
+
+  // Set the interval value according to your requirements
+  const interval = 60; //60 minutes
+  // Define the available time slots
+  const availableTimeSlots = generateTimeSlots(start_time, end_time, interval);
+
+  function chunkArray(array, chunkSize) {
+    const chunks = [];
+    for (let i = 0; i < array.length; i += chunkSize) {
+      chunks.push(array.slice(i, i + chunkSize));
+    }
+    return chunks;
+  }
 
   return (
     <div>
@@ -107,7 +156,7 @@ const AppointmentForm = () => {
                 id="appointment_type"
                 select
                 label="Select Appointment Type"
-                value={appointment_type}
+                value={type}
                 onChange={(event) => {
                   setAppointmentType(event.target.value);
                 }}
@@ -125,7 +174,7 @@ const AppointmentForm = () => {
                 helperText="Enter Appointment Date"
                 variant="outlined"
                 type="date"
-                value={appointment_date}
+                value={date}
                 onChange={(event) => {
                   setAppointmentDate(event.target.value);
                 }}
@@ -133,32 +182,57 @@ const AppointmentForm = () => {
                 required
               ></TextField>
             </Grid>
-            <Grid xs={12} sm={6} item>
-              <TextField
-                helperText="Enter Appointment Start Time"
-                variant="outlined"
-                type="time"
-                value={appointment_start_time}
-                onChange={(event) => {
-                  setAppointmentStartTime(event.target.value);
-                }}
-                fullWidth
-                required
-              ></TextField>
+            <h5 style={{ fontSize: "16px", marginTop: "8px" }}>
+              Available Time Slots
+            </h5>
+            <Grid xs={12} item>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                {chunkArray(availableTimeSlots, 2).map((row, rowIndex) => (
+                  <div key={rowIndex} style={{ display: "flex" }}>
+                    {row.map((time) => {
+                      const [startTime, endTime] = time.split(" - ");
+                      const isSelected =
+                        startTime === selectedStartTime &&
+                        endTime === selectedEndTime;
+
+                      return (
+                        <div
+                          key={time}
+                          style={{
+                            border: isSelected
+                              ? "2px solid #6439ff"
+                              : "1px solid gray",
+                            borderRadius: "10px",
+                            padding: "5px",
+                            margin: "5px",
+                            flex: 1,
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            cursor: "pointer",
+                            color: isSelected ? "#6439ff" : "#2C2C2C",
+                          }}
+                          onClick={() => {
+                            if (isSelected) {
+                              // Deselect if already selected
+                              setSelectedStartTime(null);
+                              setSelectedEndTime(null);
+                            } else {
+                              // Select the time slot
+                              setSelectedStartTime(startTime);
+                              setSelectedEndTime(endTime);
+                            }
+                          }}
+                        >
+                          {time}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
             </Grid>
-            <Grid xs={12} sm={6} item>
-              <TextField
-                helperText="Enter Appointment End Time"
-                variant="outlined"
-                type="time"
-                value={appointment_end_time}
-                onChange={(event) => {
-                  setAppointmentEndTime(event.target.value);
-                }}
-                fullWidth
-                required
-              ></TextField>
-            </Grid>
+
             <Grid xs={12} item>
               <TextField
                 label="Description"
@@ -196,7 +270,7 @@ const AppointmentForm = () => {
                 style={{ backgroundColor: "#6439ff" }}
                 fullWidth
               >
-                Submit
+                Book Appointment
               </Button>
             </Grid>
           </Grid>

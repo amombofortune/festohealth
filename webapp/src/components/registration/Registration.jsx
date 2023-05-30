@@ -13,7 +13,6 @@ function Registration() {
   const initialValues = {
     email: "",
     password: "",
-    role: "",
   };
   const [formValues, setFormValues] = useState(initialValues);
   const [formErrors, setFormErrors] = useState({});
@@ -31,7 +30,7 @@ function Registration() {
     setIsSubmit(true);
 
     await axios
-      .post("http://127.0.0.1:8000/user_account", formValues)
+      .post("http://127.0.0.1:8000/users", formValues)
       .then((res) => {
         window.location.reload(true);
         console.log("Posting data to database successful!!!", res);
@@ -124,20 +123,6 @@ function Registration() {
                 ></TextField>
               </Grid>
               <p>{formErrors.password}</p>
-
-              <Grid xs={12} item>
-                <TextField
-                  label="Role"
-                  placeholder="Enter Role"
-                  variant="outlined"
-                  type="text"
-                  name="role"
-                  value={formValues.role}
-                  onChange={handleChange}
-                  fullWidth
-                ></TextField>
-              </Grid>
-              <p>{formErrors.role}</p>
 
               <Grid xs={12} item>
                 <Button

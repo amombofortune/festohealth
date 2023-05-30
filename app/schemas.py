@@ -1,17 +1,16 @@
-from datetime import date, datetime, time
-from pydantic import BaseModel
+from datetime import date, datetime, time,timedelta
+from pydantic import BaseModel, EmailStr
+from typing import Optional
 
 
 """Administrator"""
-
-
 class AdministratorBase(BaseModel):
     firstname: str
     lastname: str
     dob: date
     gender: str
     phone_number: str
-    email: str
+    email: EmailStr
     address: str
     city: str
     state: str
@@ -33,10 +32,9 @@ class AdministratorResponse(AdministratorBase):
 
 
 """Admission"""
-
-
 class AdmissionBase(BaseModel):
-    patient_id: int
+    patient_id: str
+    doctor_id: str
     admission_date: date
     admission_time: time
     discharge_date: date
@@ -44,7 +42,6 @@ class AdmissionBase(BaseModel):
     reason: str
     diagnosis: str
     treatment: str
-    doctor_id: int
 
 
 class AdmissionCreate(AdmissionBase):
@@ -60,10 +57,8 @@ class AdmissionResponse(AdmissionBase):
 
 
 """Adverse Reaction"""
-
-
 class AdverseReactionBase(BaseModel):
-    patient_id: int
+    patient_id: str
     reaction_date: date
     reaction_time: time
     reaction_type: str
@@ -87,8 +82,6 @@ class AdverseReactionResponse(AdverseReactionBase):
 
 
 """Adverse Reaction Type"""
-
-
 class AdverseReactionTypeBase(BaseModel):
     name: str
     description: str
@@ -107,10 +100,9 @@ class AdverseReactionTypeResponse(AdverseReactionTypeBase):
 
 
 """Allergy"""
-
-
 class AllergyBase(BaseModel):
     name: str
+    patient_id: str
 
 
 class AllergyCreate(AllergyBase):
@@ -126,10 +118,10 @@ class AllergyResponse(AllergyBase):
 
 
 """Appointment Reminder"""
-
-
 class AppointmentReminderBase(BaseModel):
     appointment_id: int
+    patient_id: str
+    doctor_id: str
     user_id: int
     reminder_date: date
     reminder_time: time
@@ -150,15 +142,13 @@ class AppointmentReminderResponse(AppointmentReminderBase):
 
 
 """Appointment"""
-
-
 class AppointmentBase(BaseModel):
-    patient_id: int
-    doctor_id: int
-    appointment_type: str
-    appointment_date: date
-    appointment_start_time: time
-    appointment_end_time: time
+    patient_id: str
+    doctor_id: str
+    type: str
+    date: date
+    start_time: str
+    end_time: str
     description: str
     status: str
 
@@ -175,8 +165,6 @@ class AppointmentResponse(AppointmentBase):
         orm_mode = True
 
 """Appointment type"""
-
-
 class AppointmentTypeBase(BaseModel):
     name: str
     description: str
@@ -194,14 +182,13 @@ class AppointmentTypeResponse(AppointmentTypeBase):
         orm_mode = True
 
 """Bed"""
-
-
 class BedBase(BaseModel):
     ward: str
     bed_no: int
     bed_type: str
     availability: bool
-    occupied_by: int
+    occupied_by: str
+    assigned_by: str
 
 
 class BedCreate(BedBase):
@@ -217,8 +204,6 @@ class BedResponse(BedBase):
 
 
 """Bed Assignment"""
-
-
 class BedAssignmentBase(BaseModel):
     bed_id: int
     patient_id: int
@@ -240,14 +225,13 @@ class BedAssignmentResponse(BedAssignmentBase):
 
 
 """Billing"""
-
-
 class BillingBase(BaseModel):
-    patient_id: int
+    patient_id: str
     bill_date: date
     amount_due: float
     amount_paid: float
     payment_method: str
+    status: str
 
 
 class BillingCreate(BillingBase):
@@ -265,11 +249,10 @@ class BillingResponse(BillingBase):
 
 
 """Chronic condition"""
-
-
 class ChronicConditionBase(BaseModel):
     name: str
     description: str
+    patient_id: str
 
 
 class ChronicConditionCreate(ChronicConditionBase):
@@ -285,11 +268,10 @@ class ChronicConditionResponse(ChronicConditionBase):
 
 
 """Country"""
-
-
 class CountryBase(BaseModel):
     name: str
     code: str
+    
 
 
 class CountryCreate(CountryBase):
@@ -305,13 +287,12 @@ class CountryResponse(CountryBase):
 
 
 """Department"""
-
-
 class DepartmentBase(BaseModel):
     name: str
     description: str
-    hospital: str
-    head_doctor: str
+    hospital_id: str
+    doctor_id: str
+    nurse_id: str
 
 
 class DepartmentCreate(DepartmentBase):
@@ -327,14 +308,13 @@ class DepartmentResponse(DepartmentBase):
 
 
 """Diagnosis"""
-
-
 class DiagnosisBase(BaseModel):
     patient_id: str
+    doctor_id: str
+    hospital_id: str
     disease: str
     diagnosis: str
     date: date
-    doctor_id: str
     notes: str
 
 
@@ -351,9 +331,8 @@ class DiagnosisResponse(DiagnosisBase):
 
 
 """Diseases"""
-
-
 class DiseaseBase(BaseModel):
+    patient_id: str
     name: str
     description: str
     symptoms: str
@@ -374,8 +353,6 @@ class DiseaseResponse(DiseaseBase):
 
 
 """Doctor"""
-
-
 class DoctorBase(BaseModel):
     firstname: str
     middlename: str
@@ -383,7 +360,7 @@ class DoctorBase(BaseModel):
     dob: date
     gender: str
     phone_number: str
-    email: str
+    email: EmailStr
     specialty: str
     licence_number: str
     address: str
@@ -409,9 +386,8 @@ class DoctorResponse(DoctorBase):
 
 
 """Genetic Condition"""
-
-
 class GeneticConditionBase(BaseModel):
+    patient_id: str
     name: str
     description: str
     patient_id: int
@@ -431,18 +407,18 @@ class GeneticConditionResponse(GeneticConditionBase):
 
 
 """ Hospital """
-
-
 class HospitalBase(BaseModel):
     name: str
     address: str
     city: str
     state: str
-    zip_code: str
+    postal_code: str
     country: str
+    email: EmailStr
     phone_number: str
     website: str
     rating: float
+    verified: str
 
 
 class HospitalCreate(HospitalBase):
@@ -458,14 +434,12 @@ class HospitalResponse(HospitalBase):
 
 
 """Immunization"""
-
-
 class ImmunizationBase(BaseModel):
-    patient_id: int
+    patient_id: str
+    administering_provider: str
     vaccine_name: str
     dose_number: int
     date_given: date
-    administering_provider: str
     expiration_date: date
 
 
@@ -482,8 +456,6 @@ class ImmunizationResponse(ImmunizationBase):
 
 
 """Insurance claims"""
-
-
 class InsuranceClaimBase(BaseModel):
     patient_id: str
     provider_id: str
@@ -509,19 +481,20 @@ class InsuranceClaimResponse(InsuranceClaimBase):
 
 
 """Insurance provider"""
-
-
 class InsuranceProviderBase(BaseModel):
     name: str
     type: str
+    licence_number: str
     address: str
     city: str
     state: str
     postal_code: str
     country: str
     phone_number: int
-    email: str
+    email: EmailStr
     website: str
+    rating: float
+    verified: str
 
 
 class InsuranceProviderCreate(InsuranceProviderBase):
@@ -536,8 +509,6 @@ class InsuranceProviderResponse(InsuranceProviderBase):
         orm_mode = True
 
 """Insurance provider type"""
-
-
 class InsuranceProviderTypeBase(BaseModel):
     name: str
     description: str
@@ -556,15 +527,13 @@ class InsuranceProviderTypeResponse(InsuranceProviderTypeBase):
 
 
 """IT Staff"""
-
-
 class ItstaffBase(BaseModel):
     firstname: str
     lastname: str
     dob: date
     gender: str
     phone_number: str
-    email: str
+    email: EmailStr
     address: str
     city: str
     state: str
@@ -586,21 +555,19 @@ class ItstaffResponse(ItstaffBase):
 
 
 """Lab Technician"""
-
-
 class LabTechnicianBase(BaseModel):
     firstname: str
     lastname: str
     dob: date
     gender: str
     phone_number: str
-    email: str
+    email: EmailStr
+    hospital_id: str
     address: str
     city: str
     state: str
-    zip_code: str
+    postal_code: str
     country: str
-    hospital_id: str
 
 
 class LabTechnicianCreate(LabTechnicianBase):
@@ -616,13 +583,16 @@ class LabTechnicianResponse(LabTechnicianBase):
 
 
 """Lab test"""
-
-
 class LabTestBase(BaseModel):
+    patient_id: str
+    lab_technician_id: str
     test_name: str
+    test_date: date
     test_description: str
     test_type: str
     test_cost: float
+    test_result: str
+    comments: str
 
 
 class LabTestCreate(LabTestBase):
@@ -632,28 +602,24 @@ class LabTestCreate(LabTestBase):
 class LabTestResponse(LabTestBase):
     id: int
     created_at: datetime
+    updated_at: datetime
 
     class Config:
         orm_mode = True
 
 
-"""Lab Test Result"""
-
-
-class LabTestResultBase(BaseModel):
-    patient_id: int
-    lab_test_name: str
-    test_date: date
+"""Lab Result"""
+class LabResultBase(BaseModel):
+    patient_id: str
     test_result: str
-    units: str
     comments: str
 
 
-class LabTestResultCreate(LabTestResultBase):
+class LabResultCreate(LabResultBase):
     pass
 
 
-class LabTestResultResponse(LabTestResultBase):
+class LabResultResponse(LabResultBase):
     id: int
     created_at: datetime
 
@@ -662,10 +628,9 @@ class LabTestResultResponse(LabTestResultBase):
 
 
 """Medication Alerts"""
-
-
 class MedicationAlertBase(BaseModel):
-    patient_id: int
+    patient_id: str
+    doctor_id: str
     medication_id: int
     dosage: str
     frequency: str
@@ -687,10 +652,8 @@ class MedicationAlertResponse(MedicationAlertBase):
 
 
 """Medical conditions"""
-
-
 class MedicalConditionBase(BaseModel):
-    patient_id: int
+    patient_id: str
     name: str
     description: str
     diagnosis_date: date
@@ -710,15 +673,13 @@ class MedicalConditionResponse(MedicalConditionBase):
 
 
 """Medical devices"""
-
-
 class MedicalDeviceBase(BaseModel):
     name: str
     manufacturer: str
     model: str
     serial_number: str
-    hospital: str
-    department: str
+    hospital_id: str
+    department_id: str
     last_maintenance: date
     next_maintenance: date  
 
@@ -736,11 +697,8 @@ class MedicalDeviceResponse(MedicalDeviceBase):
 
 
 """Medical images"""
-
-
 class MedicalImageBase(BaseModel):
-    patient_id: int
-    doctor_id: int
+    patient_id: str
     image_type: str
     image_date: date
 
@@ -758,13 +716,11 @@ class MedicalImageResponse(MedicalImageBase):
 
 
 """Medical notes"""
-
-
 class MedicalNoteBase(BaseModel):
-    patient_id: int
-    doctor_id: int
+    patient_id: str
+    doctor_id: str
     date: date
-    content: str
+    note: str
 
 
 class MedicalNoteCreate(MedicalNoteBase):
@@ -780,11 +736,9 @@ class MedicalNoteResponse(MedicalNoteBase):
 
 
 """Medical procedures"""
-
-
 class MedicalProcedureBase(BaseModel):
-    patient_id: int
-    doctor_id: int
+    patient_id: str
+    doctor_id: str
     name: str
     date: date
     notes: str
@@ -803,17 +757,16 @@ class MedicalProcedureResponse(MedicalProcedureBase):
 
 
 """Medication"""
-
-
 class MedicationBase(BaseModel):
+    patient_id: str
+    doctor_id: str
     name: str
     description: str
     route_of_administration: str
     dosage: str
     unit: str
     frequency: str
-    patient_id: int
-    doctor_id: int
+  
 
 
 class MedicationCreate(MedicationBase):
@@ -829,15 +782,13 @@ class MedicationResponse(MedicationBase):
 
 
 """Nurse"""
-
-
 class NurseBase(BaseModel):
     firstname: str
     lastname: str
     dob: date
     gender: str
     phone_number: str
-    email: str
+    email: EmailStr
     licence_number: str
     hospital_id: str
     address: str
@@ -862,10 +813,8 @@ class NurseResponse(NurseBase):
 
 
 """Patient consent"""
-
-
 class PatientConsentBase(BaseModel):
-    patient_id: int
+    patient_id: str
     consent_type: str
     consent_date: date
     expiration_date: date
@@ -884,11 +833,9 @@ class PatientConsentResponse(PatientConsentBase):
 
 
 """Patient feedback"""
-
-
 class PatientFeedbackBase(BaseModel):
-    patient_id: int
-    doctor_id: int
+    patient_id: str
+    doctor_id: str
     date: date
     text: str
     rating: int
@@ -907,11 +854,9 @@ class PatientFeedbackResponse(PatientFeedbackBase):
 
 
 """Patient visit"""
-
-
 class PatientVisitBase(BaseModel):
-    patient_id: int
-    doctor_id: int
+    patient_id: str
+    doctor_id: str
     appointment_id: int
     visit_date: date
     chief_complaint: str
@@ -932,8 +877,6 @@ class PatientVisitResponse(PatientVisitBase):
 
 
 """Patient """
-
-
 class PatientBase(BaseModel):
     firstname: str
     middlename: str
@@ -941,7 +884,7 @@ class PatientBase(BaseModel):
     dob: date
     gender: str
     phonenumber: str
-    email: str
+    email: EmailStr
     address: str
     city: str
     state: str
@@ -971,20 +914,18 @@ class PatientResponse(PatientBase):
 
 
 """Pharmacist"""
-
-
 class PharmacistBase(BaseModel):
     firstname: str
     lastname: str
     dob: date
     gender: str
     phone_number: str
-    email: str
+    email: EmailStr
     licence_number: str
     address: str
     city: str
     state: str
-    zip_code: str
+    postal_code: str
     country: str
     verified: bool
 
@@ -1002,11 +943,9 @@ class PharmacistResponse(PharmacistBase):
 
 
 """Prescription"""
-
-
 class PrescriptionBase(BaseModel):
-    doctor_id: int
-    patient_id: int
+    patient_id: str
+    doctor_id: str
     medication: str
     dosage: str
     instructions: str
@@ -1025,15 +964,13 @@ class PrescriptionResponse(PrescriptionBase):
 
 
 """Receptionist"""
-
-
 class ReceptionistBase(BaseModel):
     firstname: str
     lastname: str
     dob: date
     gender: str
     phone_number: str
-    email: str
+    email: EmailStr
     address: str
     city: str
     state: str
@@ -1057,8 +994,6 @@ class ReceptionistResponse(ReceptionistBase):
 
 
 """Referrals"""
-
-
 class ReferralBase(BaseModel):
     referring_patient: str
     referred_patient: str
@@ -1084,11 +1019,10 @@ class ReferralResponse(ReferralBase):
 
 
 """Specialty"""
-
-
 class SpecialtyBase(BaseModel):
     name: str
     description: str
+    doctor_id: str
 
 
 class SpecialtyCreate(SpecialtyBase):
@@ -1102,32 +1036,61 @@ class SpecialtyResponse(SpecialtyBase):
     class Config:
         orm_mode = True
 
+"""Time Slots"""
+class TimeSlotBase(BaseModel):
+    doctor_id: str
+    appointment_date: date
+    appointment_start_time: str
+    appointment_end_time: str
+    availability: bool
+
+
+class TimeSlotCreate(TimeSlotBase):
+    pass
+
+
+class TimeSlotResponse(TimeSlotBase):
+    id: int
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        orm_mode = True
+
 """User"""
-
-
 class UserBase(BaseModel):
-    email: str
+    email: EmailStr
     password: str
-    role: str
 
 
 class UserCreate(UserBase):
     pass
 
 
-class UserResponse(UserBase):
+class UserResponse(UserBase):#what we are returning for the user to see
     id: str
+    email: EmailStr
     registration_date: datetime
 
     class Config:
         orm_mode = True
 
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    id: Optional[str] = None
+
+
 
 """Vaccinations """
-
-
 class VaccinationBase(BaseModel):
-    patient_id: int
+    patient_id: str
     vaccine_name: str
     administered_by: str
     administered_at: date
@@ -1147,11 +1110,9 @@ class VaccinationResponse(VaccinationBase):
 
 
 """Vital signs """
-
-
 class VitalSignBase(BaseModel):
-    patient_id: int
-    doctor_id: int
+    patient_id: str
+    doctor_id: str
     heart_rate: float
     blood_pressure_systolic: float
     blood_pressure_diastolic: float
@@ -1179,11 +1140,10 @@ class VitalSignResponse(VitalSignBase):
 
 
 class WardBase(BaseModel):
+    hospital_id: str
     name: str
     type: str
     capacity: int
-    location: str
-    hospital_id: int
 
 
 class WardCreate(WardBase):
@@ -1199,11 +1159,9 @@ class WardResponse(WardBase):
 
 
 """Work Schedule """
-
-
 class WorkScheduleBase(BaseModel):
-    doctor: str
-    nurse: str
+    doctor_id: str
+    nurse_id: str
     day_of_week: str
     start_time: datetime
     end_time: datetime

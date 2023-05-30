@@ -44,6 +44,12 @@ export default function InsuranceProviderTable() {
       editable: true,
     },
     {
+      field: "licence_number",
+      headerName: "Licence Number",
+      width: 100,
+      editable: true,
+    },
+    {
       field: "address",
       headerName: "Address",
       sortable: true,
@@ -89,6 +95,18 @@ export default function InsuranceProviderTable() {
     {
       field: "website",
       headerName: "Website",
+      width: 150,
+      editable: true,
+    },
+    {
+      field: "rating",
+      headerName: "Rating",
+      width: 100,
+      editable: true,
+    },
+    {
+      field: "verified",
+      headerName: "Verified",
       width: 150,
       editable: true,
     },

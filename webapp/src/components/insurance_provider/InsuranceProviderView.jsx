@@ -14,6 +14,7 @@ const InsuranceProviderView = ({ selectedRow }) => {
     country,
     phone_number,
     email,
+    rating,
     website,
   } = selectedRow;
 
@@ -66,6 +67,9 @@ const InsuranceProviderView = ({ selectedRow }) => {
             </Grid>
             <Grid xs={12} sm={6} item>
               <Typography variant="body1">Website: {website}</Typography>
+            </Grid>
+            <Grid xs={12} sm={6} item>
+              <Typography variant="body1">Rating: {rating}</Typography>
             </Grid>
           </Grid>
         </form>

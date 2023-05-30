@@ -10,13 +10,17 @@ import axios from "axios";
 import MenuItem from "@mui/material/MenuItem";
 import "./Doctor.scss";
 import { Checkbox, FormControlLabel } from "@mui/material";
+import Radio from "@mui/material/Radio";
+import RadioGroup from "@mui/material/RadioGroup";
+import FormLabel from "@mui/material/FormLabel";
+import FormControl from "@mui/material/FormControl";
 
 const DoctorForm = () => {
   const [firstname, setFirstName] = useState("");
   const [middlename, setMiddleName] = useState("");
   const [lastname, setLastName] = useState("");
   const [dob, setDOB] = useState("");
-  const [gender, setGender] = useState("");
+  const [gender, setGender] = useState("male");
   const [phone_number, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
   const [specialty, setSpecialty] = useState("");
@@ -26,6 +30,8 @@ const DoctorForm = () => {
   const [state, setState] = useState("");
   const [postal_code, setPostalCode] = useState("");
   const [country, setCountry] = useState("");
+  const [consultation_fee, setConsultationFee] = useState("");
+  const [rating, setRating] = useState("");
   const [verified, setVerified] = useState("");
 
   const [countryDB, setCountryDB] = useState([]);
@@ -53,6 +59,8 @@ const DoctorForm = () => {
         state,
         postal_code,
         country,
+        consultation_fee,
+        rating,
         verified,
       })
       .then((res) => {
@@ -125,7 +133,6 @@ const DoctorForm = () => {
                   setMiddleName(event.target.value);
                 }}
                 fullWidth
-                required
               ></TextField>
             </Grid>
             <Grid xs={12} sm={6} item>
@@ -145,7 +152,6 @@ const DoctorForm = () => {
 
             <Grid xs={12} sm={6} item>
               <TextField
-                //label="Appointment Date"
                 helperText="Enter Date of Birth"
                 variant="outlined"
                 type="date"
@@ -157,26 +163,46 @@ const DoctorForm = () => {
                 required
               ></TextField>
             </Grid>
+
             <Grid xs={12} sm={6} item>
-              <TextField
-                label="Gender"
-                helperText="Enter Gender"
-                variant="outlined"
-                type="text"
-                value={gender}
-                onChange={(event) => {
-                  setGender(event.target.value);
-                }}
-                fullWidth
-                required
-              ></TextField>
+              <FormControl>
+                <FormLabel id="demo-row-radio-buttons-group-label">
+                  Gender
+                </FormLabel>
+                <RadioGroup
+                  row
+                  aria-labelledby="demo-row-radio-buttons-group-label"
+                  name="row-radio-buttons-group"
+                  type="text"
+                  value={gender}
+                  onChange={(event) => {
+                    setGender(event.target.value);
+                  }}
+                >
+                  <FormControlLabel
+                    value="male"
+                    control={<Radio />}
+                    label="Male"
+                  />
+                  <FormControlLabel
+                    value="female"
+                    control={<Radio />}
+                    label="Female"
+                  />
+                  <FormControlLabel
+                    value="other"
+                    control={<Radio />}
+                    label="Other"
+                  />
+                </RadioGroup>
+              </FormControl>
             </Grid>
             <Grid xs={12} sm={6} item>
               <TextField
                 label="Phone Number"
                 helperText="Enter Phone Number"
                 variant="outlined"
-                type="number"
+                type="text"
                 value={phone_number}
                 onChange={(event) => {
                   setPhoneNumber(event.target.value);
@@ -204,8 +230,6 @@ const DoctorForm = () => {
                 select
                 label="Select Specialty"
                 value={specialty}
-                //defaultValue="In-person"
-                //helperText="Please select appointment type"
                 onChange={(event) => {
                   setSpecialty(event.target.value);
                 }}
@@ -290,8 +314,6 @@ const DoctorForm = () => {
                 select
                 label="Select Country"
                 value={country}
-                //defaultValue="In-person"
-                //helperText="Please select appointment type"
                 onChange={(event) => {
                   setCountry(event.target.value);
                 }}
@@ -303,6 +325,33 @@ const DoctorForm = () => {
                   </MenuItem>
                 ))}
               </TextField>
+            </Grid>
+
+            <Grid xs={12} sm={6} item>
+              <TextField
+                label="Consultation Fee"
+                placeholder="Enter Consultation Fee"
+                variant="outlined"
+                type="number"
+                value={consultation_fee}
+                onChange={(event) => {
+                  setConsultationFee(event.target.value);
+                }}
+                fullWidth
+              ></TextField>
+            </Grid>
+            <Grid xs={12} sm={6} item>
+              <TextField
+                label="Rating"
+                placeholder="Enter Rating"
+                variant="outlined"
+                type="number"
+                value={rating}
+                onChange={(event) => {
+                  setRating(event.target.value);
+                }}
+                fullWidth
+              ></TextField>
             </Grid>
 
             <Grid xs={12} item>

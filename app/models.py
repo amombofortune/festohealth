@@ -2,12 +2,15 @@
 
 from .database import Base
 from sqlalchemy import Float, ForeignKey, Text, func
-from sqlalchemy import Column, Integer, String, Date, DateTime
+from sqlalchemy import Column, Integer, String, Date, DateTime, Time
 from sqlalchemy.sql.sqltypes import TIMESTAMP, TIME
 from sqlalchemy.types import Boolean
 from sqlalchemy.sql.expression import text
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import relationship
 from .database import engine, SessionLocal
+from datetime import date, time, datetime, timedelta
+from sqlalchemy.dialects.postgresql import INTERVAL
 import uuid
 import bcrypt
 
@@ -17,6 +20,7 @@ class Administrator(Base):
     __tablename__ = "administrators"
 
     id = Column(String, primary_key=True)
+    user_id = Column(String, ForeignKey('users.id'))
     firstname = Column(String)
     lastname = Column(String)
     dob = Column(Date)
@@ -30,9 +34,11 @@ class Administrator(Base):
     country = Column(String)
     hospital_id = Column(String)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, firstname, lastname, dob, gender, phone_number, email, address, city, state, zip_code, country, hospital_id):
+    def __init__(self, user_id, firstname, lastname, dob, gender, phone_number, email, address, city, state, zip_code, country, hospital_id):
         self.id = str(uuid.uuid4().hex[:6].upper())
+        self.user_id = user_id
         self.firstname = firstname
         self.lastname = lastname
         self.dob = dob
@@ -47,50 +53,26 @@ class Administrator(Base):
         self.hospital_id = hospital_id
 
     def __repr__(self):
-        return f"({self.id}, {self.firstname}, {self.lastname}, {self.dob},{self.gender}, {self.phone_number}, {self.email}, {self.address}, {self.city}, {self.state}, {self.zip_code}, {self.country}, {self.hospital_id})"
-
-
-session = SessionLocal()
-"""
-administrator = Administrator("Susan", "Koech", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-                              "Dagoretti", "Nairobi", "Nairobi", "00100", "Kenya", 1)
-administrator1 = Administrator("Susan", "Koech", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-                               "Dagoretti", "Nairobi", "Nairobi", "00100", "Kenya", 2)
-administrator2 = Administrator("Susan", "Koech", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-                               "Dagoretti", "Nairobi", "Nairobi", "00100", "Kenya", 3)
-administrator3 = Administrator("Susan", "Koech", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-                               "Dagoretti", "Nairobi", "Nairobi", "00100", "Kenya", 4)
-administrator4 = Administrator("Susan", "Koech", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-                               "Dagoretti", "Nairobi", "Nairobi", "00100", "Kenya", 5)
-administrator5 = Administrator("Susan", "Koech", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-                               "Dagoretti", "Nairobi", "Nairobi", "00100", "Kenya", 6)
-
-
-session.add(administrator)
-session.add(administrator1)
-session.add(administrator2)
-session.add(administrator3)
-session.add(administrator4)
-session.add(administrator5)
-"""
-session.commit()
-session.close()
-
+        return f"({self.id}, {self.user_id}, {self.firstname}, {self.lastname}, {self.dob},{self.gender}, {self.phone_number}, {self.email}, {self.address}, {self.city}, {self.state}, {self.zip_code}, {self.country}, {self.hospital_id})"
 
 """ ADMISSION """
 class Admission(Base):
     __tablename__ = 'admissions'
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    patient_id = Column(Integer)
+    patient_id = Column(String, ForeignKey('patients.id'))
+    doctor_id = Column(String, ForeignKey('doctors.id'))
     admission_date = Column(Date)
-    admission_time = Column(TIME)
+    admission_time = Column(Time)
     discharge_date = Column(Date)
-    discharge_time = Column(TIME)
+    discharge_time = Column(Time)
     reason = Column(Text)
     diagnosis = Column(Text)
     treatment = Column(Text)
-    doctor_id = Column(Integer)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
+    #patient = relationship("Patient", backref="admissions")
+
 
     def __init__(self, patient_id, admission_date, admission_time, discharge_date, discharge_time, reason, diagnosis, treatment, doctor_id):
         self.patient_id = patient_id
@@ -103,45 +85,16 @@ class Admission(Base):
         self.treatment = treatment
         self.doctor_id = doctor_id
 
+
     def __repr__(self):
         return f"({self.id}), {self.patient_id}, {self.admission_date}, {self.admission_time},  {self.discharge_date}, {self.discharge_time}, {self.reason}, {self.diagnosis}, {self.treatment}, {self.doctor_id})"
-
-
-Session = sessionmaker(bind=engine)
-
-session = SessionLocal()
-"""
-admission = Admission(1, "2023-09-12", "12:45", "2023-10-12",
-                      "19:01", "Referral", "Medical pills", "Surgery", 1)
-admission1 = Admission(2, "2023-09-12", "12:45", "2023-10-12",
-                       "19:01", "Death", "Medical pills", "Surgery", 2)
-admission2 = Admission(3, "2023-09-12", "12:45", "2023-10-12",
-                       "19:01", "End of Treatment", "Medical pills", "Surgery", 3)
-admission3 = Admission(4, "2023-09-12", "12:45", "2023-10-12",
-                       "19:01", "Referral", "Medical pills", "Surgery", 4)
-admission4 = Admission(5, "2023-09-12", "12:45", "2023-10-12",
-                       "19:01", "Transfer", "Medical pills", "Surgery", 5)
-admission5 = Admission(6, "2023-09-12", "12:45", "2023-10-12",
-                       "19:01", "Transfer", "Medical pills", "Surgery", 6)
-admission6 = Admission(7, "2023-09-12", "12:45", "2023-10-12",
-                       "19:01", "Transfer", "Medical pills", "Surgery", 7)
-session.add(admission)
-session.add(admission1)
-session.add(admission2)
-session.add(admission3)
-session.add(admission5)
-session.add(admission4)
-session.add(admission6)
-"""
-session.commit()
-session.close()
 
 """ ADVERSE REACTION """
 class AdverseReaction(Base):
     __tablename__ = "adverse_reactions"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    patient_id = Column(Integer)
+    patient_id = Column(String, ForeignKey('patients.id') )
     reaction_date = Column(Date)
     reaction_time = Column(TIME(timezone=True))
     reaction_type = Column(String)  # Foreign Key
@@ -151,6 +104,7 @@ class AdverseReaction(Base):
     severity = Column(String)
     treatment = Column(Text)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
     def __init__(self, patient_id, reaction_date, reaction_time, reaction_type, reaction_details, medication_name, dosage, severity, treatment):
         self.patient_id = patient_id
@@ -167,33 +121,6 @@ class AdverseReaction(Base):
         return f"({self.id}, {self.patient_id}, {self.reaction_date}, {self.reaction_time}, {self.reaction_type}, {self.reaction_details}, {self.medication_name}, {self.dosage}, {self.severity}, {self.treatment})"
 
 
-Session = sessionmaker(bind=engine)
-
-session = SessionLocal()
-"""
-adverse_reaction = AdverseReaction(1, "2023-09-12", "10:25", "allergic_reaction",
-                                   "Milk allergy", "Medicall pills", "4 times a day", "Very Severe", "Regular pills")
-adverse_reaction1 = AdverseReaction(2, "2023-09-12", "10:25", "allergic_reaction",
-                                    "Milk allergy", "Medicall pills", "4 times a day", "Very Severe", "Regular pills")
-adverse_reaction3 = AdverseReaction(4, "2023-09-12", "10:25", "allergic_reaction",
-                                    "Milk allergy", "Medicall pills", "4 times a day", "Very Severe", "Regular pills")
-adverse_reaction2 = AdverseReaction(3, "2023-09-12", "10:25", "allergic_reaction",
-                                    "Milk allergy", "Medicall pills", "4 times a day", "Very Severe", "Regular pills")
-adverse_reaction4 = AdverseReaction(5, "2023-09-12", "10:25", "allergic_reaction",
-                                    "Milk allergy", "Medicall pills", "4 times a day", "Very Severe", "Regular pills")
-adverse_reaction5 = AdverseReaction(6, "2023-09-12", "10:25", "allergic_reaction",
-                                    "Milk allergy", "Medicall pills", "4 times a day", "Very Severe", "Regular pills")
-
-session.add(adverse_reaction)
-session.add(adverse_reaction1)
-session.add(adverse_reaction2)
-session.add(adverse_reaction3)
-session.add(adverse_reaction4)
-session.add(adverse_reaction5)
-"""
-session.commit()
-session.close()
-
 """ADVERSE REACTION TYPE """
 class AdverseReactionType(Base):
     __tablename__ = "adverse_reaction_types"
@@ -202,6 +129,7 @@ class AdverseReactionType(Base):
     name = Column(String)
     description = Column(Text)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
     def __init__(self, name, description):
         self.name = name
@@ -256,13 +184,16 @@ class Allergy(Base):
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     name = Column(String)
+    patient_id = Column(String, ForeignKey('patients.id'))
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, name):
+    def __init__(self, name, patient_id):
         self.name = name
+        self.patient_id = patient_id
 
     def __repr__(self):
-        return f"({self.id}, {self.name})"
+        return f"({self.id}, {self.name}, {self.patient_id})"
 
 
 Session = sessionmaker(bind=engine)
@@ -312,17 +243,21 @@ class AppointmentReminder(Base):
     __tablename__ = "appointment_reminders"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    appointment_id = Column(Integer)  # Foreign
-    # Foreign key to the users table(either patient or doctor)
+    appointment_id = Column(Integer, ForeignKey('appointments.id')) 
+    patient_id = Column(String, ForeignKey('patients.id'))
+    doctor_id = Column(String, ForeignKey('doctors.id'))
     user_id = Column(Integer)
     reminder_date = Column(Date)
     reminder_time = Column(TIME)
     reminder_type = Column(String)  # email, sms, push notification
     status = Column(String)  # sent, pending
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, appointment_id, user_id, reminder_date, reminder_time, reminder_type, status):
+    def __init__(self, appointment_id, patient_id, doctor_id,  user_id, reminder_date, reminder_time, reminder_type, status):
         self.appointment_id = appointment_id
+        self.patient_id = patient_id
+        self.doctor_id = doctor_id
         self.user_id = user_id
         self.reminder_date = reminder_date
         self.reminder_time = reminder_time
@@ -330,90 +265,38 @@ class AppointmentReminder(Base):
         self.status = status
 
     def __repr__(self):
-        return f"({self.id}, {self.appointment_id}, {self.user_id}, {self.reminder_date}, {self.reminder_time}, {self.reminder_type}, {self.status})"
+        return f"({self.id}, {self.appointment_id}, {self.patient_id}, {self.doctor_id} {self.user_id}, {self.reminder_date}, {self.reminder_time}, {self.reminder_type}, {self.status})"
 
-
-Session = sessionmaker(bind=engine)
-
-session = SessionLocal()
-"""
-appointment_reminder = AppointmentReminder(
-    2, 3, "2025-12-12", "12:45", "SMS", "Sent")
-appointment_reminder1 = AppointmentReminder(
-    2, 2, "2025-12-12", "12:45", "Email", "Pending")
-appointment_reminder3 = AppointmentReminder(
-    4, 4, "2025-12-12", "12:45", "Push notification", "Pending")
-appointment_reminder2 = AppointmentReminder(
-    3, 3, "2025-12-12", "12:45", "Email", "Sent")
-appointment_reminder4 = AppointmentReminder(
-    5, 5, "2025-12-12", "12:45", "Push notification", "Sent")
-
-
-session.add(appointment_reminder)
-session.add(appointment_reminder1)
-session.add(appointment_reminder3)
-session.add(appointment_reminder2)
-session.add(appointment_reminder4)
-"""
-session.commit()
-session.close()
 
 """ APPOINTMENTS """
 class Appointment(Base):
     __tablename__ = "appointments"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    patient_id = Column(Integer)
-    doctor_id = Column(Integer)
-    appointment_type = Column(String)  # In-person, Online
-    appointment_date = Column(Date)
-    appointment_start_time = Column(TIME)
-    appointment_end_time = Column(TIME)
+    patient_id = Column(String, ForeignKey('patients.id'))
+    doctor_id = Column(String, ForeignKey('doctors.id'))
+    type = Column(String)  # In-person, Online
+    date = Column(Date)
+    start_time = Column(String)
+    end_time = Column(String)
     description = Column(Text)  # check-up, follow-up, consultation
     status = Column(String)  # confirmed, cancelled, rescheduled
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, patient_id, doctor_id, appointment_type, appointment_date, appointment_start_time, appointment_end_time, description, status):
+    def __init__(self, patient_id, doctor_id, type, date, start_time, end_time, description, status):
         self.patient_id = patient_id
         self.doctor_id = doctor_id
-        self.appointment_type = appointment_type
-        self.appointment_date = appointment_date
-        self.appointment_start_time = appointment_start_time
-        self.appointment_end_time = appointment_end_time
+        self.type = type
+        self.date = date
+        self.start_time = start_time
+        self.end_time = end_time
         self.description = description
         self.status = status
 
     def __repr__(self):
-        return f"({self.id}, {self.patient_id}, {self.doctor_id}, {self.appointment_type}, {self.appointment_date}, {self.appointment_start_time}, {self.appointment_end_time}, {self.description}, {self.status})"
+        return f"({self.id}, {self.patient_id}, {self.doctor_id}, {self.type}, {self.date}, {self.start_time}, {self.end_time}, {self.description}, {self.status})"
 
-
-Session = sessionmaker(bind=engine)
-
-session = SessionLocal()
-"""
-appointment = Appointment(1, 1, "check-up", "2025-09-12",
-                          "03:00", "3:30", "Eye checkup", "Confirmed")
-appointment1 = Appointment(
-    2, 2, "check-up", "2025-09-12", "03:30", "4:30", "Eye checkup", "Cancelled")
-appointment2 = Appointment(
-    3, 3, "check-up", "2025-09-12", "03:00", "5:30", "Eye checkup", "Rescheduled")
-appointment3 = Appointment(
-    4, 4, "check-up", "2025-09-12", "06:00", "6:30", "Eye checkup", "Confirmed")
-appointment4 = Appointment(
-    5, 5, "check-up", "2025-09-12", "07:00", "7:30", "Eye checkup", "Cancelled")
-appointment5 = Appointment(
-    6, 6, "check-up", "2025-09-12", "08:00", "8:30", "Eye checkup", "Rescheduled")
-
-
-session.add(appointment)
-session.add(appointment1)
-session.add(appointment3)
-session.add(appointment2)
-session.add(appointment4)
-session.add(appointment5)
-"""
-session.commit()
-session.close()
 
 
 """ APPOINTMENT TYPE """
@@ -424,6 +307,7 @@ class AppointmentType(Base):
     name = Column(String)
     description = Column(String)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
     def __init__(self, name, description):
         self.name = name
@@ -472,40 +356,21 @@ class Bed(Base):
     bed_no = Column(Integer)
     bed_type = Column(String)  # ICU, general ward, private room
     availability = Column(Boolean)
-    occupied_by = Column(String)  # Foreing key
+    occupied_by = Column(String, ForeignKey('patients.id'))  # Foreing key
+    assigned_by = Column(String)  # Foreing key
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, ward, bed_no, bed_type, availability, occupied_by):
+    def __init__(self, ward, bed_no, bed_type, availability, occupied_by, assigned_by):
         self.ward = ward
         self.bed_no = bed_no
         self.bed_type = bed_type
         self.availability = availability
         self.occupied_by = occupied_by
+        self.assigned_by = assigned_by
 
     def __repr__(self):
-        return f"({self.id}, {self.ward}, {self.bed_no}, {self.bed_type}, {self.availability}, {self.occupied_by})"
-
-
-session = SessionLocal()
-"""
-bed = Bed("Orthopedic", 3, "ICU", True, 1)
-bed2 = Bed("Eye Clinic", 1, "ICU", True, 3)
-bed1 = Bed("Orthopedic", 1, "ICU", False, 2)
-bed3 = Bed("Eye Clinic", 1, "ICU", False, 4)
-bed4 = Bed("Eye Clinic", 1, "ICU", True, 5)
-bed5 = Bed("Eye Clinic", 1, "ICU", False, 6)
-
-
-session.add(bed)
-session.add(bed1)
-session.add(bed2)
-session.add(bed3)
-session.add(bed4)
-session.add(bed5)
-"""
-
-session.commit()
-session.close()
+        return f"({self.id}, {self.ward}, {self.bed_no}, {self.bed_type}, {self.availability}, {self.occupied_by}, {self.assigned_by})"
 
 """ BED ASSIGNMENT """
 class BedAssignment(Base):
@@ -518,6 +383,7 @@ class BedAssignment(Base):
     assigned_at = Column(TIMESTAMP(timezone=True))
     discharged_at = Column(TIMESTAMP(timezone=True))
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
     def __init__(self, bed_id, patient_id, assigned_by, assigned_at, discharged_at):
         self.bed_id = bed_id
@@ -529,74 +395,30 @@ class BedAssignment(Base):
     def __repr__(self):
         return f"({self.id}, {self.bed_id}, {self.patient_id}, {self.assigned_by}, {self.assigned_at}, {self.discharged_at})"
 
-
-session = SessionLocal()
-"""
-bed_assignment = BedAssignment(
-    1, 1, 1, "2023-05-12 12:45:00", "2023-06-12 12:45:00")
-bed_assignment1 = BedAssignment(
-    2, 2, 2, "2023-05-12 12:45:00", "2023-06-12 12:45:00")
-bed_assignment2 = BedAssignment(
-    3, 3, 3, "2023-05-12 12:45:00", "2023-06-12 12:45:00")
-bed_assignment3 = BedAssignment(
-    4, 4, 4, "2023-05-12 12:45:00", "2023-06-12 12:45:00")
-bed_assignment4 = BedAssignment(
-    5, 5, 5, "2023-05-12 12:45:00", "2023-06-12 12:45:00")
-bed_assignment5 = BedAssignment(
-    6, 6, 6, "2023-05-12 12:45:00", "2023-06-12 12:45:00")
-
-session.add(bed_assignment)
-session.add(bed_assignment1)
-session.add(bed_assignment2)
-session.add(bed_assignment3)
-session.add(bed_assignment4)
-session.add(bed_assignment5)
-"""
-session.commit()
-session.close()
-
 """ BILLING """
 class Billing(Base):
     __tablename__ = "billings"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    patient_id = Column(Integer)
+    patient_id = Column(String, ForeignKey('patients.id'))
     bill_date = Column(DateTime)
     amount_due = Column(Float)
     amount_paid = Column(Float)
     payment_method = Column(String)
+    status = Column(String)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
-    updated_at = Column(TIMESTAMP(timezone=True), onupdate=func.now())
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, patient_id, bill_date, amount_due, amount_paid, payment_method):
+    def __init__(self, patient_id, bill_date, amount_due, amount_paid, payment_method, status):
         self.patient_id = patient_id
         self.bill_date = bill_date
         self.amount_due = amount_due
         self.amount_paid = amount_paid
         self.payment_method = payment_method
+        self.status = status
 
     def __repr__(self):
-        return f"({self.id}, {self.patient_id}, {self.bill_date}, {self.amount_due}, {self.amount_paid}, {self.payment_method})"
-
-
-session = SessionLocal()
-"""
-bill = Billing(1, "2023-05-12", 2000, 800, "M-PESA")
-bill2 = Billing(1, "2023-05-12", 3000, 800, "Card")
-bill3 = Billing(1, "2023-05-12", 4000, 800, "Card")
-bill4 = Billing(1, "2023-05-12", 5000, 800, "M-PESA")
-bill5 = Billing(1, "2023-05-12", 6000, 800, "M-PESA")
-bill6 = Billing(1, "2023-05-12", 7000, 800, "M-PESA")
-
-session.add(bill)
-session.add(bill2)
-session.add(bill3)
-session.add(bill4)
-session.add(bill5)
-session.add(bill6)
-"""
-session.commit()
-session.close()
+        return f"({self.id}, {self.patient_id}, {self.bill_date}, {self.amount_due}, {self.amount_paid}, {self.payment_method},  {self.status})"
 
 """ CHRONIC CONDITION """  # main
 class ChronicCondition(Base):
@@ -605,15 +427,18 @@ class ChronicCondition(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     name = Column(String)
     description = Column(String)
+    patient_id = Column(String, ForeignKey('patients.id'))
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, name, description):
+    def __init__(self, name, description, patient_id):
         self.name = name
         self.description = description
+        self.patient_id = patient_id
    
 
     def __repr__(self):
-        return f"({self.id}, {self.name}, {self.description})"
+        return f"({self.id}, {self.name}, {self.description}, {self.patient_id})"
 
 
 session = SessionLocal()
@@ -669,10 +494,12 @@ class Country(Base):
     name = Column(String)
     code = Column(String)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, name, code):
+    def __init__(self, name, code  ):
         self.name = name
         self.code = code
+        
 
     def __repr__(self):
         return f"({self.id}, {self.name}, {self.code})"
@@ -706,18 +533,21 @@ class Department(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     name = Column(String, )
     description = Column(Text)
-    hospital = Column(String)
-    head_doctor = Column(String)
+    hospital_id = Column(String, ForeignKey('hospitals.id'))
+    doctor_id = Column(String, ForeignKey('doctors.id'))
+    nurse_id = Column(String, ForeignKey('nurses.id'))
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, name, description, hospital, head_doctor):
+    def __init__(self, name, description, hospital_id, doctor_id, nurse_id):
         self.name = name
         self.description = description
-        self.hospital = hospital
-        self.head_doctor = head_doctor
+        self.hospital_id = hospital_id
+        self.doctor_id = doctor_id
+        self.nurse_id = nurse_id
 
     def __repr__(self):
-        return f"({self.id}, {self.name}, {self.description}, {self.hospital}, {self.head_doctor})"
+        return f"({self.id}, {self.name}, {self.description}, {self.hospital_id}, {self.doctor_id}, {self.nurse_id})"
 
 
 session = SessionLocal()
@@ -778,61 +608,44 @@ class Diagnosis(Base):
     __tablename__ = "diagnoses"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    patient_id = Column(String)
+    patient_id = Column(String, ForeignKey('patients.id'))
+    doctor_id = Column(String, ForeignKey('doctors.id'))
+    hospital_id = Column(String, ForeignKey('hospitals.id'))
     disease = Column(String)
     diagnosis = Column(String)
     date = Column(Date)
-    doctor_id = Column(String)
     notes = Column(String)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
-    updated_at = Column(TIMESTAMP(timezone=True), onupdate=func.now())
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, patient_id, disease, diagnosis, date, doctor_id, notes):
+    def __init__(self, patient_id, doctor_id, hospital_id, disease, diagnosis, date, notes):
         self.patient_id = patient_id
+        self.doctor_id = doctor_id
+        self.hospital_id = hospital_id
         self.disease = disease
         self.diagnosis = diagnosis
         self.date = date
-        self.doctor_id = doctor_id
         self.notes = notes
 
     def __repr__(self):
-        return f"({self.id}, {self.patient_id}, {self.disease}, {self.diagnosis}, {self.date}, {self.doctor_id}, {self.notes})"
-
-
-session = SessionLocal()
-"""
-diagnosis = Diagnosis(1, "1", "1", "2023-12-12", "1", "Doing well")
-diagnosis1 = Diagnosis(2, "2", "2", "2023-12-12", "2", "Doing well")
-diagnosis2 = Diagnosis(3, "3", "3", "2023-12-12", "3", "Doing well")
-diagnosis3 = Diagnosis(4, "4", "4", "2023-12-12", "4", "Doing well")
-diagnosis4 = Diagnosis(5, "5", "5", "2023-12-12", "5", "Doing well")
-diagnosis5 = Diagnosis(6, "6", "6", "2023-12-12", "6", "Doing well")
-
-
-session.add(diagnosis)
-session.add(diagnosis1)
-session.add(diagnosis2)
-session.add(diagnosis3)
-session.add(diagnosis4)
-session.add(diagnosis5)
-"""
-session.commit()
-session.close()
-
+        return f"({self.id}, {self.patient_id}, {self.doctor_id}, {self.hospital_id}, {self.disease}, {self.diagnosis}, {self.date}, {self.notes})"
 
 """ DISEASES """
 class Disease(Base):
     __tablename__ = 'diseases'
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    patient_id = Column(String, ForeignKey('patients.id'))
     name = Column(String)
     description = Column(Text)
     symptoms = Column(Text)
     treatment = Column(Text)
     prevention = Column(Text)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, name, description, symptoms, treatment, prevention):
+    def __init__(self, patient_id, name, description, symptoms, treatment, prevention):
+        self.patient_id = patient_id
         self.name = name
         self.description = description
         self.symptoms = symptoms
@@ -840,34 +653,8 @@ class Disease(Base):
         self.prevention = prevention
 
     def __repr__(self):
-        return f"({self.id}, {self.name}, {self.description}, {self.symptoms}, {self.treatment}, {self.prevention})"
+        return f"({self.id}, {self.patient_id}, {self.name}, {self.description}, {self.symptoms}, {self.treatment}, {self.prevention})"
 
-
-session = SessionLocal()
-"""
-disease = Disease("Cholera", "Description", "Diarrhoea, Coughing",
-                  "Injection", "Drinking clean water")
-disease1 = Disease("HIV/AIDS", "Description",
-                   "Diarrhoea, Coughing", "Injection", "Drinking clean water")
-disease2 = Disease("Hepatitis B", "Description",
-                   "Diarrhoea, Coughing", "Injection", "Drinking clean water")
-disease3 = Disease("Malaria", "Description",
-                   "Diarrhoea, Coughing", "Injection", "Drinking clean water")
-disease4 = Disease("Typhoid", "Description",
-                   "Diarrhoea, Coughing", "Injection", "Drinking clean water")
-disease5 = Disease("Polio", "Description", "Diarrhoea, Coughing",
-                   "Injection", "Drinking clean water")
-
-
-session.add(disease)
-session.add(disease1)
-session.add(disease2)
-session.add(disease3)
-session.add(disease4)
-session.add(disease5)
-"""
-session.commit()
-session.close()
 
 """ DOCTOR """
 class Doctor(Base):
@@ -890,10 +677,11 @@ class Doctor(Base):
     state = Column(String)
     postal_code = Column(String)
     country = Column(String)
-    consultation_fee = Column(Float)
-    rating = Column(Float)
+    consultation_fee = Column(Float, nullable=True)
+    rating = Column(Float, nullable=True)
     verified = Column(Boolean)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
 
     #user = relationship("User", backref="doctor")
@@ -922,112 +710,64 @@ class Doctor(Base):
         return f"({self.id}, {self.firstname}, {self.middlename}, {self.lastname}, {self.dob},{self.gender}, {self.phone_number}, {self.email}, {self.specialty}, {self.licence_number}, {self.address}, {self.city}, {self.state}, {self.postal_code}, {self.country}, {self.consultation_fee}, {self.rating}, {self.verified})"
 
 
-session = SessionLocal()
-"""
-doctor = Doctor("Susan", "Njeri", "Koech", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-                "Neurosurgeon", "134", "Dagoretti", "Nairobi", "Nairobi", "00100", "Kenya", "4500", "2", True)
-doctor1 = Doctor("Michael", "Okumu", "Owino", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-                 "Neurosurgeon", "134", "Dagoretti", "Nairobi", "Nairobi", "00100", "Uganda", "3500", "2",  True)
-doctor2 = Doctor("Dennis", "Karuri", "Wambua", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-                 "Neurosurgeon", "134", "Dagoretti", "Nairobi", "Nairobi", "00100", "Tanzania", "4000", "2",  True)
-doctor3 = Doctor("Shirleen", "Oketch", "Okello", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-                 "Neurosurgeon", "134", "Dagoretti", "Nairobi", "Nairobi", "00100", "Rwanda", "4000", "2",  True)
-doctor4 = Doctor("Susan", "Nyambura", "Kihika", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-                 "Neurosurgeon", "134", "Dagoretti", "Nairobi", "Nairobi", "00100", "Burundi", "5500", "2",   True)
-doctor5 = Doctor("Sisa", "Ian", "Lumbugu", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-                 "Neurosurgeon", "134", "Dagoretti", "Nairobi", "Nairobi", "00100", "DRC", "2500", "2",  True)
-
-
-session.add(doctor)
-session.add(doctor1)
-session.add(doctor2)
-session.add(doctor3)
-session.add(doctor4)
-session.add(doctor5)
-"""
-session.commit()
-session.close()
-
 """ GENETIC CONDITION """
 class GeneticCondition(Base):
     __tablename__ = "genetic_conditions"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    patient_id = Column(String, ForeignKey('patients.id'))
     name = Column(String)
     description = Column(String)
-    patient_id = Column(Integer)
     inheritance_pattern = Column(Text)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, name, description, patient_id, inheritance_pattern):
+    def __init__(self,  patient_id,  name, description,inheritance_pattern):
+        self.patient_id = patient_id
         self.name = name
         self.description = description
-        self.patient_id = patient_id
         self.inheritance_pattern = inheritance_pattern
 
     def __repr__(self):
-        return f"({self.id}, {self.name}, {self.description}, {self.patient_id}, {self.inheritance_pattern})"
-
-
-session = SessionLocal()
-"""
-genetic_condition = GeneticCondition(
-    "Sickle Cell Anaemia", "Blood Disease", 1, "X-Chromosome")
-genetic_condition1 = GeneticCondition(
-    "Sickle Cell Anaemia", "Blood Disease", 1, "X-Chromosome")
-genetic_condition2 = GeneticCondition(
-    "Sickle Cell Anaemia", "Blood Disease", 1, "X-Chromosome")
-genetic_condition3 = GeneticCondition(
-    "Sickle Cell Anaemia", "Blood Disease", 1, "X-Chromosome")
-genetic_condition4 = GeneticCondition(
-    "Sickle Cell Anaemia", "Blood Disease", 1, "X-Chromosome")
-genetic_condition5 = GeneticCondition(
-    "Sickle Cell Anaemia", "Blood Disease", 1, "X-Chromosome")
-
-session.add(genetic_condition)
-session.add(genetic_condition1)
-session.add(genetic_condition2)
-session.add(genetic_condition3)
-session.add(genetic_condition4)
-session.add(genetic_condition5)
-"""
-session.commit()
-session.close()
-
+        return f"({self.id}, {self.patient_id}, {self.name}, {self.description}, {self.inheritance_pattern})"
 
 """ HOSPITAL """
 class Hospital(Base):
     __tablename__ = "hospitals"
 
     id = Column(String, primary_key=True)
-    #user_id = Column(String, ForeignKey('users.id'))
     name = Column(String(255))
     address = Column(String(255))
     city = Column(String(255))
     state = Column(String(255))
-    zip_code = Column(String(10))
+    postal_code = Column(String(10))
     country = Column(String)
+    email = Column(String)
     phone_number = Column(String(20))
     website = Column(String(255))
     rating = Column(Float)
+    verified = Column(String)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
     #user = relationship("User", backref="hospital")
 
-    def __init__(self, name, address, city, state, zip_code, country, phone_number, website, rating):
+    def __init__(self, name, address, city, state, postal_code, country, email, phone_number, website, rating, verified):
         self.id = str(uuid.uuid4().hex[:4].upper())
         self.name = name
         self.address = address
         self.city = city
         self.state = state
-        self.zip_code = zip_code
+        self.postal_code = postal_code
         self.country = country
+        self.email = email
         self.phone_number = phone_number
         self.website = website
         self.rating = rating
+        self.verified = verified
 
     def __repr__(self):
-        return f"({self.id}, {self.name}, {self.address}, {self.city}, {self.state}, {self.zip_code}, {self.country}, {self.phone_number}, {self.website}, {self.rating})"
+        return f"({self.id}, {self.name}, {self.address}, {self.city}, {self.state}, {self.postal_code}, {self.country}, {self.email}, {self.phone_number}, {self.website}, {self.rating}, {self.verified})"
 
 
 session = SessionLocal()
@@ -1062,61 +802,33 @@ class Immunization(Base):
     __tablename__ = "immunizations"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    patient_id = Column(Integer)
-    vaccine_name = Column(String(50))
-    dose_number = Column(Integer)
-    date_given = Column(Date)
+    patient_id = Column(String, ForeignKey('patients.id'))
     administering_provider = Column(String)
+    vaccine_name = Column(String(50))
+    dose_number = Column(Integer) #change to string
+    date_given = Column(Date)
     expiration_date = Column(Date)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
-    # update_at
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, patient_id, vaccine_name, dose_number, date_given, administering_provider, expiration_date):
+    def __init__(self, patient_id, administering_provider, vaccine_name, dose_number, date_given, expiration_date):
         self.patient_id = patient_id
+        self.administering_provider = administering_provider
         self.vaccine_name = vaccine_name
         self.dose_number = dose_number
         self.date_given = date_given
-        self.administering_provider = administering_provider
         self.expiration_date = expiration_date
 
     def __repr__(self):
-        return f"({self.id}, {self.patient_id}, {self.vaccine_name}, {self.dose_number}, {self.date_given}, {self.administering_provider}, {self.expiration_date})"
-
-
-session = SessionLocal()
-"""
-immunization = Immunization(1, "Pfizer vaccine", 2,
-                            "2023-12-17", "Kikuyu Hospital", "2025-09-16")
-immunization1 = Immunization(
-    2, "Pfizer vaccine", 1, "2023-12-17", "Nairobi Hospital", "2025-09-16")
-immunization2 = Immunization(3, "Pfizer vaccine", 2, "2023-12-17",
-                             "Eldoret Teaching and Referral Hospital", "2025-09-16")
-immunization3 = Immunization(
-    4, "Pfizer vaccine", 1, "2023-12-17", "Pumwani Hospital", "2025-09-16")
-immunization4 = Immunization(
-    5, "Pfizer vaccine", 2, "2023-12-17", "Pwani Hospital", "2025-09-16")
-immunization5 = Immunization(
-    6, "Pfizer vaccine", 1, "2023-12-17", "Kikuyu Hospital", "2025-09-16")
-
-
-session.add(immunization)
-session.add(immunization1)
-session.add(immunization2)
-session.add(immunization3)
-session.add(immunization4)
-session.add(immunization5)
-"""
-session.commit()
-session.close()
-
+        return f"({self.id}, {self.patient_id}, {self.administering_provider},  {self.vaccine_name}, {self.dose_number}, {self.date_given},{self.expiration_date})"
 
 """ INSURANCE CLAIMS"""
 class InsuranceClaim(Base):
     __tablename__ = "insurance_claims"
 
     id = Column(String, primary_key=True)
-    patient_id = Column(String)
-    provider_id = Column(String)
+    patient_id = Column(String, ForeignKey('patients.id'))
+    provider_id = Column(String, ForeignKey('insurance_providers.id'))
     date_of_service = Column(Date)
     procedure_code = Column(String)
     diagnosis_code = Column(String)
@@ -1125,6 +837,7 @@ class InsuranceClaim(Base):
     patient_paid = Column(Float)
     status = Column(String)  # pending denied paids
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
     def __init__(self, patient_id, provider_id, date_of_service, procedure_code, diagnosis_code, billed_amount, insurance_paid, patient_paid, status):
         self.id = str(uuid.uuid4().hex[:6].upper())
@@ -1142,40 +855,14 @@ class InsuranceClaim(Base):
         return f"({self.id}, {self.patient_id}, {self.provider_id}, {self.date_of_service}, {self.procedure_code}, {self.diagnosis_code}, {self.billed_amount}, {self.insurance_paid}, {self.patient_paid}, {self.status})"
 
 
-session = SessionLocal()
-"""
-insurance_claim = InsuranceClaim(
-    "1", "1", "2023-12-17", "1", "1", 1300.00, 300.00, 1000.00, "Paid")
-insurance_claim1 = InsuranceClaim(
-    "2", "2", "2024-12-17", "1", "1", 1300.00, 300.00, 1000.00, "Denied")
-insurance_claim2 = InsuranceClaim(
-    "3", "3", "2025-12-17", "1", "1", 1300.00, 300.00, 1000.00, "Pending")
-insurance_claim3 = InsuranceClaim(
-    "4", "4", "2026-12-17", "1", "1", 1300.00, 300.00, 1000.00, "Paid")
-insurance_claim4 = InsuranceClaim(
-    "5", "5", "2027-12-17", "1", "1", 1300.00, 300.00, 1000.00, "Pending")
-insurance_claim5 = InsuranceClaim(
-    "6", "6", "2028-12-17", "1", "1", 1300.00, 300.00, 1000.00, "Paid")
-
-
-session.add(insurance_claim)
-session.add(insurance_claim1)
-session.add(insurance_claim2)
-session.add(insurance_claim3)
-session.add(insurance_claim4)
-session.add(insurance_claim5)
-"""
-session.commit()
-session.close()
-
 """ INSURANCE PROVIDER """
 class InsuranceProvider(Base):
     __tablename__ = "insurance_providers"
 
     id = Column(String, primary_key=True)
-    #user_id = Column(String, ForeignKey('users.id'))
     name = Column(String(50))
     type = Column(String)
+    licence_number = Column(String)
     address = Column(String(255))
     city = Column(String(255))
     state = Column(String(255))
@@ -1184,14 +871,18 @@ class InsuranceProvider(Base):
     phone_number = Column(String(20))
     email = Column(String)
     website = Column(String)
+    rating = Column(Float)
+    verified = Column(String)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
     #user = relationship("User", backref="insurance_provider")
 
-    def __init__(self, name, type, address, city, state, postal_code, country, phone_number, email, website):
+    def __init__(self, name, type, licence_number, address, city, state, postal_code, country, phone_number, email, website, rating, verified):
         self.id = str(uuid.uuid4().hex[:6].upper())
         self.name = name
         self.type = type
+        self.licence_number = licence_number
         self.address = address
         self.city = city
         self.state = state
@@ -1200,9 +891,11 @@ class InsuranceProvider(Base):
         self.phone_number = phone_number
         self.email = email
         self.website = website
+        self.rating = rating
+        self.verified = verified
 
     def __repr__(self):
-        return f"({self.id}, {self.name}, {self.type}, {self.address}, {self.city}, {self.state}, {self.postal_code}, {self.country}, {self.phone_number}, {self.email}, {self.website})"
+        return f"({self.id}, {self.name}, {self.type}, {self.licence_number}, {self.address}, {self.city}, {self.state}, {self.postal_code}, {self.country}, {self.phone_number}, {self.email}, {self.website}, {self.rating}, {self.verified})"
 
 
 session = SessionLocal()
@@ -1257,6 +950,7 @@ class InsuranceProviderType(Base):
     name = Column(String)
     description = Column(String)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
     def __init__(self, name, description):
         self.name = name
@@ -1317,6 +1011,7 @@ class Itstaff(Base):
     country = Column(String)
     hospital_id = Column(String)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
     def __init__(self, firstname, lastname, dob, gender, phone_number, email, address, city, state, zip_code, country, hospital_id):
         self.id = str(uuid.uuid4().hex[:6].upper())
@@ -1335,33 +1030,6 @@ class Itstaff(Base):
 
     def __repr__(self):
         return f"({self.id}, {self.firstname}, {self.lastname}, {self.dob},{self.gender}, {self.phone_number}, {self.email}, {self.address}, {self.city}, {self.state}, {self.zip_code}, {self.country}, {self.hospital_id})"
-
-
-session = SessionLocal()
-"""
-ITStaff = Itstaff("Susan", "Koech", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-                  "Dagoretti", "Nairobi", "Nairobi", "00100", "Kenya", 1)
-ITStaff1 = Itstaff("Susan", "Koech", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-                   "Dagoretti", "Nairobi", "Nairobi", "00100", "Kenya", 2)
-ITStaff2 = Itstaff("Susan", "Koech", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-                   "Dagoretti", "Nairobi", "Nairobi", "00100", "Kenya", 3)
-ITStaff3 = Itstaff("Susan", "Koech", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-                   "Dagoretti", "Nairobi", "Nairobi", "00100", "Kenya", 4)
-ITStaff4 = Itstaff("Susan", "Koech", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-                   "Dagoretti", "Nairobi", "Nairobi", "00100", "Kenya", 5)
-ITStaff5 = Itstaff("Susan", "Koech", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-                   "Dagoretti", "Nairobi", "Nairobi", "00100", "Kenya", 6)
-
-
-session.add(ITStaff)
-session.add(ITStaff1)
-session.add(ITStaff2)
-session.add(ITStaff3)
-session.add(ITStaff4)
-session.add(ITStaff5)
-"""
-session.commit()
-session.close()
 
 
 """ LAB TECHNICIANS """
@@ -1375,15 +1043,16 @@ class LabTechnician(Base):
     gender = Column(String)
     phone_number = Column(String)
     email = Column(String)
+    hospital_id = Column(String)
     address = Column(String)
     city = Column(String)
     state = Column(String)
-    zip_code = Column(String)
+    postal_code = Column(String)
     country = Column(String)
-    hospital_id = Column(String)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, firstname, lastname, dob, gender, phone_number, email, address, city, state, zip_code, country, hospital_id):
+    def __init__(self, firstname, lastname, dob, gender, phone_number, email, hospital_id, address, city, state, postal_code, country):
         self.id = str(uuid.uuid4().hex[:6].upper())
         self.firstname = firstname
         self.lastname = lastname
@@ -1391,147 +1060,74 @@ class LabTechnician(Base):
         self.gender = gender
         self.phone_number = phone_number
         self.email = email
+        self.hospital_id = hospital_id
         self.address = address
         self.city = city
         self.state = state
-        self.zip_code = zip_code
+        self.postal_code = postal_code
         self.country = country
-        self.hospital_id = hospital_id
 
     def __repr__(self):
-        return f"({self.id}, {self.firstname}, {self.lastname}, {self.dob},{self.gender}, {self.phone_number}, {self.email}, {self.address}, {self.city}, {self.state}, {self.zip_code}, {self.country}, {self.hospital_id})"
-
-
-session = SessionLocal()
-"""
-labtechnician = LabTechnician("Susan", "Koech", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-                              "Dagoretti", "Nairobi", "Nairobi", "00100", "Kenya", 1)
-labtechnician1 = LabTechnician("Susan", "Koech", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-                               "Dagoretti", "Nairobi", "Nairobi", "00100", "Kenya", 2)
-labtechnician2 = LabTechnician("Susan", "Koech", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-                               "Dagoretti", "Nairobi", "Nairobi", "00100", "Kenya", 3)
-labtechnician3 = LabTechnician("Susan", "Koech", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-                               "Dagoretti", "Nairobi", "Nairobi", "00100", "Kenya", 4)
-labtechnician4 = LabTechnician("Susan", "Koech", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-                               "Dagoretti", "Nairobi", "Nairobi", "00100", "Kenya", 5)
-labtechnician5 = LabTechnician("Susan", "Koech", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-                               "Dagoretti", "Nairobi", "Nairobi", "00100", "Kenya", 6)
-
-
-session.add(labtechnician)
-session.add(labtechnician1)
-session.add(labtechnician2)
-session.add(labtechnician3)
-session.add(labtechnician4)
-session.add(labtechnician5)
-"""
-session.commit()
-session.close()
-
+        return f"({self.id}, {self.firstname}, {self.lastname}, {self.dob},{self.gender}, {self.phone_number}, {self.email},  {self.hospital_id}, {self.address}, {self.city}, {self.state}, {self.postal_code}, {self.country})"
 
 """ LAB TESTS """
 class LabTest(Base):
     __tablename__ = "lab_tests"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    patient_id = Column(String, ForeignKey('patients.id'))
+    lab_technician_id = Column(String, ForeignKey('lab_technicians.id'))
     test_name = Column(String)
+    test_date = Column(Date)
     test_description = Column(String)
     test_type = Column(String)  # blood test urine test
     test_cost = Column(Float)
+    test_result = Column(String)
+    comments = Column(Text)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    ##updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, test_name, test_description, test_type, test_cost):
+    def __init__(self, patient_id, lab_technician_id,  test_name, test_date, test_description, test_type, test_cost, test_result, comments):
+        self.patient_id = patient_id
+        self.lab_technician_id = lab_technician_id
         self.test_name = test_name
+        self.test_date = test_date
         self.test_description = test_description
         self.test_type = test_type
         self.test_cost = test_cost
-
-    def __repr__(self):
-        return f"({self.id}, {self.test_name}, {self.test_description}, {self.test_type}, {self.test_cost})"
-
-
-session = SessionLocal()
-"""
-lab_test = LabTest("Blood test", "Haemoglobin blood test",
-                   "Blood test", 900.00)
-lab_test1 = LabTest("Urine test", "Urine test", "Urine test", 1900.00)
-lab_test2 = LabTest("Blood test", "Haemoglobin blood test",
-                    "Blood test", 2900.00)
-lab_test3 = LabTest("Urine test", "Urine test", "Urine test", 3900.00)
-lab_test4 = LabTest("Blood test", "Haemoglobin blood test",
-                    "Blood test", 4900.00)
-lab_test5 = LabTest("Urine test", "Urine test", "Urine test", 5900.00)
-
-
-session.add(lab_test)
-session.add(lab_test1)
-session.add(lab_test2)
-session.add(lab_test3)
-session.add(lab_test4)
-session.add(lab_test5)
-"""
-session.commit()
-session.close()
-
-
-""" LAB TEST RESULTS """
-class LabTestResult(Base):
-    __tablename__ = "lab_test_results"
-
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    patient_id = Column(Integer)
-    lab_test_name = Column(String)
-    test_date = Column(Date)
-    test_result = Column(String)
-    units = Column(String)
-    comments = Column(Text)
-    created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
-    # updated_at
-
-    def __init__(self, patient_id, lab_test_name, test_date, test_result, units, comments):
-        self.patient_id = patient_id
-        self.lab_test_name = lab_test_name
-        self.test_date = test_date
         self.test_result = test_result
-        self.units = units
         self.comments = comments
 
     def __repr__(self):
-        return f"({self.id}, {self.patient_id}, {self.lab_test_name}, {self.test_date}, {self.test_result}, {self.units}, {self.comments})"
+        return f"({self.id}, {self.patient_id}, {self.lab_technician_id}, {self.test_name}, {self.test_date},  {self.test_description}, {self.test_type}, {self.test_cost},{self.test_result}, {self.comments})"
 
 
-session = SessionLocal()
-"""
-test_result = LabTestResult(
-    1, "test name", "2023-12-12", "Positive", "milligrams", "No comment")
-test_result1 = LabTestResult(
-    2, "test name", "2023-12-12", "Positive", "milligrams", "No comment")
-test_result2 = LabTestResult(
-    3, "test name", "2023-12-12", "Positive", "milligrams", "No comment")
-test_result3 = LabTestResult(
-    4, "test name", "2023-12-12", "Positive", "milligrams", "No comment")
-test_result4 = LabTestResult(
-    5, "test name", "2023-12-12", "Positive", "milligrams", "No comment")
-test_result5 = LabTestResult(
-    6, "test name", "2023-12-12", "Positive", "milligrams", "No comment")
+""" LAB RESULTS """
+class LabResult(Base):
+    __tablename__ = "lab_results"
 
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    patient_id = Column(String, ForeignKey('patients.id'))
+    test_result = Column(String)
+    comments = Column(Text)
+    created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-session.add(test_result)
-session.add(test_result1)
-session.add(test_result2)
-session.add(test_result3)
-session.add(test_result4)
-session.add(test_result5)
-"""
-session.commit()
-session.close()
+    def __init__(self, patient_id, test_result, comments):
+        self.patient_id = patient_id
+        self.test_result = test_result
+        self.comments = comments
+
+    def __repr__(self):
+        return f"({self.id}, {self.patient_id}, {self.test_result}, {self.comments})"
 
 """ MEDICATION ALERTS """
 class MedicationAlert(Base):
     __tablename__ = "medication_alerts"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    patient_id = Column(Integer)
+    patient_id = Column(String, ForeignKey('patients.id'))
+    doctor_id = Column(String, ForeignKey('doctors.id'))
     medication_id = Column(Integer)
     dosage = Column(Text)
     frequency = Column(Text)
@@ -1539,9 +1135,11 @@ class MedicationAlert(Base):
     alert_text = Column(Text)
     status = Column(Text)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, patient_id, medication_id, dosage, frequency, alert_date, alert_text, status):
+    def __init__(self, patient_id,doctor_id, medication_id, dosage, frequency, alert_date, alert_text, status):
         self.patient_id = patient_id
+        self.doctor_id = doctor_id
         self.medication_id = medication_id
         self.dosage = dosage
         self.frequency = frequency
@@ -1550,45 +1148,20 @@ class MedicationAlert(Base):
         self.status = status
 
     def __repr__(self):
-        return f"({self.id}, {self.patient_id}, {self.medication_id}, {self.dosage}, {self.frequency}, {self.alert_date}, {self.alert_text}, {self.status})"
-
-
-session = SessionLocal()
-"""
-medication_alert = MedicationAlert(
-    1, 1, "Malaria pills", "Twice a day", "2025-03-13", "Don't forget to take your pills", "Sent")
-medication_alert1 = MedicationAlert(
-    2, 2, "Malaria pills", "Twice a day", "2025-03-13", "Don't forget to take your pills", "Pending")
-medication_alert2 = MedicationAlert(
-    3, 3, "Malaria pills", "Twice a day", "2025-03-13", "Don't forget to take your pills", "Sent")
-medication_alert3 = MedicationAlert(
-    4, 4, "Malaria pills", "Twice a day", "2025-03-13", "Don't forget to take your pills", "Failed")
-medication_alert4 = MedicationAlert(
-    5, 5, "Malaria pills", "Twice a day", "2025-03-13", "Don't forget to take your pills", "Sent")
-medication_alert5 = MedicationAlert(
-    6, 6, "Malaria pills", "Twice a day", "2025-03-13", "Don't forget to take your pills", "Sent")
-
-session.add(medication_alert)
-session.add(medication_alert1)
-session.add(medication_alert2)
-session.add(medication_alert3)
-session.add(medication_alert4)
-session.add(medication_alert5)
-"""
-session.commit()
-session.close()
+        return f"({self.id}, {self.patient_id}, {self.doctor_id}, {self.medication_id}, {self.dosage}, {self.frequency}, {self.alert_date}, {self.alert_text}, {self.status})"
 
 """ MEDICAL CONDITION """
 class MedicalCondition(Base):
     __tablename__ = "medical_conditions"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    patient_id = Column(Integer, )
+    patient_id = Column(String, ForeignKey('patients.id'))
     name = Column(String(50))
     description = Column(Text)
     diagnosis_date = Column(Date)
     treatment = Column(Text)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
     def __init__(self, patient_id, name, description, diagnosis_date, treatment):
         self.patient_id = patient_id
@@ -1600,32 +1173,6 @@ class MedicalCondition(Base):
     def __repr__(self):
         return f"({self.id}, {self.patient_id}, {self.name}, {self.description}, {self.diagnosis_date}, {self.treatment})"
 
-
-session = SessionLocal()
-"""
-medication_condition = MedicalCondition(
-    1, "Diabetes", "Disease caused by sugar", "2025-03-13", "Insulin")
-medication_condition1 = MedicalCondition(
-    2, "Diabetes", "Disease caused by sugar", "2025-03-13", "Insulin")
-medication_condition2 = MedicalCondition(
-    3, "Diabetes", "Disease caused by sugar", "2025-03-13", "Insulin")
-medication_condition3 = MedicalCondition(
-    4, "Diabetes", "Disease caused by sugar", "2025-03-13", "Insulin")
-medication_condition4 = MedicalCondition(
-    5, "Diabetes", "Disease caused by sugar", "2025-03-13", "Insulin")
-medication_condition5 = MedicalCondition(
-    6, "Diabetes", "Disease caused by sugar", "2025-03-13", "Insulin")
-
-session.add(medication_condition)
-session.add(medication_condition1)
-session.add(medication_condition2)
-session.add(medication_condition3)
-session.add(medication_condition4)
-session.add(medication_condition5)
-"""
-session.commit()
-session.close()
-
 """ MEDICAL DEVICES """
 class MedicalDevice(Base):
     __tablename__ = "medical_devices"
@@ -1635,146 +1182,79 @@ class MedicalDevice(Base):
     manufacturer = Column(String)
     model = Column(String)
     serial_number = Column(String)
-    hospital = Column(String)
-    department = Column(String)
+    hospital_id = Column(String, ForeignKey('hospitals.id'))
+    department_id = Column(Integer, ForeignKey('departments.id'))
     last_maintenance = Column(Date)
     next_maintenance = Column(Date)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, name, manufacturer, model, serial_number, hospital, department, last_maintenance, next_maintenance):
+    def __init__(self, name, manufacturer, model, serial_number, hospital_id, department_id, last_maintenance, next_maintenance):
         self.name = name
         self.manufacturer = manufacturer
         self.model = model
         self.serial_number = serial_number
-        self.hospital = hospital
-        self.department = department
+        self.hospital_id = hospital_id
+        self.department_id = department_id
         self.last_maintenance = last_maintenance
         self.next_maintenance = next_maintenance
 
     def __repr__(self):
-        return f"({self.id}, {self.name}, {self.manufacturer}, {self.model}, {self.serial_number}, {self.hospital}, {self.department}, {self.last_maintenance}, {self.next_maintenance})"
-
-
-session = SessionLocal()
-"""
-medical_device = MedicalDevice(
-    "Printer", "HP", "HP-900GHES", "239-GTJD-249", "1", "1", "2021-07-16", "2022-07-16")
-medical_device1 = MedicalDevice(
-    "Printer", "HP", "HP-900GHES", "239-GTJD-249", "2", "2", "2021-07-16", "2022-07-16")
-medical_device2 = MedicalDevice(
-    "Printer", "HP", "HP-900GHES", "239-GTJD-249", "3", "3", "2021-07-16", "2022-07-16")
-medical_device3 = MedicalDevice(
-    "Printer", "HP", "HP-900GHES", "239-GTJD-249", "4", "4", "2021-07-16", "2022-07-16")
-medical_device4 = MedicalDevice(
-    "Printer", "HP", "HP-900GHES", "239-GTJD-249", "5", "5", "2021-07-16", "2022-07-16")
-medical_device5 = MedicalDevice(
-    "Printer", "HP", "HP-900GHES", "239-GTJD-249", "6", "6", "2021-07-16", "2022-07-16")
-
-session.add(medical_device)
-session.add(medical_device1)
-session.add(medical_device2)
-session.add(medical_device3)
-session.add(medical_device4)
-session.add(medical_device5)
-"""
-session.commit()
-session.close()
-
+        return f"({self.id}, {self.name}, {self.manufacturer}, {self.model}, {self.serial_number}, {self.hospital_id}, {self.department_id}, {self.last_maintenance}, {self.next_maintenance})"
 
 """ MEDICAL IMAGES """
 class MedicalImage(Base):
     __tablename__ = "medical_images"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    patient_id = Column(Integer)
-    doctor_id = Column(Integer)
+    patient_id = Column(String, ForeignKey('patients.id'))
     image_type = Column(String)
     image_date = Column(Date)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    ##updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, patient_id, doctor_id, image_type, image_date):
+    def __init__(self, patient_id, image_type, image_date):
         self.patient_id = patient_id
-        self.doctor_id = doctor_id
         self.image_type = image_type
         self.image_date = image_date
 
     def __repr__(self):
-        return f"({self.id}, {self.patient_id}, {self.doctor_id}, {self.image_type}, {self.image_date})"
-
-
-session = SessionLocal()
-"""
-medical_image = MedicalImage(1, 1, "X-Ray", "2024-04-14")
-medical_image1 = MedicalImage(2, 2, "X-Ray", "2024-04-14")
-medical_image2 = MedicalImage(3, 3, "X-Ray", "2024-04-14")
-medical_image3 = MedicalImage(4, 4, "X-Ray", "2024-04-14")
-medical_image4 = MedicalImage(5, 5, "X-Ray", "2024-04-14")
-medical_image5 = MedicalImage(6, 6, "X-Ray", "2024-04-14")
-
-session.add(medical_image)
-session.add(medical_image1)
-session.add(medical_image2)
-session.add(medical_image3)
-session.add(medical_image4)
-session.add(medical_image5)
-"""
-session.commit()
-session.close()
-
+        return f"({self.id}, {self.patient_id}, {self.image_type}, {self.image_date})"
 
 """MEDICAL NOTES """
 class MedicalNote(Base):
     __tablename__ = "medical_notes"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    patient_id = Column(Integer)
-    doctor_id = Column(Integer)
+    patient_id = Column(String, ForeignKey('patients.id'))
+    doctor_id = Column(String, ForeignKey('doctors.id'))
     date = Column(Date)
-    content = Column(Text)
+    note = Column(Text)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
-    # updated_at
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, patient_id, doctor_id, date, content):
+    def __init__(self, patient_id, doctor_id, date, note):
         self.patient_id = patient_id
         self.doctor_id = doctor_id
         self.date = date
-        self.content = content
+        self.note = note
 
     def __repr__(self):
-        return f"({self.id}, {self.patient_id}, {self.doctor_id}, {self.date}, {self.content})"
+        return f"({self.id}, {self.patient_id}, {self.doctor_id}, {self.date}, {self.note})"
 
-
-session = SessionLocal()
-
-medical_note = MedicalNote(1, 1, "2024-04-14", "Needs monitoring")
-medical_note1 = MedicalNote(2, 2, "2024-04-14", "Needs monitoring")
-medical_note2 = MedicalNote(3, 3, "2024-04-14", "Needs monitoring")
-medical_note3 = MedicalNote(4, 4, "2024-04-14", "Needs monitoring")
-medical_note4 = MedicalNote(5, 5, "2024-04-14", "Needs monitoring")
-medical_note5 = MedicalNote(6, 6, "2024-04-14", "Needs monitoring")
-
-
-session.add(medical_note)
-session.add(medical_note1)
-session.add(medical_note2)
-session.add(medical_note3)
-session.add(medical_note4)
-session.add(medical_note5)
-
-session.commit()
-session.close()
 
 """ MEDICAL PROCEDURES"""
 class MedicalProcedure(Base):
     __tablename__ = "medical_procedures"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    patient_id = Column(Integer)
-    doctor_id = Column(Integer)
+    patient_id = Column(String, ForeignKey('patients.id'))
+    doctor_id = Column(String, ForeignKey('doctors.id'))
     name = Column(String)
     date = Column(Date)
     notes = Column(Text)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
     def __init__(self, patient_id, doctor_id, name, date, notes):
         self.patient_id = patient_id
@@ -1787,93 +1267,42 @@ class MedicalProcedure(Base):
         return f"({self.id}, {self.patient_id}, {self.doctor_id}, {self.name}, {self.date}, {self.notes})"
 
 
-session = SessionLocal()
-"""
-medical_procedure = MedicalProcedure(
-    1, 1, "Colon surgery", "2017-08-01", "Successful")
-medical_procedure1 = MedicalProcedure(
-    2, 2, "Colon surgery", "2017-08-01", "Successful")
-medical_procedure2 = MedicalProcedure(
-    3, 3, "Colon surgery", "2017-08-01", "Successful")
-medical_procedure3 = MedicalProcedure(
-    4, 4, "Colon surgery", "2017-08-01", "Successful")
-medical_procedure4 = MedicalProcedure(
-    5, 5, "Colon surgery", "2017-08-01", "Successful")
-medical_procedure5 = MedicalProcedure(
-    6, 6, "Colon surgery", "2017-08-01", "Successful")
-
-session.add(medical_procedure)
-session.add(medical_procedure1)
-session.add(medical_procedure2)
-session.add(medical_procedure3)
-session.add(medical_procedure4)
-session.add(medical_procedure5)
-"""
-session.commit()
-session.close()
-
 """ MEDICATION """
 class Medication(Base):
     __tablename__ = "medications"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    patient_id = Column(String, ForeignKey('patients.id'))
+    doctor_id = Column(String, ForeignKey('doctors.id'))
     name = Column(String)
     description = Column(String)
     route_of_administration = Column(String)  # oral topical intravenous
     dosage = Column(String)
     unit = Column(String)
     frequency = Column(String)  # twice daily once weekly
-    patient_id = Column(Integer)
-    doctor_id = Column(Integer)
+    
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, name, description, route_of_administration, dosage, unit, frequency, patient_id, doctor_id):
+    def __init__(self, patient_id, doctor_id, name, description, route_of_administration, dosage, unit, frequency):
+        self.patient_id = patient_id
+        self.doctor_id = doctor_id
         self.name = name
         self.description = description
         self.route_of_administration = route_of_administration
         self.dosage = dosage
         self.unit = unit
         self.frequency = frequency
-        self.patient_id = patient_id
-        self.doctor_id = doctor_id
+        
 
     def __repr__(self):
-        return f"({self.id}, {self.name}, {self.description}, {self.route_of_administration}, {self.dosage}, {self.unit}, {self.frequency}, {self.patient_id}, {self.doctor_id})"
-
-
-session = SessionLocal()
-"""
-medication = Medication("Malaria", "Caused by mosquitos",
-                        "oral", "4", "milligram", "Twice daily", 1, 1)
-medication1 = Medication("Malaria", "Caused by mosquitos",
-                         "oral", "5", "milligram", "Twice daily", 2, 2)
-medication2 = Medication("Malaria", "Caused by mosquitos",
-                         "oral", "6", "milligram", "Twice daily", 3, 3)
-medication3 = Medication("Malaria", "Caused by mosquitos",
-                         "oral", "7", "milligram", "Twice daily", 4, 4)
-medication4 = Medication("Malaria", "Caused by mosquitos",
-                         "oral", "8", "milligram", "Twice daily", 5, 5)
-medication5 = Medication("Malaria", "Caused by mosquitos",
-                         "oral", "9", "milligram", "Twice daily", 6, 6)
-
-
-session.add(medication)
-session.add(medication1)
-session.add(medication2)
-session.add(medication3)
-session.add(medication4)
-session.add(medication5)
-"""
-session.commit()
-session.close()
-
+        return f"({self.id}, {self.patient_id}, {self.doctor_id}, {self.name}, {self.description}, {self.route_of_administration}, {self.dosage}, {self.unit}, {self.frequency})"
 
 """ NURSE """
 class Nurse(Base):
     __tablename__ = "nurses"
 
     id = Column(String, primary_key=True)
-    #user_id = Column(String, ForeignKey('users.id'))
     firstname = Column(String)
     lastname = Column(String)
     dob = Column(Date)
@@ -1891,6 +1320,7 @@ class Nurse(Base):
     verified = Column(Boolean)
     
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
     #user = relationship("User", backref="nurse")
 
@@ -1916,44 +1346,17 @@ class Nurse(Base):
     def __repr__(self):
         return f"({self.id}, {self.firstname}, {self.lastname}, {self.dob},{self.gender}, {self.phone_number}, {self.email}, {self.licence_number}, {self.hospital_id}, {self.address}, {self.city}, {self.state}, {self.postal_code}, {self.country}, {self.work_schedule}, {self.verified})"
 
-
-session = SessionLocal()
-"""
-nurse = Nurse("Susan", "Koech", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-              "134", 1, "Dagoretti", "Nairobi", "Nairobi", "00100", "Kenya", "Mon, Tue, Wed", True)
-nurse1 = Nurse("Susan", "Koech", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-               "134", 2, "Dagoretti", "Nairobi", "Nairobi", "00100", "Kenya", "Mon, Tue, Wed", True)
-nurse2 = Nurse("Susan", "Koech", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-               "134", 3,  "Dagoretti", "Nairobi", "Nairobi", "00100", "Kenya", "Mon, Tue, Wed", True)
-nurse3 = Nurse("Susan", "Koech", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-               "134", 4, "Dagoretti", "Nairobi", "Nairobi", "00100", "Kenya", "Mon, Tue, Wed", True)
-nurse4 = Nurse("Susan", "Koech", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-               "134", 5, "Dagoretti", "Nairobi", "Nairobi", "00100", "Kenya", "Mon, Tue, Wed", True)
-nurse5 = Nurse("Susan", "Koech", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-               "134", 6, "Dagoretti", "Nairobi", "Nairobi", "00100", "Kenya", "Mon, Tue, Wed", True)
-
-
-session.add(nurse)
-session.add(nurse1)
-session.add(nurse2)
-session.add(nurse3)
-session.add(nurse4)
-session.add(nurse5)
-"""
-session.commit()
-session.close()
-
-
 """ PATIENT CONSENT"""
 class PatientConsent(Base):
     __tablename__ = "patient_consents"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    patient_id = Column(Integer)
+    patient_id = Column(String, ForeignKey('patients.id'))
     consent_type = Column(String)  # treatment release of medical information
     consent_date = Column(Date)
     expiration_date = Column(Date)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
     def __init__(self, patient_id, consent_type, consent_date, expiration_date):
         self.patient_id = patient_id
@@ -1965,35 +1368,17 @@ class PatientConsent(Base):
         return f"({self.id}, {self.patient_id}, {self.consent_type}, {self.consent_date}, {self.expiration_date})"
 
 
-session = SessionLocal()
-"""
-patient_consent = PatientConsent(1, "Treatment", "2015-08-15", "2019-09-18")
-patient_consent1 = PatientConsent(2, "Treatment", "2015-08-15", "2019-09-18")
-patient_consent2 = PatientConsent(3, "Treatment", "2015-08-15", "2019-09-18")
-patient_consent3 = PatientConsent(4, "Treatment", "2015-08-15", "2019-09-18")
-patient_consent4 = PatientConsent(5, "Treatment", "2015-08-15", "2019-09-18")
-patient_consent5 = PatientConsent(6, "Treatment", "2015-08-15", "2019-09-18")
-
-session.add(patient_consent)
-session.add(patient_consent1)
-session.add(patient_consent2)
-session.add(patient_consent3)
-session.add(patient_consent4)
-session.add(patient_consent5)
-"""
-session.commit()
-session.close()
-
 """ PATIENT FEEDBACK """
 class PatientFeedback(Base):
     __tablename__ = "patient_feedback"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    patient_id = Column(Integer)
-    doctor_id = Column(Integer)
+    patient_id = Column(String, ForeignKey('patients.id'))
+    doctor_id = Column(String, ForeignKey('doctors.id'))
     date = Column(Date)
     text = Column(Text)
     rating = Column(Integer)
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
     def __init__(self, patient_id, doctor_id, date, text, rating):
         self.patient_id = patient_id
@@ -2005,46 +1390,21 @@ class PatientFeedback(Base):
     def __repr__(self):
         return f"({self.id}, {self.patient_id}, {self.doctor_id}, {self.date}, {self.text}, {self.rating})"
 
-
-session = SessionLocal()
-"""
-patient_feedback = PatientFeedback(
-    1, 1, "2015-08-15", "Good doctor. Highly recommend", 5)
-patient_feedback1 = PatientFeedback(
-    2, 2, "2015-08-15", "Good doctor. Highly recommend", 1)
-patient_feedback2 = PatientFeedback(
-    3, 3, "2015-08-15", "Good doctor. Highly recommend", 2)
-patient_feedback3 = PatientFeedback(
-    4, 4, "2015-08-15", "Good doctor. Highly recommend", 3)
-patient_feedback4 = PatientFeedback(
-    5, 5, "2015-08-15", "Good doctor. Highly recommend", 4)
-patient_feedback5 = PatientFeedback(
-    6, 6, "2015-08-15", "Good doctor. Highly recommend", 5)
-
-session.add(patient_feedback)
-session.add(patient_feedback1)
-session.add(patient_feedback2)
-session.add(patient_feedback3)
-session.add(patient_feedback4)
-session.add(patient_feedback5)
-"""
-session.commit()
-session.close()
-
 """ PATIENT VISIT """
 class PatientVisit(Base):
     __tablename__ = "patient_visits"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    #user_id = Column(String, ForeignKey('users.id'))
-    patient_id = Column(Integer)
-    doctor_id = Column(Integer)
-    appointment_id = Column(Integer)
+    patient_id = Column(String, ForeignKey('patients.id'))
+    doctor_id = Column(String, ForeignKey('doctors.id'))
+    appointment_id = Column(Integer, ForeignKey('appointments.id'))
     visit_date = Column(Date)
     chief_complaint = Column(Text)
     diagnosis_id = Column(Integer)
     notes = Column(Text)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
 
     #user = relationship("User", backref="patient")
 
@@ -2061,37 +1421,11 @@ class PatientVisit(Base):
         return f"({self.id}, {self.patient_id}, {self.doctor_id}, {self.appointment_id}, {self.visit_date}, {self.chief_complaint}, {self.diagnosis_id}, {self.notes})"
 
 
-session = SessionLocal()
-"""
-patient_visit = PatientVisit(
-    1, 1, 1, "2015-08-15", "Fever and nausea", 1, "Patient doing okay")
-patient_visit1 = PatientVisit(
-    2, 2, 2, "2015-08-15", "Fever and nausea", 2, "Patient doing okay")
-patient_visit2 = PatientVisit(
-    3, 3, 3, "2015-08-15", "Fever and nausea", 3, "Patient doing okay")
-patient_visit3 = PatientVisit(
-    4, 4, 4, "2015-08-15", "Fever and nausea", 4, "Patient doing okay")
-patient_visit4 = PatientVisit(
-    5, 5, 5, "2015-08-15", "Fever and nausea", 5, "Patient doing okay")
-patient_visit5 = PatientVisit(
-    6, 6, 6, "2015-08-15", "Fever and nausea", 6, "Patient doing okay")
-
-session.add(patient_visit)
-session.add(patient_visit1)
-session.add(patient_visit2)
-session.add(patient_visit3)
-session.add(patient_visit4)
-session.add(patient_visit5)
-"""
-session.commit()
-session.close()
-
 """ PATIENT """
 class Patient(Base):
     __tablename__ = "patients"
 
     id = Column(String, primary_key=True)
-    #user_id = Column(String, ForeignKey('users.id'))
     # Personal Information
     firstname = Column(String)
     middlename = Column(String)
@@ -2117,8 +1451,10 @@ class Patient(Base):
     effective_date = Column(Date)
     expiration_date = Column(Date)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
 
+    #admissions = relationship("Admission", backref="patient")
     #user = relationship("User", backref="patient")
 
     def __init__(self, firstname, middlename, lastname, dob, gender, phonenumber, email, address, city, state, postal_code, country, emergency_contact_name, emergency_contact_phone, relationship, insurance, provider_name, policy_number, group_number, effective_date, expiration_date):
@@ -2149,36 +1485,11 @@ class Patient(Base):
         return f"({self.id}, {self.firstname}, {self.middlename}, {self.lastname}, {self.dob}, {self.gender}, {self.phonenumber}, {self.email}, {self.address}, {self.city}, {self.state}, {self.postal_code}, {self.country}, {self.emergency_contact_name}, {self.emergency_contact_phone}, {self.relationship}, {self.insurance}, {self.provider_name}, {self.policy_number}, {self.group_number}, {self.effective_date}, {self.expiration_date})"
 
 
-session = SessionLocal()
-"""
-patient = Patient("fortune", "amombo", "amombo", "2015-08-15", "male", "745369800", "amombofortune77@gmail.com", "P.O Box 980", "Nairobi", "Kileleshwa",
-                  "00100", "Kenya", "Dennis Okutoyi", "735400400", "son", True, "Britam Insurance", "28930", "34829", "2023-12-12", "2025-12-19")
-patient1 = Patient("fortune","amombo", "amombo", "2015-08-15", "male", "745369800", "amombofortune77@gmail.com", "P.O Box 980", "Nairobi", "Kileleshwa",
-                   "00100", "Kenya", "Dennis Okutoyi", "735400400", "son", False, "Britam Insurance", "28930", "34829", "2023-12-12", "2025-12-19")
-patient2 = Patient("fortune","amombo", "amombo", "2015-08-15", "male", "745369800", "amombofortune77@gmail.com", "P.O Box 980", "Nairobi", "Kileleshwa",
-                   "00100", "Kenya", "Dennis Okutoyi", "735400400", "son", True, "Britam Insurance", "28930", "34829", "2023-12-12", "2025-12-19")
-patient3 = Patient("fortune", "amombo", "amombo", "2015-08-15", "male", "745369800", "amombofortune77@gmail.com", "P.O Box 980", "Nairobi", "Kileleshwa",
-                   "00100", "Kenya", "Dennis Okutoyi", "735400400", "son", False, "Britam Insurance", "28930", "34829", "2023-12-12", "2025-12-19")
-patient4 = Patient("fortune", "amombo", "amombo", "2015-08-15", "male", "745369800", "amombofortune77@gmail.com", "P.O Box 980", "Nairobi", "Kileleshwa",
-                   "00100", "Kenya", "Dennis Okutoyi", "735400400", "son", True, "Britam Insurance", "28930", "34829", "2023-12-12", "2025-12-19")
-patient5 = Patient("fortune","amombo", "amombo", "2015-08-15", "male", "745369800", "amombofortune77@gmail.com", "P.O Box 980", "Nairobi", "Kileleshwa",
-                   "00100", "Kenya", "Dennis Okutoyi", "735400400", "son", False, "Britam Insurance", "28930", "34829", "2023-12-12", "2025-12-19")
-session.add(patient)
-session.add(patient1)
-session.add(patient2)
-session.add(patient3)
-session.add(patient4)
-session.add(patient5)
-"""
-session.commit()
-session.close()
-
 """ PHARMACIST """
 class Pharmacist(Base):
     __tablename__ = "pharmacists"
 
     id = Column(String, primary_key=True)
-    #user_id = Column(String, ForeignKey('users.id'))
     firstname = Column(String)
     lastname = Column(String)
     dob = Column(Date)
@@ -2189,14 +1500,16 @@ class Pharmacist(Base):
     address = Column(String)
     city = Column(String)
     state = Column(String)
-    zip_code = Column(String)
+    postal_code = Column(String)
     country = Column(String)
     verified = Column(Boolean)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
 
     #user = relationship("User", backref="pharmacist")
 
-    def __init__(self, firstname, lastname, dob, gender, phone_number, email, licence_number, address, city, state, zip_code, country, verified):
+    def __init__(self, firstname, lastname, dob, gender, phone_number, email, licence_number, address, city, state, postal_code, country, verified):
         self.id = str(uuid.uuid4().hex[:6].upper())
         self.firstname = firstname
         self.lastname = lastname
@@ -2208,39 +1521,12 @@ class Pharmacist(Base):
         self.address = address
         self.city = city
         self.state = state
-        self.zip_code = zip_code
+        self.postal_code = postal_code
         self.country = country
         self.verified = verified
 
     def __repr__(self):
-        return f"({self.id}, {self.firstname}, {self.lastname}, {self.dob},{self.gender}, {self.phone_number}, {self.email}, {self.licence_number}, {self.address}, {self.city}, {self.state}, {self.zip_code}, {self.country}, {self.verified})"
-
-
-session = SessionLocal()
-"""
-pharmacist = Pharmacist("Susan", "Koech", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-                        "134", "Dagoretti", "Nairobi", "Nairobi", "00100", "Kenya", True)
-pharmacist1 = Pharmacist("Susan", "Koech", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-                         "134", "Dagoretti", "Nairobi", "Nairobi", "00100", "Kenya", True)
-pharmacist2 = Pharmacist("Susan", "Koech", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-                         "134", "Dagoretti", "Nairobi", "Nairobi", "00100", "Kenya", True)
-pharmacist3 = Pharmacist("Susan", "Koech", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-                         "134", "Dagoretti", "Nairobi", "Nairobi", "00100", "Kenya", True)
-pharmacist4 = Pharmacist("Susan", "Koech", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-                         "134", "Dagoretti", "Nairobi", "Nairobi", "00100", "Kenya", True)
-pharmacist5 = Pharmacist("Susan", "Koech", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-                         "134", "Dagoretti", "Nairobi", "Nairobi", "00100", "Kenya", True)
-
-
-session.add(pharmacist)
-session.add(pharmacist1)
-session.add(pharmacist2)
-session.add(pharmacist3)
-session.add(pharmacist4)
-session.add(pharmacist5)
-"""
-session.commit()
-session.close()
+        return f"({self.id}, {self.firstname}, {self.lastname}, {self.dob},{self.gender}, {self.phone_number}, {self.email}, {self.licence_number}, {self.address}, {self.city}, {self.state}, {self.postal_code}, {self.country}, {self.verified})"
 
 
 """PRESCRIPTION """
@@ -2248,13 +1534,14 @@ class Prescription(Base):
     __tablename__ = "prescriptions"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    doctor_id = Column(Integer)
-    patient_id = Column(Integer)
+    patient_id = Column(String, ForeignKey('patients.id'))
+    doctor_id = Column(String, ForeignKey('doctors.id'))
     medication = Column(String)
     dosage = Column(String)
     instructions = Column(Text)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
-    # updated_at
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
 
     def __init__(self, doctor_id, patient_id, medication, dosage, instructions):
         self.doctor_id = doctor_id
@@ -2266,25 +1553,6 @@ class Prescription(Base):
     def __repr__(self):
         return f"({self.id}, {self.doctor_id}, {self.patient_id}, {self.medication}, {self.dosage}, {self.instructions})"
 
-
-session = SessionLocal()
-
-prescription = Prescription(1, 1, "malaria", "10", "Twice a day")
-prescription1 = Prescription(2, 2, "malaria", "10", "Twice a day")
-prescription2 = Prescription(3, 3, "malaria", "10", "Twice a day")
-prescription3 = Prescription(4, 4, "malaria", "10", "Twice a day")
-prescription4 = Prescription(5, 5, "malaria", "10", "Twice a day")
-prescription5 = Prescription(6, 6, "malaria", "10", "Twice a day")
-
-session.add(prescription)
-session.add(prescription1)
-session.add(prescription2)
-session.add(prescription3)
-session.add(prescription4)
-session.add(prescription5)
-
-session.commit()
-session.close()
 
 """ RECEPTIONISTS """
 class Receptionist(Base):
@@ -2304,6 +1572,8 @@ class Receptionist(Base):
     country = Column(String)
     hospital_id = Column(String)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
 
     def __init__(self, firstname, lastname, dob, gender, phone_number, email, address, city, state, zip_code, country, hospital_id):
         self.id = str(uuid.uuid4().hex[:6].upper())
@@ -2324,48 +1594,23 @@ class Receptionist(Base):
         return f"({self.id}, {self.firstname}, {self.lastname}, {self.dob},{self.gender}, {self.phone_number}, {self.email}, {self.address}, {self.city}, {self.state}, {self.zip_code}, {self.country}, {self.hospital_id})"
 
 
-session = SessionLocal()
-"""
-receptionist = Receptionist("Susan", "Koech", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-                            "Dagoretti", "Nairobi", "Nairobi", "00100", "Kenya", 1)
-receptionist1 = Receptionist("Susan", "Koech", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-                             "Dagoretti", "Nairobi", "Nairobi", "00100", "Kenya", 2)
-receptionist2 = Receptionist("Susan", "Koech", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-                             "Dagoretti", "Nairobi", "Nairobi", "00100", "Kenya", 3)
-receptionist3 = Receptionist("Susan", "Koech", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-                             "Dagoretti", "Nairobi", "Nairobi", "00100", "Kenya", 4)
-receptionist4 = Receptionist("Susan", "Koech", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-                             "Dagoretti", "Nairobi", "Nairobi", "00100", "Kenya", 5)
-receptionist5 = Receptionist("Susan", "Koech", "2019-09-15", "female", "725490873", "susankoech@gmail.com",
-                             "Dagoretti", "Nairobi", "Nairobi", "00100", "Kenya", 6)
-
-
-session.add(receptionist)
-session.add(receptionist1)
-session.add(receptionist2)
-session.add(receptionist3)
-session.add(receptionist4)
-session.add(receptionist5)
-"""
-session.commit()
-session.close()
-
-
 """ REFERRALS """
 class Referral(Base):
     __tablename__ = "referrals"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    referring_patient = Column(String)
-    referred_patient = Column(String)
-    referring_doctor = Column(String)
-    referred_doctor = Column(String)
-    referring_hospital = Column(String)
-    referred_hospital = Column(String)
+    referring_patient = Column(String, ForeignKey('patients.id'))
+    referred_patient = Column(String, ForeignKey('patients.id'))
+    referring_doctor = Column(String, ForeignKey('doctors.id'))
+    referred_doctor = Column(String, ForeignKey('doctors.id'))
+    referring_hospital = Column(String, ForeignKey('hospitals.id'))
+    referred_hospital = Column(String, ForeignKey('hospitals.id'))
     referral_date = Column(Date)
     referral_reason = Column(Text)
     status = Column(String)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
 
     def __init__(self, referring_patient, referred_patient, referring_doctor, referred_doctor, referring_hospital, referred_hospital, referral_date, referral_reason, status):
         self.referring_patient = referring_patient
@@ -2381,33 +1626,6 @@ class Referral(Base):
     def __repr__(self):
         return f"({self.id}, {self.referring_patient}, {self.referred_patient}, {self.referring_doctor}, {self.referred_doctor}, {self.referring_hospital}, {self.referred_hospital}, {self.referral_date}, {self.referral_reason}, {self.status})"
 
-
-session = SessionLocal()
-"""
-referral = Referral("1", "1", "1", "1", "1", "1", "2024-09-18", "Good services", "Done")
-referral1 = Referral("2", "2", "2", "2", "2", "2", "2024-09-18",
-                     "Good services", "Pending")
-referral2 = Referral("3", "3", "3", "3", "3", "3", "2024-09-18",
-                     "Good services", "Done")
-referral3 = Referral("4", "4", "4", "4", "4", "4", "2024-09-18",
-                     "Good services", "Pending")
-referral4 = Referral("5", "5", "5", "5", "5", "5",  "2024-09-18",
-                     "Good services", "Done")
-referral5 = Referral("6", "6", "6", "6", "6", "6", "2024-09-18",
-                     "Good services", "Done")
-
-
-session.add(referral)
-session.add(referral1)
-session.add(referral2)
-session.add(referral3)
-session.add(referral4)
-session.add(referral5)
-"""
-session.commit()
-session.close()
-
-
 """ SPECIALTY """
 class Specialty(Base):
     __tablename__ = "specialties"
@@ -2415,14 +1633,18 @@ class Specialty(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     name = Column(String)
     description = Column(String)
+    doctor_id = Column(String, ForeignKey('doctors.id'))
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, name, description):
+
+    def __init__(self, name, description, doctor_id):
         self.name = name
         self.description = description
+        self.doctor_id = doctor_id
 
     def __repr__(self):
-        return f"({self.id}, {self.name}, {self.description})"
+        return f"({self.id}, {self.name}, {self.description}, {self.doctor_id})"
 
 
 session = SessionLocal()
@@ -2492,56 +1714,63 @@ session.add(specialty29)
 session.commit()
 session.close()
 
+"""TIME SLOTS"""
+class TimeSlot(Base):
+    __tablename__ = 'time_slots'
+
+    id = Column(Integer, primary_key=True)
+    doctor_id = Column(String, ForeignKey('doctors.id'))
+    appointment_date = Column(Date)
+    appointment_start_time = Column(String)
+    appointment_end_time = Column(String)
+    availability = Column(Boolean, default=True)
+    created_at = Column(TIMESTAMP, server_default=func.now())
+    updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
+    def __init__(self, doctor_id, appointment_date, appointment_start_time, appointment_end_time, availability ):
+        self.doctor_id = doctor_id
+        self.appointment_date = appointment_date
+        self.appointment_start_time = appointment_start_time
+        self.appointment_end_time = appointment_end_time
+        self.availability = availability
+
+    def __repr__(self):
+        return f"({self.id},  {self.doctor_id}, {self.appointment_date}, {self.appointment_start_time}, {self.appointment_end_time}, {self.availability})"
+
+
+
 """ USERS """
 class User(Base):
     __tablename__ = "users"
 
     id = Column(String, primary_key=True)
-    email = Column(String)
-    password = Column(String)
-    role = Column(String) #patient, doctor, nurse, company
+    email = Column(String, nullable=False, unique=True)
+    password = Column(String, nullable=False)
     registration_date = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    created_at = Column(TIMESTAMP, server_default=func.now())
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, email, password, role):
+    def __init__(self, email, password):
         self.id = str(uuid.uuid4().hex[:6].upper())
         self.email = email
-        self.password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-        self.role = role
+        self.password = password
 
     def __repr__(self):
-        return f"({self.id}, {self.email}, {self.role})"
-
-
-session = SessionLocal()
-"""
-user = User("example@example.com", "password123", "patient")
-user1 = User("example@example.com", "shikyuku345", "doctor")
-user2 = User( "example@example.com", "password123", "hospital")
-user3 = User("example@example.com", "password123", "nurse")
-user4 = User( "example@example.com", "password123", "pharmacy")
-user5 = User( "example@example.com", "password123", "patient")
-
-session.add(user)
-session.add(user1)
-session.add(user2)
-session.add(user3)
-session.add(user4)
-session.add(user5)
-"""
-session.commit()
-session.close()
+        return f"({self.id}, {self.email})"
 
 """ VACCINATION """
 class Vaccination(Base):
     __tablename__ = "vaccinations"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    patient_id = Column(Integer, )
+    patient_id = Column(String, ForeignKey('patients.id'))
     vaccine_name = Column(String)
     administered_by = Column(String)
     administered_at = Column(TIMESTAMP(timezone=True))
     next_dose_due = Column(Date)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
 
     def __init__(self, patient_id, vaccine_name, administered_by, administered_at, next_dose_due):
         self.patient_id = patient_id
@@ -2550,40 +1779,13 @@ class Vaccination(Base):
         self.administered_at = administered_at
         self.next_dose_due = next_dose_due
 
-
-session = SessionLocal()
-"""
-vaccination = Vaccination(
-    1, "Pfizer vaccine", "Dr. Sikhwele", "2024-09-18", "2024-10-18")
-vaccination1 = Vaccination(
-    2, "Moderna vaccine", "Dr. Sikhwele", "2024-09-18", "2024-10-18")
-vaccination2 = Vaccination(
-    3, "Pfizer vaccine", "Dr. Sikhwele", "2024-09-18", "2024-10-18")
-vaccination3 = Vaccination(4, "Astra Zeneca vaccine",
-                           "Dr. Sikhwele", "2024-09-18", "2024-10-18")
-vaccination4 = Vaccination(
-    5, "Pfizer vaccine", "Dr. Sikhwele", "2024-09-18", "2024-10-18")
-vaccination5 = Vaccination(
-    6, "Pfizer vaccine", "Dr. Sikhwele", "2024-09-18", "2024-10-18")
-
-session.add(vaccination)
-session.add(vaccination1)
-session.add(vaccination2)
-session.add(vaccination3)
-session.add(vaccination4)
-session.add(vaccination5)
-"""
-session.commit()
-session.close()
-
-
 """ VITAL SIGNS """
 class VitalSign(Base):
     __tablename__ = "vital_signs"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    patient_id = Column(Integer)
-    doctor_id = Column(Integer)
+    patient_id = Column(String, ForeignKey('patients.id'))
+    doctor_id = Column(String, ForeignKey('doctors.id'))
     heart_rate = Column(Float)
     blood_pressure_systolic = Column(Float)
     blood_pressure_diastolic = Column(Float)
@@ -2594,6 +1796,8 @@ class VitalSign(Base):
     oxygen_saturation = Column(Float)
     recorded_at = Column(TIMESTAMP(timezone=True))
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
 
     def __init__(self, patient_id, doctor_id, heart_rate, blood_pressure_systolic, blood_pressure_diastolic, respiratory_rate, temperature, height, weight, oxygen_saturation, recorded_at):
         self.patient_id = patient_id
@@ -2611,111 +1815,52 @@ class VitalSign(Base):
     def __repr__(self):
         return f"({self.id}, {self.patient_id}, {self.doctor_id}, {self.heart_rate}, {self.blood_pressure_systolic}, {self.blood_pressure_diastolic}, {self.respiratory_rate}, {self.temperature}, {self.height}, {self.weight}, {self.oxygen_saturation}, {self.recorded_at})"
 
-
-session = SessionLocal()
-"""
-vital_sign = VitalSign(1, 1, 24, 56, 56, 102, 34, 170, 75, 390, "2023-09-09")
-vital_sign1 = VitalSign(1, 1, 24, 56, 56, 102, 34, 170, 75, 390, "2023-09-09")
-vital_sign2 = VitalSign(1, 1, 24, 56, 56, 102, 34, 170, 75, 390, "2023-09-09")
-vital_sign3 = VitalSign(1, 1, 24, 56, 56, 102, 34, 170, 75, 390, "2023-09-09")
-vital_sign4 = VitalSign(1, 1, 24, 56, 56, 102, 34, 170, 75, 390, "2023-09-09")
-vital_sign5 = VitalSign(1, 1, 24, 56, 56, 102, 34, 170, 75, 390, "2023-09-09")
-
-
-session.add(vital_sign)
-session.add(vital_sign1)
-session.add(vital_sign2)
-session.add(vital_sign3)
-session.add(vital_sign4)
-session.add(vital_sign5)
-"""
-session.commit()
-session.close()
-
 """ WARD """
 class Ward(Base):
     __tablename__ = "wards"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    hospital_id = Column(String, ForeignKey('hospitals.id'))
     name = Column(String)
     type = Column(String)
     capacity = Column(Integer)
-    location = Column(String)
-    hospital_id = Column(Integer)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+   #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, name, type, capacity, location, hospital_id):
+
+    def __init__(self, hospital_id, name, type, capacity, location ):
+        self.hospital_id = hospital_id
         self.name = name
         self.type = type
         self.capacity = capacity
         self.location = location
-        self.hospital_id = hospital_id
 
     def __repr__(self):
-        return f"({self.id}, {self.name}, {self.type}, {self.capacity}, {self.location}, {self.hospital_id})"
-
-
-session = SessionLocal()
-"""
-ward = Ward("Orthopedics", "Orthopedics", 240, "Left Wing", 1)
-ward1 = Ward("Orthopedics", "Orthopedics", 240, "Left Wing", 2)
-ward2 = Ward("Orthopedics", "Orthopedics", 240, "Left Wing", 3)
-ward3 = Ward("Orthopedics", "Orthopedics", 240, "Left Wing", 4)
-ward4 = Ward("Orthopedics", "Orthopedics", 240, "Left Wing", 5)
-ward5 = Ward("Orthopedics", "Orthopedics", 240, "Left Wing", 6)
-
-session.add(ward)
-session.add(ward1)
-session.add(ward2)
-session.add(ward3)
-session.add(ward4)
-session.add(ward5)
-"""
-session.commit()
-session.close()
-
+        return f"({self.id},  {self.hospital_id}, {self.name}, {self.type}, {self.capacity}, {self.location})"
 
 """ WORK SCHEDULE """
 class WorkSchedule(Base):
     __tablename__ = "work_schedules"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    doctor = Column(String)
-    nurse = Column(String)
+    doctor_id = Column(String, ForeignKey('doctors.id'))
+    nurse_id = Column(String, ForeignKey('nurses.id'))
     day_of_week = Column(String)
     start_time = Column(DateTime)
     end_time = Column(DateTime)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+   #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, doctor, nurse, day_of_week, start_time, end_time):
-        self.doctor = doctor
-        self.nurse = nurse
+
+    def __init__(self, doctor_id, nurse_id, day_of_week, start_time, end_time):
+        self.doctor_id = doctor_id
+        self.nurse_id = nurse_id
         self.day_of_week = day_of_week
         self.start_time = start_time
         self.end_time = end_time
 
     def __repr__(self):
-        return f"({self.doctor}, {self.nurse}, {self.day_of_week}, {self.start_time}, {self.end_time})"
-
-
-session = SessionLocal()
-"""
-work_schedule = WorkSchedule("2567", "2234", "Monday, Tuesday, Wednesday", "2023-12-12 12:45:00", "2023-12-12 12:45:00")
-work_schedule1 = WorkSchedule("2567", "2234", "Monday, Tuesday, Wednesday", "2023-12-12 12:45:00", "2023-12-12 12:45:00")
-work_schedule2 = WorkSchedule("2567", "2234", "Monday, Tuesday, Wednesday", "2023-12-12 12:45:00", "2023-12-12 12:45:00")
-work_schedule3 = WorkSchedule("2567", "2234", "Monday, Tuesday, Wednesday", "2023-12-12 12:45:00", "2023-12-12 12:45:00")
-work_schedule4 = WorkSchedule("2567", "2234", "Monday, Tuesday, Wednesday", "2023-12-12 12:45:00", "2023-12-12 12:45:00")
-work_schedule5 = WorkSchedule("2567", "2234", "Monday, Tuesday, Wednesday", "2023-12-12 12:45:00", "2023-12-12 12:45:00")
-
-session.add(work_schedule)
-session.add(work_schedule1)
-session.add(work_schedule2)
-session.add(work_schedule3)
-session.add(work_schedule4)
-session.add(work_schedule5)
-"""
-session.commit()
-session.close()
+        return f"({self.doctor_id}, {self.nurse_id}, {self.day_of_week}, {self.start_time}, {self.end_time})"
 
 
 # results = session.query(Person).all()
@@ -2723,3 +1868,7 @@ session.close()
 # results = session.query(Person).filter(Person.gender == 'female')
 # for r in results:
 #   print(r)
+
+
+
+

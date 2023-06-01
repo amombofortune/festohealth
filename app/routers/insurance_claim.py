@@ -2,8 +2,8 @@ from .. import models, schemas, utils
 from fastapi import FastAPI, HTTPException, Response, status, Depends,APIRouter
 from ..database import get_db
 from sqlalchemy.orm import Session
-from typing import List
-from . import oauth2
+from typing import List, Optional
+from .. import oauth2
 
 
 router = APIRouter(
@@ -42,17 +42,18 @@ def get_insurance_claim(id: str, db: Session = Depends(get_db),
     return insurance_claim
 
 # Read All insurance claim
-
-
 @router.get("/", response_model=List[schemas.InsuranceClaimResponse])
 def get_insurance_claim(db: Session = Depends(get_db),
-                        current_user: int = Depends(oauth2.get_current_user)):
-    insurance_claim = db.query(models.InsuranceClaim).filter(models.InsuranceClaim.user_id == current_user.id).all()
+                        current_user: int = Depends(oauth2.get_current_user), limit: int = 10, skip: int = 0, search: Optional[str] = ""):
+    insurance_claim = db.query(models.InsuranceClaim)\
+    .filter(models.InsuranceClaim.user_id == current_user.id)\
+    .filter(models.InsuranceClaim.status.ilike(f'%{search}%'))\
+    .limit(limit)\
+    .offset(skip)\
+    .all()
     return insurance_claim
 
 # Update insurance claim
-
-
 @router.put("/{id}", response_model=schemas.InsuranceClaimResponse)
 def update_insurance_claim(id: str, updated_insurance_claim: schemas.InsuranceClaimCreate, db: Session = Depends(get_db),
                            current_user: int = Depends(oauth2.get_current_user)):

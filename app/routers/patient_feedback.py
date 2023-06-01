@@ -2,8 +2,8 @@ from .. import models, schemas, utils
 from fastapi import FastAPI, HTTPException, Response, status, Depends,APIRouter
 from ..database import get_db
 from sqlalchemy.orm import Session
-from typing import List
-from . import oauth2
+from typing import List, Optional
+from .. import oauth2
 
 
 router = APIRouter(
@@ -43,12 +43,15 @@ def get_patient_feedback(id: int, db: Session = Depends(get_db),
     return patient_feedback
 
 # Read All patient feedback
-
-
 @router.get("/", response_model=List[schemas.PatientFeedbackResponse])
 def get_patient_feedback(db: Session = Depends(get_db),
-                         current_user: int = Depends(oauth2.get_current_user)):
-    patient_feedback = db.query(models.PatientFeedback).filter(models.PatientFeedback.user_id == current_user.id).all()
+                         current_user: int = Depends(oauth2.get_current_user), limit: int = 10, skip: int = 0, search: Optional[str] = ""):
+    patient_feedback = db.query(models.PatientFeedback)\
+    .filter(models.PatientFeedback.user_id == current_user.id)\
+    .filter(models.PatientFeedback.patient_id.ilike(f'%{search}%'))\
+    .limit(limit)\
+    .offset(skip)\
+    .all()
     return patient_feedback
 
 # Update patient feedback

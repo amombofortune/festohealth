@@ -2,8 +2,8 @@ from .. import models, schemas, utils
 from fastapi import FastAPI, HTTPException, Response, status, Depends,APIRouter
 from ..database import get_db
 from sqlalchemy.orm import Session
-from typing import List
-from . import oauth2
+from typing import List, Optional
+from .. import oauth2
 
 
 router = APIRouter(
@@ -40,12 +40,15 @@ def get_patient_consent(id: int, db: Session = Depends(get_db),
     return patient_consent
 
 # Read All patient consents
-
-
 @router.get("/", response_model=List[schemas.PatientConsentResponse])
 def get_patient_consent(db: Session = Depends(get_db),
-                        current_user: int = Depends(oauth2.get_current_user)):
-    patient_consent = db.query(models.PatientConsent).filter(models.PatientConsent.user_id == current_user.id).all()
+                        current_user: int = Depends(oauth2.get_current_user), limit: int = 10, skip: int = 0, search: Optional[str] = ""):
+    patient_consent = db.query(models.PatientConsent)\
+    .filter(models.PatientConsent.user_id == current_user.id)\
+    .filter(models.PatientConsent.consent_type.ilike(f'%{search}%'))\
+    .limit(limit)\
+    .offset(skip)\
+    .all()
     return patient_consent
 
 # Update patient consent

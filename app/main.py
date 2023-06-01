@@ -1,10 +1,8 @@
 from fastapi import FastAPI
-import psycopg2
-from psycopg2.extras import RealDictCursor
 from . import models
 from .database import engine
-import time
 from fastapi.middleware.cors import CORSMiddleware
+from .config import settings
 from .routers import administrator, admission, adverse_reaction_type, adverse_reaction, allergy, \
 appointment_reminder, appointment_type, appointment, bed_assignment, bed, billing, chronic_condition,\
 country, department, diagnosis, disease, doctor, genetic_condition, hospital, immunization, insurance_claim, \
@@ -13,11 +11,10 @@ medical_condition, medical_device, medical_images, medical_note, medical_procedu
 medication, nurses, patient_consent, patient_feedback, patient_visit, patient, pharmacist, prescription, \
 receptionist, referral, specialty, time_slot, user, vaccination, vital_sign, ward, work_schedule
 
+
 app = FastAPI()
 
 origins = [
-    "http://localhost.tiangolo.com",
-    "https://localhost.tiangolo.com",
     "http://localhost",
     "http://localhost:8080",
     "http://localhost:3000",  # webapp
@@ -36,18 +33,7 @@ app.add_middleware(
 models.Base.metadata.create_all(bind=engine)
 
 
-""" CONNECTING TO DATABASE """
-while True:
-    try:
-        conn = psycopg2.connect(host='localhost', database='festo', user='postgres', password='password',
-                                cursor_factory=RealDictCursor)
-        cursor = conn.cursor()
-        print("Database connection was successful!")
-        break
-    except Exception as error:
-        print("Connection to database failed")
-        print("Error", error)
-        time.sleep(2)
+
 
 
 app.include_router(administrator.router)

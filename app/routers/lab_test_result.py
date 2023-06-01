@@ -2,8 +2,8 @@ from .. import models, schemas, utils
 from fastapi import FastAPI, HTTPException, Response, status, Depends,APIRouter
 from ..database import get_db
 from sqlalchemy.orm import Session
-from typing import List
-from . import oauth2
+from typing import List, Optional
+from .. import oauth2
 
 
 router = APIRouter(
@@ -40,17 +40,18 @@ def get_lab_result(id: int, db: Session = Depends(get_db),
     return lab_result
 
 # Read All lab tests result
-
-
 @router.get("/", response_model=List[schemas.LabResultResponse])
 def get_lab_result(db: Session = Depends(get_db),
-                   current_user: int = Depends(oauth2.get_current_user)):
-    lab_results = db.query(models.LabResult).filter(models.LabResult.user_id == current_user.id).all()
+                   current_user: int = Depends(oauth2.get_current_user), limit: int = 10, skip: int = 0, search: Optional[str] = ""):
+    lab_results = db.query(models.LabResult)\
+    .filter(models.LabResult.user_id == current_user.id)\
+    .filter(models.LabResult.diagnosis.ilike(f'%{search}%'))\
+    .limit(limit)\
+    .offset(skip)\
+    .all()
     return lab_results
 
 # Update lab tests result
-
-
 @router.put("/{id}", response_model=schemas.LabResultResponse)
 def update_lab_result(id: int, updated_lab_result: schemas.LabResultCreate, db: Session = Depends(get_db),
                       current_user: int = Depends(oauth2.get_current_user)):

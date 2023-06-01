@@ -2,8 +2,8 @@ from .. import models, schemas, utils
 from fastapi import FastAPI, HTTPException, Response, status, Depends,APIRouter
 from ..database import get_db
 from sqlalchemy.orm import Session
-from typing import List
-from . import oauth2
+from typing import List, Optional
+from .. import oauth2
 
 
 router = APIRouter(
@@ -44,8 +44,13 @@ def get_medical_note(id: int, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.MedicalNoteResponse])
 def get_medical_note(db: Session = Depends(get_db),
-                     current_user: int = Depends(oauth2.get_current_user)):
-    medical_notes = db.query(models.MedicalNote).filter(models.MedicalNote.user_id == current_user.id).all()
+                     current_user: int = Depends(oauth2.get_current_user), limit: int = 10, skip: int = 0, search: Optional[str] = ""):
+    medical_notes = db.query(models.MedicalNote)\
+    .filter(models.MedicalNote.user_id == current_user.id)\
+    .filter(models.MedicalNote.note.ilike(f'%{search}%'))\
+    .limit(limit)\
+    .offset(skip)\
+    .all()
     return medical_notes
 
 # Update medical note

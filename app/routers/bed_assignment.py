@@ -2,8 +2,8 @@ from .. import models, schemas, utils
 from fastapi import FastAPI, HTTPException, Response, status, Depends,APIRouter
 from ..database import get_db
 from sqlalchemy.orm import Session
-from typing import List
-from . import oauth2
+from typing import List, Optional
+from .. import oauth2
 
 router = APIRouter(
      prefix="/bed_assignment",
@@ -43,8 +43,12 @@ def get_bed_assignment(id: int, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.BedAssignmentResponse])
 def get_bed_assignment(db: Session = Depends(get_db),
-                       current_user: int = Depends(oauth2.get_current_user)):
-    bed_assignment = db.query(models.BedAssignment).filter(models.BedAssignment.user_id == current_user.id).all()
+                       current_user: int = Depends(oauth2.get_current_user), limit: int = 10, skip: int = 0, search: Optional[str] = ""):
+    bed_assignment = db.query(models.BedAssignment)\
+    .filter(models.BedAssignment.user_id == current_user.id)\
+    .filter(models.BedAssignment.patient_id.ilike(f'%{search}%'))\
+    .limit(limit)\
+    .all()
     return bed_assignment
 
 # Update Bed Assignment

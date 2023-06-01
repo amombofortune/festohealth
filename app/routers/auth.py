@@ -1,5 +1,5 @@
 from .. import models, schemas, utils
-from . import oauth2
+from .. import oauth2
 from fastapi.security.oauth2 import OAuth2PasswordRequestForm
 from fastapi import HTTPException, status, Depends,APIRouter
 from ..database import get_db

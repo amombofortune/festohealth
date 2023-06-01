@@ -2,8 +2,8 @@ from .. import models, schemas, utils
 from fastapi import FastAPI, HTTPException, Response, status, Depends,APIRouter
 from ..database import get_db
 from sqlalchemy.orm import Session
-from typing import List
-from . import oauth2
+from typing import List, Optional
+from .. import oauth2
 
 
 router = APIRouter(
@@ -42,12 +42,15 @@ def get_pharmacist(id: str, db: Session = Depends(get_db),
     return pharmacist
 
 # Read All pharmacist
-
-
 @router.get("/", response_model=List[schemas.PharmacistResponse])
 def get_pharmacist(db: Session = Depends(get_db),
-                   current_user: int = Depends(oauth2.get_current_user)):
-    pharmacist = db.query(models.Pharmacist).all()
+                   current_user: int = Depends(oauth2.get_current_user), limit: int = 10, skip: int = 0, search: Optional[str] = ""):
+    pharmacist = db.query(models.Pharmacist)\
+    .filter(models.Pharmacist.user_id == current_user.id)\
+    .filter(models.Pharmacist.licence_number.ilike(f'%{search}%'))\
+    .limit(limit)\
+    .offset(skip)\
+    .all()
     return pharmacist
 
 # Update pharmacist

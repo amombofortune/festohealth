@@ -2,8 +2,8 @@ from .. import models, schemas, utils
 from fastapi import FastAPI, HTTPException, Response, status, Depends,APIRouter
 from ..database import get_db
 from sqlalchemy.orm import Session
-from . import oauth2
-from typing import List
+from .. import oauth2
+from typing import List, Optional
 
 router = APIRouter(
      prefix="/adverse_reaction",
@@ -45,8 +45,13 @@ def get_one_adverse_reaction(id: int, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.AdverseReactionResponse])
 def get_adverse_reactions(db: Session = Depends(get_db),
-                          current_user: int = Depends(oauth2.get_current_user)):
-    adverse_reactions = db.query(models.AdverseReaction).filter(models.AdverseReaction.user_id == current_user.id).all() #return for that user only
+                          current_user: int = Depends(oauth2.get_current_user), limit: int = 10, skip: int = 0, search: Optional[str] = ""):
+    adverse_reactions = db.query(models.AdverseReaction)\
+        .filter(models.AdverseReaction.user_id == current_user.id)\
+        .filter(models.AdverseReaction.treatment.ilike(f'%{search}%'))\
+        .limit(limit)\
+        .offset(skip)\
+        .all() #return for that user only
     return adverse_reactions
 
 # Update Adverse Reaction

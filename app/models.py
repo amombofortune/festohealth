@@ -72,6 +72,8 @@ class Admission(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
+    user = relationship("User")
+
     #patient = relationship("Patient", backref="admissions")
 
 
@@ -108,6 +110,9 @@ class AdverseReaction(Base):
     treatment = Column(Text)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
+    user = relationship("User")
+
 
     def __init__(self, user_id, patient_id, reaction_date, reaction_time, reaction_type, reaction_details, medication_name, dosage, severity, treatment):
         self.user_id = user_id
@@ -195,6 +200,9 @@ class Allergy(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
+    user = relationship("User")
+
+
     def __init__(self, user_id, name, patient_id):
         self.user_id = user_id
         self.name = name
@@ -262,6 +270,9 @@ class AppointmentReminder(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
+    user = relationship("User")
+
+
     def __init__(self, user_id, appointment_id, patient_id, doctor_id, reminder_date, reminder_time, reminder_type, status):
         self.user_id = user_id
         self.appointment_id = appointment_id
@@ -292,6 +303,9 @@ class Appointment(Base):
     status = Column(String)  # confirmed, cancelled, rescheduled
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
+    user = relationship("User")
+
 
     def __init__(self, user_id, patient_id, doctor_id, type, date, start_time, end_time, description, status):
         self.user_id = user_id
@@ -374,6 +388,9 @@ class Bed(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
+    user = relationship("User", foreign_keys=[user_id])
+
+
     def __init__(self, user_id, ward, bed_no, bed_type, availability, occupied_by, assigned_by):
         self.user_id = user_id
         self.ward = ward
@@ -393,12 +410,15 @@ class BedAssignment(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
     bed_id = Column(Integer)
-    patient_id = Column(Integer)
+    patient_id = Column(Integer) #String
     assigned_by = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION')) 
     assigned_at = Column(TIMESTAMP(timezone=True))
     discharged_at = Column(TIMESTAMP(timezone=True))
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
+    user = relationship("User", foreign_keys=[user_id])
+
 
     def __init__(self, user_id, bed_id, patient_id, assigned_by, assigned_at, discharged_at):
         self.user_id = user_id
@@ -426,6 +446,9 @@ class Billing(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
+    user = relationship("User", foreign_keys=[user_id])
+
+
     def __init__(self, user_id, patient_id, bill_date, amount_due, amount_paid, payment_method, status):
         self.user_id = user_id
         self.patient_id = patient_id
@@ -449,6 +472,9 @@ class ChronicCondition(Base):
     description = Column(String)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
+    user = relationship("User", foreign_keys=[user_id])
+
 
     def __init__(self, user_id, patient_id, name, description ):
         self.user_id = user_id
@@ -559,9 +585,11 @@ class Department(Base):
     nurse_id = Column(String, ForeignKey('nurses.id', ondelete='CASCADE', onupdate='NO ACTION'))
     name = Column(String)
     description = Column(Text)
-    
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
+    user = relationship("User", foreign_keys=[user_id])
+
 
     def __init__(self, user_id, hospital_id, doctor_id, nurse_id, name, description ):
         self.user_id = user_id
@@ -645,6 +673,9 @@ class Diagnosis(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
+    user = relationship("User", foreign_keys=[user_id])
+
+
     def __init__(self, user_id, patient_id, doctor_id, hospital_id, disease, diagnosis, date, notes):
         self.user_id = user_id
         self.patient_id = patient_id
@@ -672,6 +703,9 @@ class Disease(Base):
     prevention = Column(Text)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
+    user = relationship("User", foreign_keys=[user_id])
+
 
     def __init__(self, user_id, patient_id, name, description, symptoms, treatment, prevention):
         self.user_id = user_id
@@ -711,6 +745,9 @@ class Doctor(Base):
     verified = Column(Boolean, server_default='FALSE')
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
+    user = relationship("User", foreign_keys=[user_id])
+
 
 
     #user = relationship("User", backref="doctor")
@@ -753,6 +790,9 @@ class GeneticCondition(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
+    user = relationship("User", foreign_keys=[user_id])
+
+
     def __init__(self, user_id, patient_id,  name, description,inheritance_pattern):
         self.user_id = user_id
         self.patient_id = patient_id
@@ -782,6 +822,9 @@ class Hospital(Base):
     verified = Column(String)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
+    user = relationship("User", foreign_keys=[user_id])
+
 
     #user = relationship("User", backref="hospital")
 
@@ -846,6 +889,9 @@ class Immunization(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
+    user = relationship("User", foreign_keys=[user_id])
+
+
     def __init__(self, user_id, patient_id, administering_provider, vaccine_name, dose_number, date_given, expiration_date):
         self.user_id = user_id
         self.patient_id = patient_id
@@ -875,6 +921,9 @@ class InsuranceClaim(Base):
     status = Column(String)  # pending denied paids
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
+    user = relationship("User", foreign_keys=[user_id])
+
 
     def __init__(self, user_id, patient_id, provider_id, date_of_service, procedure_code, diagnosis_code, billed_amount, insurance_paid, patient_paid, status):
         self.id = str(uuid.uuid4().hex[:6].upper())
@@ -914,6 +963,9 @@ class InsuranceProvider(Base):
     verified = Column(String)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
+    user = relationship("User", foreign_keys=[user_id])
+
 
     #user = relationship("User", backref="insurance_provider")
 
@@ -1056,6 +1108,9 @@ class Itstaff(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
+    user = relationship("User", foreign_keys=[user_id])
+
+
     def __init__(self, user_id, firstname, lastname, dob, gender, phone_number, email, address, city, state, zip_code, country, hospital_id):
         self.id = str(uuid.uuid4().hex[:6].upper())
         self.user_id = user_id
@@ -1097,6 +1152,9 @@ class LabTechnician(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
+    user = relationship("User", foreign_keys=[user_id])
+
+
     def __init__(self, user_id, firstname, lastname, dob, gender, phone_number, email, hospital_id, address, city, state, postal_code, country):
         self.id = str(uuid.uuid4().hex[:6].upper())
         self.user_id = user_id
@@ -1134,6 +1192,9 @@ class LabTest(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     ##updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
+    user = relationship("User", foreign_keys=[user_id])
+
+
     def __init__(self, user_id, patient_id, lab_technician_id,  test_name, test_date, test_description, test_type, test_cost, test_result, comments):
         self.user_id = user_id
         self.patient_id = patient_id
@@ -1162,6 +1223,9 @@ class LabResult(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
+    user = relationship("User", foreign_keys=[user_id])
+
+
     def __init__(self, user_id, patient_id, test_result, comments):
         self.user_id = user_id
         self.patient_id = patient_id
@@ -1187,6 +1251,9 @@ class MedicationAlert(Base):
     status = Column(Text)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
+    user = relationship("User", foreign_keys=[user_id])
+
 
     def __init__(self, user_id, patient_id,doctor_id, medication_id, dosage, frequency, alert_date, alert_text, status):
         self.user_id = user_id
@@ -1216,6 +1283,9 @@ class MedicalCondition(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
+    user = relationship("User", foreign_keys=[user_id])
+
+
     def __init__(self, user_id, patient_id, name, description, diagnosis_date, treatment):
         self.user_id = user_id
         self.patient_id = patient_id
@@ -1244,6 +1314,9 @@ class MedicalDevice(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
+    user = relationship("User", foreign_keys=[user_id])
+
+
     def __init__(self, user_id, hospital_id, department_id, name, manufacturer, model, serial_number, last_maintenance, next_maintenance):
         self.user_id = user_id
         self.hospital_id = hospital_id
@@ -1270,6 +1343,9 @@ class MedicalImage(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     ##updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
+    user = relationship("User", foreign_keys=[user_id])
+
+
     def __init__(self, user_id, patient_id, image_type, image_date):
         self.user_id = user_id
         self.patient_id = patient_id
@@ -1291,6 +1367,9 @@ class MedicalNote(Base):
     note = Column(Text)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
+    user = relationship("User", foreign_keys=[user_id])
+
 
     def __init__(self, user_id, patient_id, doctor_id, date, note):
         self.user_id = user_id
@@ -1316,6 +1395,9 @@ class MedicalProcedure(Base):
     notes = Column(Text)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
+    user = relationship("User", foreign_keys=[user_id])
+
 
     def __init__(self, user_id, patient_id, doctor_id, name, date, notes):
         self.user_id = user_id
@@ -1343,9 +1425,11 @@ class Medication(Base):
     dosage = Column(String)
     unit = Column(String)
     frequency = Column(String)  # twice daily once weekly
-    
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
+    user = relationship("User", foreign_keys=[user_id])
+
 
     def __init__(self, user_id, patient_id, doctor_id, name, description, route_of_administration, dosage, unit, frequency):
         self.user_id = user_id
@@ -1383,9 +1467,11 @@ class Nurse(Base):
     country = Column(String)
     work_schedule = Column(String)
     verified = Column(Boolean, server_default='FALSE')
-    
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
+    user = relationship("User", foreign_keys=[user_id])
+
 
     #user = relationship("User", backref="nurse")
 
@@ -1425,6 +1511,9 @@ class PatientConsent(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
+    user = relationship("User", foreign_keys=[user_id])
+
+
     def __init__(self, user_id, patient_id, consent_type, consent_date, expiration_date):
         self.user_id = user_id
         self.patient_id = patient_id
@@ -1448,6 +1537,9 @@ class PatientFeedback(Base):
     text = Column(Text)
     rating = Column(Integer)
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
+    user = relationship("User", foreign_keys=[user_id])
+
 
     def __init__(self, user_id, patient_id, doctor_id, date, text, rating):
         self.user_id = user_id
@@ -1475,6 +1567,9 @@ class PatientVisit(Base):
     notes = Column(Text)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
+    user = relationship("User", foreign_keys=[user_id])
+
 
 
     #user = relationship("User", backref="patient")
@@ -1526,9 +1621,8 @@ class Patient(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
+    #user = relationship("User")
 
-    #admissions = relationship("Admission", backref="patient")
-    #user = relationship("User", backref="patient")
 
     def __init__(self, user_id, firstname, middlename, lastname, dob, gender, phonenumber, email, address, city, state, postal_code, country, emergency_contact_name, emergency_contact_phone, relationship, insurance, provider_name, policy_number, group_number, effective_date, expiration_date):
         self.id = str(uuid.uuid4().hex[:6].upper())
@@ -1581,6 +1675,7 @@ class Pharmacist(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
+    user = relationship("User", foreign_keys=[user_id])
 
     #user = relationship("User", backref="pharmacist")
 
@@ -1605,6 +1700,8 @@ class Pharmacist(Base):
         return f"({self.id}, {self.user_id}, {self.firstname}, {self.lastname}, {self.dob},{self.gender}, {self.phone_number}, {self.email}, {self.licence_number}, {self.address}, {self.city}, {self.state}, {self.postal_code}, {self.country}, {self.verified})"
 
 
+
+
 """PRESCRIPTION """
 class Prescription(Base):
     __tablename__ = "prescriptions"
@@ -1619,6 +1716,9 @@ class Prescription(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
+    user = relationship("User", foreign_keys=[user_id])
+
+
 
     def __init__(self, user_id, doctor_id, patient_id, medication, dosage, instructions):
         self.user_id = user_id
@@ -1630,6 +1730,9 @@ class Prescription(Base):
 
     def __repr__(self):
         return f"({self.id}, {self.user_id}, {self.doctor_id}, {self.patient_id}, {self.medication}, {self.dosage}, {self.instructions})"
+
+
+
 
 
 """ RECEPTIONISTS """
@@ -1652,6 +1755,9 @@ class Receptionist(Base):
     hospital_id = Column(String)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
+    user = relationship("User", foreign_keys=[user_id])
+
 
 
     def __init__(self, user_id, firstname, lastname, dob, gender, phone_number, email, address, city, state, zip_code, country, hospital_id):
@@ -1692,6 +1798,9 @@ class Referral(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
+    user = relationship("User", foreign_keys=[user_id])
+
+
 
     def __init__(self, user_id, referring_patient, referred_patient, referring_doctor, referred_doctor, referring_hospital, referred_hospital, referral_date, referral_reason, status):
         self.user_id = user_id
@@ -1719,6 +1828,9 @@ class Specialty(Base):
     description = Column(String)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
+    user = relationship("User", foreign_keys=[user_id])
+
 
 
     def __init__(self, user_id, doctor_id, name, description):
@@ -1812,6 +1924,9 @@ class TimeSlot(Base):
     created_at = Column(TIMESTAMP, server_default=func.now())
     updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
+    user = relationship("User", foreign_keys=[user_id])
+
+
     def __init__(self, user_id, doctor_id, appointment_date, appointment_start_time, appointment_end_time, availability ):
         self.user_id = user_id
         self.doctor_id = doctor_id
@@ -1836,6 +1951,8 @@ class User(Base):
     created_at = Column(TIMESTAMP, server_default=func.now())
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
+
+
     def __init__(self, email, password):
         self.id = str(uuid.uuid4().hex[:6].upper())
         self.email = email
@@ -1857,6 +1974,9 @@ class Vaccination(Base):
     next_dose_due = Column(Date)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
+    user = relationship("User", foreign_keys=[user_id])
+
 
 
     def __init__(self, user_id, patient_id, vaccine_name, administered_by, administered_at, next_dose_due):
@@ -1886,6 +2006,9 @@ class VitalSign(Base):
     recorded_at = Column(TIMESTAMP(timezone=True))
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
+    user = relationship("User", foreign_keys=[user_id])
+
 
 
     def __init__(self, user_id, patient_id, doctor_id, heart_rate, blood_pressure_systolic, blood_pressure_diastolic, respiratory_rate, temperature, height, weight, oxygen_saturation, recorded_at):
@@ -1918,6 +2041,9 @@ class Ward(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
+    user = relationship("User", foreign_keys=[user_id])
+
+
 
     def __init__(self, user_id, hospital_id, name, type, capacity, location ):
         self.user_id = user_id
@@ -1943,6 +2069,9 @@ class WorkSchedule(Base):
     end_time = Column(DateTime)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
+    user = relationship("User", foreign_keys=[user_id])
+
 
 
     def __init__(self, user_id, doctor_id, nurse_id, day_of_week, start_time, end_time):

@@ -2,8 +2,8 @@ from .. import models, schemas, utils
 from fastapi import FastAPI, HTTPException, Response, status, Depends,APIRouter
 from ..database import get_db
 from sqlalchemy.orm import Session
-from typing import List
-from . import oauth2
+from typing import List, Optional
+from .. import oauth2
 
 
 router = APIRouter(
@@ -46,8 +46,13 @@ def get_medical_procedure(id: int, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.MedicalProcedureResponse])
 def get_medical_procedure(db: Session = Depends(get_db),
-                          current_user: int = Depends(oauth2.get_current_user)):
-    medical_procedures = db.query(models.MedicalProcedure).filter(models.MedicalProcedure.user_id == current_user.id).all()
+                          current_user: int = Depends(oauth2.get_current_user), limit: int = 10, skip: int = 0, search: Optional[str] = ""):
+    medical_procedures = db.query(models.MedicalProcedure)\
+    .filter(models.MedicalProcedure.user_id == current_user.id)\
+    .filter(models.MedicalProcedure.name.ilike(f'%{search}%'))\
+    .limit(limit)\
+    .offset(skip)\
+    .all()
     return medical_procedures
 
 # Update medical procedure

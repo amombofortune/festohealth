@@ -3,6 +3,37 @@ from pydantic import BaseModel, EmailStr
 from typing import Optional
 
 
+"""User"""
+class UserBase(BaseModel):
+    email: EmailStr
+
+
+class UserCreate(UserBase):
+    password: str
+    
+
+
+class UserResponse(UserBase):#what we are returning for the user to see
+    id: str
+    email: EmailStr
+    registration_date: datetime
+
+    class Config:
+        orm_mode = True
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    id: Optional[str] = None
+
+
+
 """Administrator"""
 class AdministratorBase(BaseModel):
     firstname: str
@@ -53,6 +84,7 @@ class AdmissionResponse(AdmissionBase):
     id: int
     created_at: datetime
     user_id: str
+    user: UserResponse
 
     class Config:
         orm_mode = True
@@ -79,6 +111,8 @@ class AdverseReactionResponse(AdverseReactionBase):
     id: int
     created_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True
@@ -117,6 +151,8 @@ class AllergyResponse(AllergyBase):
     id: int
     created_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True
@@ -142,6 +178,8 @@ class AppointmentReminderResponse(AppointmentReminderBase):
     id: int
     created_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True
@@ -167,6 +205,8 @@ class AppointmentResponse(AppointmentBase):
     id: int
     created_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True
@@ -207,6 +247,8 @@ class BedResponse(BedBase):
     id: int
     created_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True
@@ -229,6 +271,8 @@ class BedAssignmentResponse(BedAssignmentBase):
     id: int
     created_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True
@@ -252,6 +296,8 @@ class BillingResponse(BillingBase):
     id: int
     created_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True
@@ -274,6 +320,8 @@ class ChronicConditionResponse(ChronicConditionBase):
     id: int
     created_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True
@@ -294,6 +342,8 @@ class CountryResponse(CountryBase):
     id: int
     created_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True
@@ -316,6 +366,8 @@ class DepartmentResponse(DepartmentBase):
     id: int
     created_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True
@@ -340,6 +392,8 @@ class DiagnosisResponse(DiagnosisBase):
     id: int
     created_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True
@@ -363,6 +417,8 @@ class DiseaseResponse(DiseaseBase):
     id: int
     created_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True
@@ -397,6 +453,8 @@ class DoctorResponse(DoctorBase):
     id: str
     created_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True
@@ -419,6 +477,8 @@ class GeneticConditionResponse(GeneticConditionBase):
     id: int
     created_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True
@@ -447,6 +507,8 @@ class HospitalResponse(HospitalBase):
     id: str
     created_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True
@@ -470,6 +532,8 @@ class ImmunizationResponse(ImmunizationBase):
     id: int
     created_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True
@@ -496,6 +560,8 @@ class InsuranceClaimResponse(InsuranceClaimBase):
     id: str
     created_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True
@@ -526,6 +592,8 @@ class InsuranceProviderResponse(InsuranceProviderBase):
     id: str
     created_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True
@@ -573,6 +641,8 @@ class ItstaffResponse(ItstaffBase):
     id: str
     created_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True
@@ -602,6 +672,8 @@ class LabTechnicianResponse(LabTechnicianBase):
     id: str
     created_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True
@@ -629,6 +701,8 @@ class LabTestResponse(LabTestBase):
     created_at: datetime
     updated_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True
@@ -649,6 +723,8 @@ class LabResultResponse(LabResultBase):
     id: int
     created_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True
@@ -674,6 +750,8 @@ class MedicationAlertResponse(MedicationAlertBase):
     id: int
     created_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True
@@ -696,6 +774,8 @@ class MedicalConditionResponse(MedicalConditionBase):
     id: int
     created_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True
@@ -721,6 +801,8 @@ class MedicalDeviceResponse(MedicalDeviceBase):
     id: int
     created_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True
@@ -741,6 +823,8 @@ class MedicalImageResponse(MedicalImageBase):
     id: int
     created_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True
@@ -762,6 +846,8 @@ class MedicalNoteResponse(MedicalNoteBase):
     id: int
     created_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True
@@ -784,6 +870,8 @@ class MedicalProcedureResponse(MedicalProcedureBase):
     id: int
     created_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True
@@ -810,6 +898,8 @@ class MedicationResponse(MedicationBase):
     id: int
     created_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True
@@ -842,6 +932,8 @@ class NurseResponse(NurseBase):
     id: str
     created_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True
@@ -863,6 +955,8 @@ class PatientConsentResponse(PatientConsentBase):
     id: int
     created_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True
@@ -885,6 +979,8 @@ class PatientFeedbackResponse(PatientFeedbackBase):
     id: int
     # created_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True
@@ -909,6 +1005,8 @@ class PatientVisitResponse(PatientVisitBase):
     id: int
     created_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True
@@ -948,6 +1046,7 @@ class PatientResponse(PatientBase):
     created_at: datetime
     user_id: str
 
+
     class Config:
         orm_mode = True
 
@@ -977,6 +1076,8 @@ class PharmacistResponse(PharmacistBase):
     id: str
     created_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True
@@ -999,6 +1100,8 @@ class PrescriptionResponse(PrescriptionBase):
     id: int
     created_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True
@@ -1028,6 +1131,8 @@ class ReceptionistResponse(ReceptionistBase):
     id: str
     created_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True
@@ -1056,6 +1161,8 @@ class ReferralResponse(ReferralBase):
     id: int
     created_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True
@@ -1076,6 +1183,8 @@ class SpecialtyResponse(SpecialtyBase):
     id: int
     created_at: datetime
     user_id: str
+    user: UserResponse
+
 
 
     class Config:
@@ -1099,39 +1208,12 @@ class TimeSlotResponse(TimeSlotBase):
     created_at: datetime
     updated_at: datetime
     user_id: str
+    user: UserResponse
 
 
-    class Config:
-        orm_mode = True
-
-"""User"""
-class UserBase(BaseModel):
-    email: EmailStr
-    password: str
-
-
-class UserCreate(UserBase):
-    pass
-
-
-class UserResponse(UserBase):#what we are returning for the user to see
-    id: str
-    email: EmailStr
-    registration_date: datetime
 
     class Config:
         orm_mode = True
-
-class UserLogin(BaseModel):
-    email: EmailStr
-    password: str
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-class TokenData(BaseModel):
-    id: Optional[str] = None
 
 
 
@@ -1152,6 +1234,8 @@ class VaccinationResponse(VaccinationBase):
     id: int
     created_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True
@@ -1180,6 +1264,8 @@ class VitalSignResponse(VitalSignBase):
     id: int
     created_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True
@@ -1203,6 +1289,8 @@ class WardResponse(WardBase):
     id: int
     created_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True
@@ -1225,6 +1313,8 @@ class WorkScheduleResponse(WorkScheduleBase):
     id: int
     created_at: datetime
     user_id: str
+    user: UserResponse
+
 
     class Config:
         orm_mode = True

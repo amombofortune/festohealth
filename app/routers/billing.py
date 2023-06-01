@@ -2,8 +2,8 @@ from .. import models, schemas, utils
 from fastapi import FastAPI, HTTPException, Response, status, Depends,APIRouter
 from ..database import get_db
 from sqlalchemy.orm import Session
-from typing import List
-from . import oauth2
+from typing import List, Optional
+from .. import oauth2
 
 router = APIRouter(
      prefix="/billing",
@@ -44,8 +44,13 @@ def get_billing(id: int, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.BillingResponse])
 def get_billing(db: Session = Depends(get_db),
-                current_user: int = Depends(oauth2.get_current_user)):
-    billing = db.query(models.Billing).filter(models.Billing.user_id == current_user.id).all()
+                current_user: int = Depends(oauth2.get_current_user), limit: int = 10, skip: int = 0, search: Optional[str] = ""):
+    billing = db.query(models.Billing)\
+    .filter(models.Billing.user_id == current_user.id)\
+    .filter(models.Billing.payment_method.ilike(f'%{search}%'))\
+    .limit(limit)\
+    .offset(skip)\
+    .all()
     return billing
 
 # Update Billing

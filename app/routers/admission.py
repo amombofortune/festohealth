@@ -2,8 +2,8 @@ from .. import models, schemas, utils
 from fastapi import FastAPI, HTTPException, Response, status, Depends,APIRouter
 from ..database import get_db
 from sqlalchemy.orm import Session
-from . import oauth2
-from typing import List
+from .. import oauth2
+from typing import List, Optional
 
 router = APIRouter(
     prefix="/admission",
@@ -38,12 +38,15 @@ def get_one_admission(id: int, db: Session = Depends(get_db),
 # Read All Admission
 @router.get("/", response_model=List[schemas.AdmissionResponse])
 def get_admission(db: Session = Depends(get_db),
-                  current_user: int = Depends(oauth2.get_current_user)):
+                  current_user: int = Depends(oauth2.get_current_user), limit: int = 10, skip: int = 0, search: Optional[str] = ""):
     print(current_user.email)
 
-    admission = db.query(models.Admission).filter(models.Admission.user_id == current_user.id).all()
-
-   
+    admission = db.query(models.Admission)\
+        .filter(models.Admission.user_id == current_user.id)\
+        .filter(models.Admission.diagnosis.ilike(f'%{search}%'))\
+        .limit(limit)\
+        .offset(skip)\
+        .all()
     return admission
 
 

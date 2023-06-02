@@ -20,12 +20,22 @@ const AdmissionForm = () => {
   const [treatment, setTreatment] = useState("");
   const [doctor_id, setDoctorID] = useState("");
 
-  //Post data to database
+  //post data to database
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    await axios
-      .post("http://127.0.0.1:8000/admission", {
+    try {
+      const access_token = document.cookie.replace(
+        /(?:(?:^|.*;\s*)access_token\s*=\s*([^;]*).*$)|^.*$/,
+        "$1"
+      );
+
+      const headers = {
+        Authorization: `Bearer ${access_token}`,
+        "Content-Type": "application/json",
+      };
+
+      const data = {
         patient_id,
         admission_date,
         admission_time,
@@ -35,12 +45,19 @@ const AdmissionForm = () => {
         diagnosis,
         treatment,
         doctor_id,
-      })
-      .then((res) => {
-        window.location.reload(true);
-        console.log("Posting data to database successful!!!", res);
-      })
-      .catch((err) => console.log(err));
+      };
+
+      await axios.post("http://127.0.0.1:8000/admission", data, {
+        withCredentials: true, // Enable sending cookies with the request
+        headers,
+      });
+
+      window.location.reload(true);
+      console.log("Posting data to database successful!!!");
+    } catch (error) {
+      console.error("Failed to post data to the database:", error);
+      // Handle error posting data
+    }
   };
 
   return (
@@ -176,7 +193,7 @@ const AdmissionForm = () => {
                 label="Doctor ID"
                 placeholder="Enter Doctor ID"
                 variant="outlined"
-                type="number"
+                type="text"
                 value={doctor_id}
                 onChange={(event) => {
                   setDoctorID(event.target.value);

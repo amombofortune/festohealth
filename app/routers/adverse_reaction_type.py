@@ -40,8 +40,6 @@ def get_one_adverse_reaction_type(id: int, db: Session = Depends(get_db),
     return adverse_reaction_type
 
 # Read All Adverse Reaction Type
-
-
 @router.get("/", response_model=List[schemas.AdverseReactionTypeResponse])
 def get_adverse_reaction_types(db: Session = Depends(get_db),
                                current_user: int = Depends(oauth2.get_current_user)):
@@ -49,8 +47,6 @@ def get_adverse_reaction_types(db: Session = Depends(get_db),
     return adverse_reaction_types
 
 # Update Adverse Reaction Type
-
-
 @router.put("/{id}", response_model=schemas.AdverseReactionTypeResponse)
 def update_adverse_reaction_type(id: int, updated_adverse_reaction_type: schemas.AdverseReactionTypeCreate, db: Session = Depends(get_db),
                                  current_user: int = Depends(oauth2.get_current_user)):

@@ -173,18 +173,37 @@ export default function MedicationAlertTable() {
     )
   );
 
-  //Fetch immunization
+  //Fetch medication alert
   useEffect(() => {
-    axios
-      .get("http://127.0.0.1:8000/medical_alert")
-      .then((res) => {
-        console.log(
-          "Fetching medical alerts from database successful!!!",
-          res.data
+    const fetchData = async () => {
+      try {
+        const access_token = document.cookie.replace(
+          /(?:(?:^|.*;\s*)access_token\s*=\s*([^;]*).*$)|^.*$/,
+          "$1"
         );
-        setData(res.data);
-      })
-      .catch((err) => console.log(err));
+
+        const response = await axios.get(
+          "http://127.0.0.1:8000/medical_alert",
+          {
+            withCredentials: true, // Enable sending cookies with the request
+            headers: {
+              Authorization: `Bearer ${access_token}`, // Include the access token as a request header
+            },
+          }
+        );
+
+        console.log(
+          "Fetching medication alert from database successful!!!",
+          response.data
+        );
+        setData(response.data);
+      } catch (error) {
+        console.error("Failed to fetch medication alert data:", error);
+        // Handle error fetching medication alert data
+      }
+    };
+
+    fetchData();
   }, []);
 
   // Delete record

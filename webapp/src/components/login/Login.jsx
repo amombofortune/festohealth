@@ -9,7 +9,6 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 function Login() {
@@ -21,43 +20,39 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://127.0.0.1:8000/login", {
-        email,
-        password,
-      });
-      // Do something with the response, such as storing the authentication token
-      // and redirecting to a protected page
-      // ...
+      const formData = new FormData();
+      formData.append("username", email);
+      formData.append("password", password);
 
-      // Reset the form fields after successful login
+      const response = await axios.post(
+        "http://127.0.0.1:8000/login",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          withCredentials: true, // Enable sending cookies with the request
+        }
+      );
+
+      console.log("Login Successful");
+      // Handle successful login, e.g., store access token in a cookie
+
+      const { access_token } = response.data;
+      console.log("Access Token:", access_token);
+
+      // Set the access token as an HTTP-only cookie
+      document.cookie = `access_token=${access_token}; path=/;`;
+
+      // Reset the form fields
       setEmail("");
       setPassword("");
 
-      navigate("/"); // Replace '/' with your desired route
+      // Navigate to the desired page
+      navigate("/");
     } catch (error) {
-      if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        const { status, data } = error.response;
-        console.log("Error status:", status);
-        console.log("Error data:", data);
-
-        // Display an error toast notification to the user
-        toast.error(data.message); // Replace 'data.message' with the actual error message from the API response
-      } else if (error.request) {
-        // The request was made but no response was received
-        // Error with the network or server is down
-        console.log("Error request:", error.request);
-
-        // Display an error toast notification to the user
-        toast.error("Network Error. Please try again later.");
-      } else {
-        // Something else happened in making the request
-        console.log("Error message:", error.message);
-
-        // Display an error toast notification to the user
-        toast.error("An error occurred. Please try again.");
-      }
+      console.error("Login Failed:", error);
+      // Handle login error, e.g., display error message to the user
     }
   };
 

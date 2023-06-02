@@ -17,16 +17,33 @@ function AdverseReactionTypeForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    await axios
-      .post("http://127.0.0.1:8000/adverse_reaction_type", {
+    try {
+      const access_token = document.cookie.replace(
+        /(?:(?:^|.*;\s*)access_token\s*=\s*([^;]*).*$)|^.*$/,
+        "$1"
+      );
+
+      const headers = {
+        Authorization: `Bearer ${access_token}`,
+        "Content-Type": "application/json",
+      };
+
+      const data = {
         name,
         description,
-      })
-      .then((res) => {
-        window.location.reload(true);
-        console.log("Posting data to database successful!!!", res);
-      })
-      .catch((err) => console.log(err));
+      };
+
+      await axios.post("http://127.0.0.1:8000/adverse_reaction_type", data, {
+        withCredentials: true, // Enable sending cookies with the request
+        headers,
+      });
+
+      window.location.reload(true);
+      console.log("Posting data to database successful!!!");
+    } catch (error) {
+      console.error("Failed to post data to the database:", error);
+      // Handle error posting data
+    }
   };
 
   return (

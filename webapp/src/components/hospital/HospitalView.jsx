@@ -9,7 +9,7 @@ const HospitalView = ({ selectedRow }) => {
     address,
     city,
     state,
-    zip_code,
+    postal_code,
     country,
     phone_number,
     website,
@@ -45,7 +45,9 @@ const HospitalView = ({ selectedRow }) => {
               <Typography variant="body1">State: {state}</Typography>
             </Grid>
             <Grid xs={12} sm={6} item>
-              <Typography variant="body1">Zip Code: {zip_code}</Typography>
+              <Typography variant="body1">
+                Postal Code: {postal_code}
+              </Typography>
             </Grid>
             <Grid xs={12} sm={6} item>
               <Typography variant="body1">Country: {country}</Typography>

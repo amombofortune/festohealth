@@ -30,41 +30,72 @@ const AppointmentForm = () => {
     setStartTime(start_time);
     setEndTime(end_time);
 
-    console.log("Doctor ID:", doctor_id);
-    console.log("Date:", date);
-    console.log("Start Time:", start_time);
-    console.log("End Time:", end_time);
+    try {
+      const access_token = document.cookie.replace(
+        /(?:(?:^|.*;\s*)access_token\s*=\s*([^;]*).*$)|^.*$/,
+        "$1"
+      );
 
-    await axios
-      .post("http://127.0.0.1:8000/appointment", {
+      const headers = {
+        Authorization: `Bearer ${access_token}`,
+        "Content-Type": "application/json",
+      };
+
+      const data = {
         patient_id,
         doctor_id,
         type,
         date,
-        start_time: selectedStartTime,
-        end_time: selectedEndTime,
+        start_time,
+        end_time,
         description,
         status,
-      })
-      .then((res) => {
-        window.location.reload(true);
-        console.log("Posting data to database successful!!!", res);
-      })
-      .catch((err) => console.log(err));
+      };
+
+      await axios.post("http://127.0.0.1:8000/appointment", data, {
+        withCredentials: true, // Enable sending cookies with the request
+        headers,
+      });
+
+      window.location.reload(true);
+      console.log("Posting data to database successful!!!");
+    } catch (error) {
+      console.error("Failed to post data to the database:", error);
+      // Handle error posting data
+    }
   };
 
   //Fetch appointment type
   useEffect(() => {
-    axios
-      .get("http://127.0.0.1:8000/appointment_type")
-      .then((res) => {
-        console.log(
-          "Fetching appointment type from database successful!!!",
-          res.data
+    const fetchData = async () => {
+      try {
+        const access_token = document.cookie.replace(
+          /(?:(?:^|.*;\s*)access_token\s*=\s*([^;]*).*$)|^.*$/,
+          "$1"
         );
-        setAppointmentTypeDB(res.data);
-      })
-      .catch((err) => console.log(err));
+
+        const response = await axios.get(
+          "http://127.0.0.1:8000/appointment_type",
+          {
+            withCredentials: true, // Enable sending cookies with the request
+            headers: {
+              Authorization: `Bearer ${access_token}`, // Include the access token as a request header
+            },
+          }
+        );
+
+        console.log(
+          "Fetching reaction type from database successful!!!",
+          response.data
+        );
+        setAppointmentTypeDB(response.data);
+      } catch (error) {
+        console.error("Failed to fetch reaction type data:", error);
+        // Handle error fetching admission data
+      }
+    };
+
+    fetchData();
   }, []);
 
   const generateTimeSlots = (start, end, interval) => {

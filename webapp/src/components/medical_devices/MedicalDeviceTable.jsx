@@ -179,19 +179,37 @@ export default function MedicalDeviceTable() {
     )
   );
 
-  //Fetch appointments
+  //Fetch medical device
   useEffect(() => {
-    axios
-      .get("http://127.0.0.1:8000/medical_device")
-      .then((res) => {
-        console.log(
-          "Fetching medical devices from database successful!!!",
-          res.data
+    const fetchData = async () => {
+      try {
+        const access_token = document.cookie.replace(
+          /(?:(?:^|.*;\s*)access_token\s*=\s*([^;]*).*$)|^.*$/,
+          "$1"
         );
-        setData(res.data);
-        //updateCount(res.data);
-      })
-      .catch((err) => console.log(err));
+
+        const response = await axios.get(
+          "http://127.0.0.1:8000/medical_device",
+          {
+            withCredentials: true, // Enable sending cookies with the request
+            headers: {
+              Authorization: `Bearer ${access_token}`, // Include the access token as a request header
+            },
+          }
+        );
+
+        console.log(
+          "Fetching medical device from database successful!!!",
+          response.data
+        );
+        setData(response.data);
+      } catch (error) {
+        console.error("Failed to fetch medical device data:", error);
+        // Handle error fetching lab test data
+      }
+    };
+
+    fetchData();
   }, []);
 
   // Delete record

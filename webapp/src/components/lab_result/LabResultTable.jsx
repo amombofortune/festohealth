@@ -167,16 +167,37 @@ export default function Trial() {
     )
   );
 
-  //Fetch appointments
+  //Fetch lab result
   useEffect(() => {
-    axios
-      .get("http://127.0.0.1:8000/lab_test_result")
-      .then((res) => {
-        console.log("Fetching lab test from database successful!!!", res.data);
-        setData(res.data);
-        //updateCount(res.data);
-      })
-      .catch((err) => console.log(err));
+    const fetchData = async () => {
+      try {
+        const access_token = document.cookie.replace(
+          /(?:(?:^|.*;\s*)access_token\s*=\s*([^;]*).*$)|^.*$/,
+          "$1"
+        );
+
+        const response = await axios.get(
+          "http://127.0.0.1:8000/lab_test_result",
+          {
+            withCredentials: true, // Enable sending cookies with the request
+            headers: {
+              Authorization: `Bearer ${access_token}`, // Include the access token as a request header
+            },
+          }
+        );
+
+        console.log(
+          "Fetching lab result from database successful!!!",
+          response.data
+        );
+        setData(response.data);
+      } catch (error) {
+        console.error("Failed to fetch lab result data:", error);
+        // Handle error fetching lab result data
+      }
+    };
+
+    fetchData();
   }, []);
 
   // Delete record

@@ -43,8 +43,18 @@ const DoctorForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    await axios
-      .post("http://127.0.0.1:8000/doctor", {
+    try {
+      const access_token = document.cookie.replace(
+        /(?:(?:^|.*;\s*)access_token\s*=\s*([^;]*).*$)|^.*$/,
+        "$1"
+      );
+
+      const headers = {
+        Authorization: `Bearer ${access_token}`,
+        "Content-Type": "application/json",
+      };
+
+      const data = {
         firstname,
         middlename,
         lastname,
@@ -62,34 +72,79 @@ const DoctorForm = () => {
         consultation_fee,
         rating,
         verified,
-      })
-      .then((res) => {
-        window.location.reload(true);
-        console.log("Posting data to database successful!!!", res);
-      })
-      .catch((err) => console.log(err));
+      };
+
+      await axios.post("http://127.0.0.1:8000/doctor", data, {
+        withCredentials: true, // Enable sending cookies with the request
+        headers,
+      });
+
+      window.location.reload(true);
+      console.log("Posting data to database successful!!!");
+    } catch (error) {
+      console.error("Failed to post data to the database:", error);
+      // Handle error posting data
+    }
   };
 
   //Fetch country
   useEffect(() => {
-    axios
-      .get("http://127.0.0.1:8000/country")
-      .then((res) => {
-        console.log("Fetching country from database successful!!!", res.data);
-        setCountryDB(res.data);
-      })
-      .catch((err) => console.log(err));
+    const fetchData = async () => {
+      try {
+        const access_token = document.cookie.replace(
+          /(?:(?:^|.*;\s*)access_token\s*=\s*([^;]*).*$)|^.*$/,
+          "$1"
+        );
+
+        const response = await axios.get("http://127.0.0.1:8000/country", {
+          withCredentials: true, // Enable sending cookies with the request
+          headers: {
+            Authorization: `Bearer ${access_token}`, // Include the access token as a request header
+          },
+        });
+
+        console.log(
+          "Fetching country from database successful!!!",
+          response.data
+        );
+        setCountryDB(response.data);
+      } catch (error) {
+        console.error("Failed to fetch country data:", error);
+        // Handle error fetching admission data
+      }
+    };
+
+    fetchData();
   }, []);
 
   //Fetch specialties
   useEffect(() => {
-    axios
-      .get("http://127.0.0.1:8000/specialty")
-      .then((res) => {
-        console.log("Fetching specialty from database successful!!!", res.data);
-        setSpecialtyDB(res.data);
-      })
-      .catch((err) => console.log(err));
+    const fetchData = async () => {
+      try {
+        const access_token = document.cookie.replace(
+          /(?:(?:^|.*;\s*)access_token\s*=\s*([^;]*).*$)|^.*$/,
+          "$1"
+        );
+
+        const response = await axios.get("http://127.0.0.1:8000/specialty", {
+          withCredentials: true, // Enable sending cookies with the request
+          headers: {
+            Authorization: `Bearer ${access_token}`, // Include the access token as a request header
+          },
+        });
+
+        console.log(
+          "Fetching specialty from database successful!!!",
+          response.data
+        );
+        setSpecialtyDB(response.data);
+      } catch (error) {
+        console.error("Failed to fetch specialty data:", error);
+        // Handle error fetching admission data
+      }
+    };
+
+    fetchData();
   }, []);
 
   return (

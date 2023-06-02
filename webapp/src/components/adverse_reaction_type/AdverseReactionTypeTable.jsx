@@ -145,16 +145,35 @@ export default function AdverseReactionTypeTable() {
 
   //Fetch adverse reaction type
   useEffect(() => {
-    axios
-      .get("http://127.0.0.1:8000/adverse_reaction_type")
-      .then((res) => {
+    const fetchData = async () => {
+      try {
+        const access_token = document.cookie.replace(
+          /(?:(?:^|.*;\s*)access_token\s*=\s*([^;]*).*$)|^.*$/,
+          "$1"
+        );
+
+        const response = await axios.get(
+          "http://127.0.0.1:8000/adverse_reaction_type",
+          {
+            withCredentials: true, // Enable sending cookies with the request
+            headers: {
+              Authorization: `Bearer ${access_token}`, // Include the access token as a request header
+            },
+          }
+        );
+
         console.log(
           "Fetching adverse reaction type from database successful!!!",
-          res.data
+          response.data
         );
-        setData(res.data);
-      })
-      .catch((err) => console.log(err));
+        setData(response.data);
+      } catch (error) {
+        console.error("Failed to fetch adverse reaction type data:", error);
+        // Handle error fetching adverse reaction type data
+      }
+    };
+
+    fetchData();
   }, []);
 
   // Delete record

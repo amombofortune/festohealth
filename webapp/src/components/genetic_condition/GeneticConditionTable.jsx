@@ -155,18 +155,37 @@ export default function Trial() {
     )
   );
 
-  //Fetch department
+  //Fetch genetic condition
   useEffect(() => {
-    axios
-      .get("http://127.0.0.1:8000/genetic_condition")
-      .then((res) => {
+    const fetchData = async () => {
+      try {
+        const access_token = document.cookie.replace(
+          /(?:(?:^|.*;\s*)access_token\s*=\s*([^;]*).*$)|^.*$/,
+          "$1"
+        );
+
+        const response = await axios.get(
+          "http://127.0.0.1:8000/genetic_condition",
+          {
+            withCredentials: true, // Enable sending cookies with the request
+            headers: {
+              Authorization: `Bearer ${access_token}`, // Include the access token as a request header
+            },
+          }
+        );
+
         console.log(
           "Fetching genetic condition from database successful!!!",
-          res.data
+          response.data
         );
-        setData(res.data);
-      })
-      .catch((err) => console.log(err));
+        setData(response.data);
+      } catch (error) {
+        console.error("Failed to fetch genetic condition data:", error);
+        // Handle error fetching genetic condition data
+      }
+    };
+
+    fetchData();
   }, []);
 
   // Delete record

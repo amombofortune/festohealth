@@ -256,16 +256,34 @@ export default function PatientTable() {
     )
   );
 
-  //Fetch appointments
+  //Fetch patient
   useEffect(() => {
-    axios
-      .get("http://127.0.0.1:8000/patient")
-      .then((res) => {
-        console.log("Fetching patients from database successful!!!", res.data);
-        setData(res.data);
-        //updateCount(res.data);
-      })
-      .catch((err) => console.log(err));
+    const fetchData = async () => {
+      try {
+        const access_token = document.cookie.replace(
+          /(?:(?:^|.*;\s*)access_token\s*=\s*([^;]*).*$)|^.*$/,
+          "$1"
+        );
+
+        const response = await axios.get("http://127.0.0.1:8000/patient", {
+          withCredentials: true, // Enable sending cookies with the request
+          headers: {
+            Authorization: `Bearer ${access_token}`, // Include the access token as a request header
+          },
+        });
+
+        console.log(
+          "Fetching patient from database successful!!!",
+          response.data
+        );
+        setData(response.data);
+      } catch (error) {
+        console.error("Failed to fetch patient data:", error);
+        // Handle error fetching patient data
+      }
+    };
+
+    fetchData();
   }, []);
 
   // Delete record

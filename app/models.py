@@ -14,6 +14,27 @@ from sqlalchemy.dialects.postgresql import INTERVAL
 import uuid
 import bcrypt
 
+""" USERS """
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(String, primary_key=True)
+    email = Column(String, nullable=False, unique=True)
+    password = Column(String, nullable=False)
+    registration_date = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    created_at = Column(TIMESTAMP, server_default=func.now())
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
+
+
+    def __init__(self, email, password):
+        self.id = str(uuid.uuid4().hex[:6].upper())
+        self.email = email
+        self.password = password
+
+    def __repr__(self):
+        return f"({self.id}, {self.email})"
+    
 
 """ ADMINISTRATORS """
 class Administrator(Base):
@@ -135,19 +156,17 @@ class AdverseReactionType(Base):
     __tablename__ = "adverse_reaction_types"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
     name = Column(String)
-    description = Column(Text)
+    description = Column(String)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, user_id, name, description):
-        self.user_id = user_id
+    def __init__(self, name, description):
         self.name = name
         self.description = description
 
     def __repr__(self):
-        return f"{self.id}, {self.user_id}, {self.name}, {self.description})"
+        return f"{self.id}, {self.name}, {self.description})"
 
 
 Session = sessionmaker(bind=engine)
@@ -187,7 +206,6 @@ session.add(adverse_reaction_type8)
 session.add(adverse_reaction_type9)
 """
 session.commit()
-session.close()
 
 """ ALLERGIES """
 class Allergy(Base):
@@ -328,20 +346,18 @@ class AppointmentType(Base):
     __tablename__ = "appointment_types"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
     name = Column(String)
     description = Column(String)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    def __init__(self, user_id, name, description):
-        self.user_id = user_id
+    def __init__(self, name, description):
         self.name = name
         self.description = description
         
 
     def __repr__(self):
-        return f"({self.name}, {self.user_id}, {self.description})"
+        return f"({self.name}, {self.description})"
 
 
 Session = sessionmaker(bind=engine)
@@ -694,8 +710,6 @@ class Disease(Base):
     __tablename__ = 'diseases'
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
-    patient_id = Column(String, ForeignKey('patients.id', ondelete='CASCADE', onupdate='NO ACTION'))
     name = Column(String)
     description = Column(Text)
     symptoms = Column(Text)
@@ -704,12 +718,8 @@ class Disease(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    user = relationship("User", foreign_keys=[user_id])
 
-
-    def __init__(self, user_id, patient_id, name, description, symptoms, treatment, prevention):
-        self.user_id = user_id
-        self.patient_id = patient_id
+    def __init__(self, name, description, symptoms, treatment, prevention):
         self.name = name
         self.description = description
         self.symptoms = symptoms
@@ -717,7 +727,7 @@ class Disease(Base):
         self.prevention = prevention
 
     def __repr__(self):
-        return f"({self.id}, {self.user_id}, {self.patient_id}, {self.name}, {self.description}, {self.symptoms}, {self.treatment}, {self.prevention})"
+        return f"({self.id}, {self.name}, {self.description}, {self.symptoms}, {self.treatment}, {self.prevention})"
 
 
 """ DOCTOR """
@@ -1940,27 +1950,6 @@ class TimeSlot(Base):
 
 
 
-""" USERS """
-class User(Base):
-    __tablename__ = "users"
-
-    id = Column(String, primary_key=True)
-    email = Column(String, nullable=False, unique=True)
-    password = Column(String, nullable=False)
-    registration_date = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
-    created_at = Column(TIMESTAMP, server_default=func.now())
-    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
-
-
-
-    def __init__(self, email, password):
-        self.id = str(uuid.uuid4().hex[:6].upper())
-        self.email = email
-        self.password = password
-
-    def __repr__(self):
-        return f"({self.id}, {self.email})"
-
 """ VACCINATION """
 class Vaccination(Base):
     __tablename__ = "vaccinations"
@@ -2033,7 +2022,6 @@ class Ward(Base):
     __tablename__ = "wards"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
     hospital_id = Column(String, ForeignKey('hospitals.id', ondelete='CASCADE', onupdate='NO ACTION'))
     name = Column(String)
     type = Column(String)
@@ -2041,20 +2029,15 @@ class Ward(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    user = relationship("User", foreign_keys=[user_id])
 
-
-
-    def __init__(self, user_id, hospital_id, name, type, capacity, location ):
-        self.user_id = user_id
+    def __init__(self, hospital_id, name, type, capacity ):
         self.hospital_id = hospital_id
         self.name = name
         self.type = type
         self.capacity = capacity
-        self.location = location
 
     def __repr__(self):
-        return f"({self.id}, {self.user_id}, {self.hospital_id}, {self.name}, {self.type}, {self.capacity}, {self.location})"
+        return f"({self.id}, {self.hospital_id}, {self.name}, {self.type}, {self.capacity})"
 
 """ WORK SCHEDULE """
 class WorkSchedule(Base):
@@ -2091,13 +2074,19 @@ class WorkSchedule(Base):
 # results = session.query(Person).filter(Person.gender == 'female')
 # for r in results:
 #   print(r)
-
 """
+import bcrypt
+password="password123"
+
+salt = bcrypt.gensalt()
+hashed_password = bcrypt.hashpw(password.encode("utf-8"), salt)
+
 Session = sessionmaker(bind=engine)
 session = SessionLocal()
 user = User(
-    email="dorothyarieda@gmail.com",
-    password="password123"
+    email="amombofortune79@gmail.com",
+    password=hashed_password.decode("utf-8")
+    
 )
 session.add(user)
 session.commit()
@@ -2684,5 +2673,5 @@ work_schedule = WorkSchedule(
 session.add(work_schedule)
 session.commit()
 session.close()
-"""
 
+"""

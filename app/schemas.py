@@ -6,12 +6,13 @@ from typing import Optional
 """User"""
 class UserBase(BaseModel):
     email: EmailStr
+    password: str
+
 
 
 class UserCreate(UserBase):
+    email: EmailStr
     password: str
-    
-
 
 class UserResponse(UserBase):#what we are returning for the user to see
     id: str
@@ -131,7 +132,6 @@ class AdverseReactionTypeCreate(AdverseReactionTypeBase):
 class AdverseReactionTypeResponse(AdverseReactionTypeBase):
     id: int
     created_at: datetime
-    user_id: str
 
     class Config:
         orm_mode = True
@@ -224,7 +224,6 @@ class AppointmentTypeCreate(AppointmentTypeBase):
 class AppointmentTypeResponse(AppointmentTypeBase):
     id: int
     created_at: datetime
-    user_id: str
 
     class Config:
         orm_mode = True
@@ -342,7 +341,6 @@ class CountryResponse(CountryBase):
     id: int
     created_at: datetime
     user_id: str
-    user: UserResponse
 
 
     class Config:
@@ -401,7 +399,6 @@ class DiagnosisResponse(DiagnosisBase):
 
 """Diseases"""
 class DiseaseBase(BaseModel):
-    patient_id: str
     name: str
     description: str
     symptoms: str
@@ -416,8 +413,6 @@ class DiseaseCreate(DiseaseBase):
 class DiseaseResponse(DiseaseBase):
     id: int
     created_at: datetime
-    user_id: str
-    user: UserResponse
 
 
     class Config:
@@ -1288,8 +1283,6 @@ class WardCreate(WardBase):
 class WardResponse(WardBase):
     id: int
     created_at: datetime
-    user_id: str
-    user: UserResponse
 
 
     class Config:

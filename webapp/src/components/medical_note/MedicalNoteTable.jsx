@@ -155,18 +155,34 @@ export default function MedicalNoteTable() {
     )
   );
 
-  //Fetch immunization
+  //Fetch medical note
   useEffect(() => {
-    axios
-      .get("http://127.0.0.1:8000/medical_note")
-      .then((res) => {
-        console.log(
-          "Fetching medical image from database successful!!!",
-          res.data
+    const fetchData = async () => {
+      try {
+        const access_token = document.cookie.replace(
+          /(?:(?:^|.*;\s*)access_token\s*=\s*([^;]*).*$)|^.*$/,
+          "$1"
         );
-        setData(res.data);
-      })
-      .catch((err) => console.log(err));
+
+        const response = await axios.get("http://127.0.0.1:8000/medical_note", {
+          withCredentials: true, // Enable sending cookies with the request
+          headers: {
+            Authorization: `Bearer ${access_token}`, // Include the access token as a request header
+          },
+        });
+
+        console.log(
+          "Fetching medical note from database successful!!!",
+          response.data
+        );
+        setData(response.data);
+      } catch (error) {
+        console.error("Failed to fetch medical note data:", error);
+        // Handle error fetching medical note data
+      }
+    };
+
+    fetchData();
   }, []);
 
   // Delete record

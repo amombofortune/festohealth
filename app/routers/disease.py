@@ -19,7 +19,7 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_disease(disease: schemas.DiseaseCreate, db: Session = Depends(get_db),
                    current_user: int = Depends(oauth2.get_current_user)):
-    new_disease = models.Disease(user_id= current_user.id, **disease.dict())
+    new_disease = models.Disease(**disease.dict())
     db.add(new_disease)
     db.commit()
     db.refresh(new_disease)
@@ -43,13 +43,8 @@ def get_disease(id: int, db: Session = Depends(get_db),
 
 @router.get("/", response_model=List[schemas.DiseaseResponse])
 def get_disease(db: Session = Depends(get_db),
-                current_user: int = Depends(oauth2.get_current_user), limit: int = 10, skip: int = 0, search: Optional[str] = ""):
-    disease = db.query(models.Disease)\
-    .filter(models.Disease.user_id == current_user.id)\
-    .filter(models.Disease.name.ilike(f'%{search}%'))\
-    .limit(limit)\
-    .offset(skip)\
-    .all()
+                current_user: int = Depends(oauth2.get_current_user)):
+    disease = db.query(models.Disease).all()
     return disease
 
 # Update disease

@@ -1,24 +1,24 @@
-function Validation(values) {
-  let error = {};
+export const validateLogin = (email, password) => {
+  const errors = {};
 
-  const email_pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-  const password_pattern = /^(?=.\d)(?=.[a-z])(?=.*[A-Z])[a-zA-Z0-9]{8,}$/;
-
-  if (values.email === "") {
-    error.email = "Name should not be empty";
-  } else if (!email_pattern.test(values.email)) {
-    error.email = "Email Didn't match";
-  } else {
-    error.email = "";
+  // Validate email
+  if (!email) {
+    errors.emailError = "Email is required";
+  } else if (!isValidEmail(email)) {
+    errors.emailError = "Invalid email format";
   }
-  if (values.password === "") {
-    error.password = "Password should not be empty";
-  } else if (!password_pattern.test(values.password)) {
-    error.password = "Password didn't match";
-  } else {
-    error.password = "";
+
+  // Validate password
+  if (!password) {
+    errors.passwordError = "Password is required";
   }
-  return error;
-}
-export default Validation;
+
+  return errors;
+};
+
+// Helper function to validate email format
+const isValidEmail = (email) => {
+  // Basic email format validation
+  const emailRegex = /^\S+@\S+\.\S+$/;
+  return emailRegex.test(email);
+};

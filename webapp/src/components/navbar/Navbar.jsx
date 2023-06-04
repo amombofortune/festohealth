@@ -7,6 +7,8 @@ import FullscreenExitOutlinedIcon from "@mui/icons-material/FullscreenExitOutlin
 import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
 import ChatBubbleOutlineOutlinedIcon from "@mui/icons-material/ChatBubbleOutlineOutlined";
 import ListOutlinedIcon from "@mui/icons-material/ListOutlined";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const menu = ["Profile", "Settings", "Logout"];
@@ -31,6 +33,36 @@ const Navbar = () => {
       document.removeEventListener("click", handleClickOutside);
     };
   }, []);
+
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      // Send a POST request to the logout endpoint
+      await axios.post("http://127.0.0.1:8000/logout", null, {
+        withCredentials: true,
+      });
+
+      // Clear the access token cookie
+      document.cookie =
+        "access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
+      // Redirect or perform any additional client-side cleanup
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout Failed:", error);
+      // Handle logout error, e.g., display error message to the user
+    }
+  };
+
+  const handleMenuClick = (item) => {
+    if (item === "Logout") {
+      handleLogout();
+    } else {
+      // Handle clicks for other menu items if needed
+    }
+  };
+
   return (
     <div className="navbar">
       <div className="wrapper">
@@ -73,7 +105,8 @@ const Navbar = () => {
                 <ul>
                   {menu.map((item) => (
                     <li
-                      onClick={() => setOpen(false)}
+                      //onClick={() => setOpen(false)}
+                      onClick={() => handleMenuClick(item)}
                       className="item-menu"
                       key={item}
                     >

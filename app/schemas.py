@@ -7,16 +7,19 @@ from typing import Optional
 class UserBase(BaseModel):
     email: EmailStr
     password: str
+    user_type: str
 
 
 
 class UserCreate(UserBase):
     email: EmailStr
     password: str
+    user_type: str
 
 class UserResponse(UserBase):#what we are returning for the user to see
     id: str
     email: EmailStr
+    user_type: str
     registration_date: datetime
 
     class Config:

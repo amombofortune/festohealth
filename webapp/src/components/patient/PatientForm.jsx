@@ -402,7 +402,7 @@ const PatientForm = () => {
                 id="provider_name"
                 select
                 label="Select Insurance Provider"
-                value={country}
+                value={provider_name}
                 //defaultValue="In-person"
                 //helperText="Please select appointment type"
                 onChange={(event) => {

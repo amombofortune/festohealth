@@ -21,19 +21,21 @@ class User(Base):
     id = Column(String, primary_key=True)
     email = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
+    user_type = Column(String, nullable=False)
     registration_date = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     created_at = Column(TIMESTAMP, server_default=func.now())
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
 
 
-    def __init__(self, email, password):
+    def __init__(self, email, password, user_type):
         self.id = str(uuid.uuid4().hex[:6].upper())
         self.email = email
         self.password = password
+        self.user_type = user_type
 
     def __repr__(self):
-        return f"({self.id}, {self.email})"
+        return f"({self.id}, {self.email}, {self.user_type})"
     
 
 """ ADMINISTRATORS """

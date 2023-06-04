@@ -1,29 +1,49 @@
-function Validation(values) {
-  let error = {};
+export const validateRegistration = (
+  email,
+  password,
+  confirmPassword,
+  user_type
+) => {
+  const errors = {};
 
-  const email_pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!user_type) {
+    errors.userTypeError = "User type is required";
+  }
 
-  const password_pattern = /^(?=.\d)(?=.[a-z])(?=.*[A-Z])[a-zA-Z0-9]{8,}$/;
+  // Validate email
+  if (!email) {
+    errors.emailError = "Email is required";
+  } else if (!isValidEmail(email)) {
+    errors.emailError = "Invalid email format";
+  }
 
-  if (values.role === "") {
-    error.role = "Name should not be empty";
-  } else {
-    error.role = "";
+  if (!password) {
+    errors.passwordError = "Password is required";
+  } else if (password.length < 8) {
+    errors.passwordError = "Password must be at least 8 characters long";
+  } else if (!/\d/.test(password)) {
+    errors.passwordError = "Password must contain at least one digit";
+  } else if (!/[a-z]/.test(password)) {
+    errors.passwordError =
+      "Password must contain at least one lowercase letter";
+  } else if (!/[A-Z]/.test(password)) {
+    errors.passwordError =
+      "Password must contain at least one uppercase letter";
+  } else if (!/[!@#$%^&*]/.test(password)) {
+    errors.passwordError =
+      "Password must contain at least one special character (!@#$%^&*)";
   }
-  if (values.email === "") {
-    error.email = "Email should not be empty";
-  } else if (!email_pattern.test(values.email)) {
-    error.email = "Email Didn't match";
-  } else {
-    error.email = "";
+
+  if (password !== confirmPassword) {
+    errors.confirmPasswordError = "Password and Confirm Password do not match";
   }
-  if (values.password === "") {
-    error.password = "Password should not be empty";
-  } else if (!password_pattern.test(values.password)) {
-    error.password = "Password didn't match";
-  } else {
-    error.password = "";
-  }
-  return error;
-}
-export default Validation;
+
+  return errors;
+};
+
+// Helper function to validate email format
+const isValidEmail = (email) => {
+  // Basic email format validation
+  const emailRegex = /^\S+@\S+\.\S+$/;
+  return emailRegex.test(email);
+};

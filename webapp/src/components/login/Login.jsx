@@ -10,15 +10,27 @@ import {
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "react-toastify/dist/ReactToastify.css";
+import { validateLogin } from "./LoginValidation";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState({});
 
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const validationErrors = validateLogin(email, password);
+    setErrors(validationErrors);
+
+    if (Object.keys(validationErrors).length > 0) {
+      // If there are validation errors, handle them (e.g., display error messages)
+      console.log("Validation Errors:", validationErrors);
+      return;
+    }
+
     try {
       const formData = new FormData();
       formData.append("username", email);
@@ -96,10 +108,16 @@ function Login() {
                   value={email}
                   onChange={(event) => {
                     setEmail(event.target.value);
+                    setErrors((prevErrors) => ({
+                      ...prevErrors,
+                      emailError: "",
+                    })); // Clear previous error
                   }}
                   fullWidth
-                  required
                 ></TextField>
+                {errors.emailError && (
+                  <p className="error-message">{errors.emailError}</p>
+                )}
               </Grid>
 
               <Grid xs={12} item>
@@ -111,10 +129,16 @@ function Login() {
                   value={password}
                   onChange={(event) => {
                     setPassword(event.target.value);
+                    setErrors((prevErrors) => ({
+                      ...prevErrors,
+                      passwordError: "",
+                    })); // Clear previous error
                   }}
                   fullWidth
-                  required
                 ></TextField>
+                {errors.passwordError && (
+                  <p className="error-message">{errors.passwordError}</p>
+                )}
               </Grid>
 
               <Grid xs={12} item>

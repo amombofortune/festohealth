@@ -4,7 +4,7 @@ from fastapi.security.oauth2 import OAuth2PasswordRequestForm
 from fastapi import HTTPException, status, Depends,APIRouter
 from ..database import get_db
 from sqlalchemy.orm import Session
-
+from fastapi import Response
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 
@@ -46,4 +46,14 @@ def login_user(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Sess
     response.set_cookie(key="access_token", value=access_token, httponly=True, secure=True, samesite="None")
     
     return response
+
+
+@router.post("/logout")
+def logout_user(response: Response):
+    # Clear the access token cookie
+    response.delete_cookie(key="access_token")
+
+    # Return a response indicating successful logout
+    return {"message": "Logout successful"}
+
 

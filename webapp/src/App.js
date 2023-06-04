@@ -61,6 +61,9 @@ import AppointmentEdit from "./components/appointment/AppointmentEdit";
 import Nurse from "./components/nurse/Nurse";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import PatientForm from "./components/patient/PatientForm";
+import DoctorForm from "./components/doctor/DoctorForm";
+import PatientMultiStepForm from "./components/patient/PatientMultiStepForm";
 
 function App() {
   return (
@@ -123,6 +126,12 @@ function App() {
           <Route path="/complete" element={<Complete />} />
           <Route path="/login" element={<Login />} />
           <Route path="/registration" element={<Registration />} />
+          <Route path="/patientform" element={<PatientForm />} />
+          <Route path="/doctorform" element={<DoctorForm />} />
+          <Route
+            path="/patientmultistepform"
+            element={<PatientMultiStepForm />}
+          />
 
           {"Dashboard"}
           <Route path="/">

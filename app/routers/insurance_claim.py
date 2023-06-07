@@ -16,11 +16,17 @@ router = APIRouter(
 
 """ INSURANCE CLAIM APIs """
 # Create insurance claims
-
-
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_insurance_claim(insurance_claim: schemas.InsuranceClaimCreate, db: Session = Depends(get_db),
                            current_user: int = Depends(oauth2.get_current_user)):
+    
+    # Check if the current user has the "patient" role
+    if current_user.user_type != "patient":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors can create insurance claim"
+        )
+    
     new_insurance_claim = models.InsuranceClaim(user_id= current_user.id, **insurance_claim.dict())
     db.add(new_insurance_claim)
     db.commit()
@@ -28,11 +34,17 @@ def create_insurance_claim(insurance_claim: schemas.InsuranceClaimCreate, db: Se
     return new_insurance_claim
 
 # Read one insurance claim
-
-
 @router.get("/{id}", response_model=schemas.InsuranceClaimResponse)
 def get_insurance_claim(id: str, db: Session = Depends(get_db),
                         current_user: int = Depends(oauth2.get_current_user)):
+    
+      # Check if the current user has the "doctor" or "hospital" or "patient" role
+    if current_user.user_type not in ["insurance_provider", "patient"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only insurance providers or patients can read insurance claims"
+        )
+    
     insurance_claim = db.query(models.InsuranceClaim).filter(
         models.InsuranceClaim.id == id).first()
 
@@ -45,6 +57,14 @@ def get_insurance_claim(id: str, db: Session = Depends(get_db),
 @router.get("/", response_model=List[schemas.InsuranceClaimResponse])
 def get_insurance_claim(db: Session = Depends(get_db),
                         current_user: int = Depends(oauth2.get_current_user), limit: int = 10, skip: int = 0, search: Optional[str] = ""):
+    
+     # Check if the current user has the "doctor" or "hospital" or "patient" role
+    if current_user.user_type not in ["insurance_provider", "patient"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only insurance providers or patients can read insurance claims"
+        )
+    
     insurance_claim = db.query(models.InsuranceClaim)\
     .filter(models.InsuranceClaim.user_id == current_user.id)\
     .filter(models.InsuranceClaim.status.ilike(f'%{search}%'))\

@@ -15,11 +15,17 @@ router = APIRouter(
 
 """ BILLING APIs"""
 # Create Billing
-
-
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_billing(billing: schemas.BillingCreate, db: Session = Depends(get_db),
                    current_user: int = Depends(oauth2.get_current_user)):
+    
+    # Check if the current user has the "doctor" role
+    if current_user.user_type != "doctor":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors can create billing"
+        )
+    
     new_billing = models.Billing(user_id= current_user.id, **billing.dict())
     db.add(new_billing)
     db.commit()
@@ -27,11 +33,17 @@ def create_billing(billing: schemas.BillingCreate, db: Session = Depends(get_db)
     return new_billing
 
 # Read One Billing
-
-
 @router.get("/{id}", response_model=schemas.BillingResponse)
 def get_billing(id: int, db: Session = Depends(get_db),
                 current_user: int = Depends(oauth2.get_current_user)):
+    
+    # Check if the current user has the "doctor" or "hospital" or "patient" role
+    if current_user.user_type not in ["doctor", "hospital", "patient"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors, hospitals or patients can read billing"
+        )
+    
     billing = db.query(models.Billing).filter(models.Billing.id == id).first()
 
     if not billing:
@@ -40,11 +52,17 @@ def get_billing(id: int, db: Session = Depends(get_db),
     return billing
 
 # Read All Billings
-
-
 @router.get("/", response_model=List[schemas.BillingResponse])
 def get_billing(db: Session = Depends(get_db),
                 current_user: int = Depends(oauth2.get_current_user), limit: int = 10, skip: int = 0, search: Optional[str] = ""):
+    
+    # Check if the current user has the "doctor" or "hospital" or "patient" role
+    if current_user.user_type not in ["doctor", "hospital", "patient"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors, hospitals or patients can read beds"
+        )
+    
     billing = db.query(models.Billing)\
     .filter(models.Billing.user_id == current_user.id)\
     .filter(models.Billing.payment_method.ilike(f'%{search}%'))\
@@ -54,11 +72,16 @@ def get_billing(db: Session = Depends(get_db),
     return billing
 
 # Update Billing
-
-
 @router.put("/{id}", response_model=schemas.BillingResponse)
 def update_billing(id: int, updated_billing: schemas.BillingCreate, db: Session = Depends(get_db),
                    current_user: int = Depends(oauth2.get_current_user)):
+    
+    # Check if the current user has the "doctor" role
+    if current_user.user_type != "doctor":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors can update billing"
+        )
 
     billing_query = db.query(models.Billing).filter(models.Billing.id == id)
 
@@ -81,6 +104,13 @@ def update_billing(id: int, updated_billing: schemas.BillingCreate, db: Session 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_bill(id: int, db: Session = Depends(get_db),
                 current_user: int = Depends(oauth2.get_current_user)):
+    
+    # Check if the current user has the "doctor" role
+    if current_user.user_type != "doctor":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors can delete billing"
+        )
 
     billing_query = db.query(models.Billing).filter(models.Billing.id == id)
 

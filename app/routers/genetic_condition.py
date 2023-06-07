@@ -16,11 +16,17 @@ router = APIRouter(
 
 """ GENETIC CONDITION APIs """
 # Create genetic condition
-
-
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_genetic_condition(genetic_condition: schemas.GeneticConditionCreate, db: Session = Depends(get_db),
                              current_user: int = Depends(oauth2.get_current_user)):
+    
+    # Check if the current user has the "doctor" role
+    if current_user.user_type != "doctor":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors can create genetic condition"
+        )
+    
     new_genetic_condition = models.GeneticCondition(user_id= current_user.id, **genetic_condition.dict())
     db.add(new_genetic_condition)
     db.commit()
@@ -28,11 +34,17 @@ def create_genetic_condition(genetic_condition: schemas.GeneticConditionCreate, 
     return new_genetic_condition
 
 # Read One genetic condition
-
-
 @router.get("/{id}", response_model=schemas.GeneticConditionResponse)
 def get_genetic_condition(id: int, db: Session = Depends(get_db),
                           current_user: int = Depends(oauth2.get_current_user)):
+    
+     # Check if the current user has the "doctor" or "hospital" or "patient" role
+    if current_user.user_type not in ["doctor", "hospital", "patient"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors, hospitals or patients can read genetic condition"
+        )
+    
     genetic_condition = db.query(models.GeneticCondition).filter(
         models.GeneticCondition.id == id).first()
 
@@ -42,11 +54,17 @@ def get_genetic_condition(id: int, db: Session = Depends(get_db),
     return genetic_condition
 
 # Read All genetic conditions
-
-
 @router.get("/", response_model=List[schemas.GeneticConditionResponse])
 def get_genetic_condition(db: Session = Depends(get_db),
                           current_user: int = Depends(oauth2.get_current_user), limit: int = 10, skip: int = 0, search: Optional[str] = ""):
+    
+     # Check if the current user has the "doctor" or "hospital" or "patient" role
+    if current_user.user_type not in ["doctor", "hospital", "patient"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors, hospitals or patients can read genetic condition"
+        )
+    
     genetic_condition = db.query(models.GeneticCondition)\
     .filter(models.GeneticCondition.user_id == current_user.id)\
     .filter(models.GeneticCondition.name.ilike(f'%{search}%'))\
@@ -56,11 +74,16 @@ def get_genetic_condition(db: Session = Depends(get_db),
     return genetic_condition
 
 # Update genetic condition
-
-
 @router.put("/{id}", response_model=schemas.GeneticConditionResponse)
 def update_genetic_condition(id: int, updated_genetic_condition: schemas.GeneticConditionCreate, db: Session = Depends(get_db),
                              current_user: int = Depends(oauth2.get_current_user)):
+    
+     # Check if the current user has the "doctor" role
+    if current_user.user_type != "doctor":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors can create genetic condition"
+        )
 
     genetic_condition_query = db.query(models.GeneticCondition).filter(
         models.GeneticCondition.id == id)
@@ -85,6 +108,13 @@ def update_genetic_condition(id: int, updated_genetic_condition: schemas.Genetic
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_genetic_condition(id: int, db: Session = Depends(get_db),
                              current_user: int = Depends(oauth2.get_current_user)):
+    
+     # Check if the current user has the "doctor" role
+    if current_user.user_type != "doctor":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors can delete genetic condition"
+        )
 
     genetic_condition_query = db.query(models.GeneticCondition).filter(
         models.GeneticCondition.id == id)

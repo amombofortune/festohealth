@@ -16,11 +16,17 @@ router = APIRouter(
 
 """ REFERRALS """
 # Create referrals
-
-
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_referral(referral: schemas.ReferralCreate, db: Session = Depends(get_db),
                     current_user: int = Depends(oauth2.get_current_user)):
+    
+    # Check if the current user has the "doctor" or "hospital" or "patient" role
+    if current_user.user_type not in ["doctor", "hospital"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors or hospitals can read referral"
+        )
+    
     referral = models.Referral(user_id= current_user.id, **referral.dict())
     db.add(referral)
     db.commit()
@@ -28,11 +34,17 @@ def create_referral(referral: schemas.ReferralCreate, db: Session = Depends(get_
     return referral
 
 # Read single referral
-
-
 @router.get("/{id}", response_model=schemas.ReferralResponse)
 def get_referral(id: int, db: Session = Depends(get_db),
                  current_user: int = Depends(oauth2.get_current_user)):
+    
+     # Check if the current user has the "doctor" or "hospital" or "patient" role
+    if current_user.user_type not in ["doctor", "hospital", "patient"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors, hospitals or patients can read referral"
+        )
+    
     referral = db.query(models.Referral).filter(
         models.Referral.id == id).first()
 
@@ -45,6 +57,14 @@ def get_referral(id: int, db: Session = Depends(get_db),
 @router.get("/", response_model=List[schemas.ReferralResponse])
 def get_referrals(db: Session = Depends(get_db),
                   current_user: int = Depends(oauth2.get_current_user), limit: int = 10, skip: int = 0, search: Optional[str] = ""):
+    
+     # Check if the current user has the "doctor" or "hospital" or "patient" role
+    if current_user.user_type not in ["doctor", "hospital", "patient"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors, hospitals or patients can read referral"
+        )
+    
     referrals = db.query(models.Referral).\
     filter(models.Referral.user_id == current_user.id)\
     .filter(models.Referral.status.ilike(f'%{search}%'))\
@@ -54,11 +74,16 @@ def get_referrals(db: Session = Depends(get_db),
     return referrals
 
 # Update referrals
-
-
 @router.put("/{id}", response_model=schemas.ReferralResponse)
 def update_referral(id: int, updated_referral: schemas.ReferralCreate, db: Session = Depends(get_db),
                     current_user: int = Depends(oauth2.get_current_user)):
+    
+    # Check if the current user has the "doctor" or "hospital" or "patient" role
+    if current_user.user_type not in ["doctor", "hospital"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors or hospitals can update referral"
+        )
 
     referral_query = db.query(models.Referral).filter(models.Referral.id == id)
 
@@ -81,6 +106,13 @@ def update_referral(id: int, updated_referral: schemas.ReferralCreate, db: Sessi
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_referral(id: int, db: Session = Depends(get_db),
                     current_user: int = Depends(oauth2.get_current_user)):
+    
+    # Check if the current user has the "doctor" or "hospital" or "patient" role
+    if current_user.user_type not in ["doctor", "hospital"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors or hospitals can delete referral"
+        )
 
     referral_query = db.query(models.Referral).filter(models.Referral.id == id)
 

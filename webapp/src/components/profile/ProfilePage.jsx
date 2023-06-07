@@ -54,15 +54,11 @@ const ProfilePage = () => {
 
       try {
         // Send the image data to the server for uploading
-        await axios.post(
-          "/profile", // Replace `userId` with the actual user ID
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
+        await axios.post(`/${user_id}/profile_image`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
 
         console.log("Image uploaded successfully");
         // Handle success, e.g., show a success message to the user
@@ -172,7 +168,7 @@ const ProfilePage = () => {
             }}
           >
             <Button onClick={handleDialogClose}>Cancel</Button>
-            <Button onClick={handleSaveImage}>Update</Button>
+            <Button onClick={handleSaveImage}>Save</Button>
           </div>
           {file && <Button onClick={handleRemoveImage}>Remove Image</Button>}
         </DialogContent>

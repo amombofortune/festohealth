@@ -14,12 +14,19 @@ router = APIRouter(
 )
 
 
-
 """ VITAL SIGN APIs """
 # Create vital sign
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_vital_sign(vital_sign: schemas.VitalSignCreate, db: Session = Depends(get_db),
                       current_user: int = Depends(oauth2.get_current_user)):
+    
+       # Check if the current user has the "doctor" role
+    if current_user.user_type != "doctor":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors can create vital sign"
+        )
+    
     vital_sign = models.VitalSign(user_id= current_user.id, **vital_sign.dict())
     db.add(vital_sign)
     db.commit()
@@ -30,6 +37,14 @@ def create_vital_sign(vital_sign: schemas.VitalSignCreate, db: Session = Depends
 @router.get("/{id}", response_model=schemas.VitalSignResponse)
 def get_vital_sign(id: int, db: Session = Depends(get_db),
                    current_user: int = Depends(oauth2.get_current_user)):
+    
+      # Check if the current user has the "doctor" or "hospital" or "patient" role
+    if current_user.user_type not in ["doctor", "hospital", "patient"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors, hospitals or patients can read vital sign"
+        )
+    
     vital_sign = db.query(models.VitalSign).filter(
         models.VitalSign.id == id).first()
 
@@ -38,12 +53,18 @@ def get_vital_sign(id: int, db: Session = Depends(get_db),
                             detail=f"Vital sign with id: {id} was not found")
     return vital_sign
 
-# Read All vaccination
-
-
+# Read All vital sign
 @router.get("/", response_model=List[schemas.VitalSignResponse])
 def get_vital_sign(db: Session = Depends(get_db),
                    current_user: int = Depends(oauth2.get_current_user), limit: int = 10, skip: int = 0, search: Optional[str] = ""):
+    
+      # Check if the current user has the "doctor" or "hospital" or "patient" role
+    if current_user.user_type not in ["doctor", "hospital", "patient"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors, hospitals or patients can read vital sign"
+        )
+    
     vital_sign = db.query(models.VitalSign)\
     .filter(models.VitalSign.user_id == current_user.id)\
     .filter(models.VitalSign.patient_id.ilike(f'%{search}%'))\
@@ -52,12 +73,17 @@ def get_vital_sign(db: Session = Depends(get_db),
     .all()
     return vital_sign
 
-# Update vaccination
-
-
+# Update vital sign
 @router.put("/{id}", response_model=schemas.VitalSignResponse)
 def update_vital_sign(id: int, updated_vital_sign: schemas.VitalSignCreate, db: Session = Depends(get_db),
                       current_user: int = Depends(oauth2.get_current_user)):
+    
+       # Check if the current user has the "doctor" role
+    if current_user.user_type != "doctor":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors can update vital sign"
+        )
 
     vital_sign_query = db.query(models.VitalSign).filter(
         models.VitalSign.id == id)
@@ -78,10 +104,17 @@ def update_vital_sign(id: int, updated_vital_sign: schemas.VitalSignCreate, db: 
     return vital_sign_query.first()
 
 
-# Delete vaccination
+# Delete vital sign
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_vital_sign(id: int, db: Session = Depends(get_db),
                       current_user: int = Depends(oauth2.get_current_user)):
+    
+       # Check if the current user has the "doctor" role
+    if current_user.user_type != "doctor":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors can update vital sign"
+        )
 
     vital_sign_query = db.query(models.VitalSign).filter(models.VitalSign.id == id)
 

@@ -17,11 +17,17 @@ router = APIRouter(
 
 """ MEDICATION APIs """
 # Create medication
-
-
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_medication(medication: schemas.MedicationCreate, db: Session = Depends(get_db),
                       current_user: int = Depends(oauth2.get_current_user)):
+    
+      # Check if the current user has the "doctor" role
+    if current_user.user_type != "doctor":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors can create medication"
+        )
+    
     new_medication = models.Medication(user_id= current_user.id, **medication.dict())
     db.add(new_medication)
     db.commit()
@@ -29,11 +35,17 @@ def create_medication(medication: schemas.MedicationCreate, db: Session = Depend
     return new_medication
 
 # Read one medication
-
-
 @router.get("/{id}", response_model=schemas.MedicationResponse)
 def get_medication(id: int, db: Session = Depends(get_db),
                    current_user: int = Depends(oauth2.get_current_user)):
+    
+      # Check if the current user has the "doctor" or "hospital" or "patient" role
+    if current_user.user_type not in ["doctor", "hospital", "patient"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors, hospitals or patients can read medication"
+        )
+    
     medication = db.query(models.Medication).filter(
         models.Medication.id == id).first()
 
@@ -46,6 +58,14 @@ def get_medication(id: int, db: Session = Depends(get_db),
 @router.get("/", response_model=List[schemas.MedicationResponse])
 def get_medication(db: Session = Depends(get_db),
                    current_user: int = Depends(oauth2.get_current_user), limit: int = 10, skip: int = 0, search: Optional[str] = ""):
+    
+       # Check if the current user has the "doctor" or "hospital" or "patient" role
+    if current_user.user_type not in ["doctor", "hospital", "patient"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors, hospitals or patients can read medication"
+        )
+    
     medication = db.query(models.Medication)\
     .filter(models.Medication.user_id == current_user.id)\
     .filter(models.Medication.name.ilike(f'%{search}%'))\
@@ -55,11 +75,16 @@ def get_medication(db: Session = Depends(get_db),
     return medication
 
 # Update medication
-
-
 @router.put("/{id}", response_model=schemas.MedicationResponse)
 def update_medication(id: int, updated_medication: schemas.MedicationCreate, db: Session = Depends(get_db),
                       current_user: int = Depends(oauth2.get_current_user)):
+    
+      # Check if the current user has the "doctor" role
+    if current_user.user_type != "doctor":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors can update medication"
+        )
 
     medication_query = db.query(models.Medication).filter(
         models.Medication.id == id)
@@ -84,6 +109,13 @@ def update_medication(id: int, updated_medication: schemas.MedicationCreate, db:
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_medication(id: int, db: Session = Depends(get_db),
                       current_user: int = Depends(oauth2.get_current_user)):
+    
+      # Check if the current user has the "doctor" role
+    if current_user.user_type != "doctor":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors can delete medication"
+        )
 
     medication_query = db.query(models.Medication).filter(models.Medication.id == id)
 

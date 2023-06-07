@@ -13,12 +13,20 @@ router = APIRouter(
 )
 
 
-
 """ APPOINTMENTS API """
 # Create Appointment
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_appointment(appointment: schemas.AppointmentCreate, db: Session = Depends(get_db),
                        current_user: int = Depends(oauth2.get_current_user)):
+    
+    # Check if the current user has the "doctor" or "patient" role
+    if current_user.user_type not in ["doctor", "patient"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors and patients can create appointments"
+        )
+
+    
     new_appointment = models.Appointment(user_id= current_user.id, **appointment.dict())
     db.add(new_appointment)
     db.commit()
@@ -26,11 +34,17 @@ def create_appointment(appointment: schemas.AppointmentCreate, db: Session = Dep
     return new_appointment
 
 # Read One Appointment
-
-
 @router.get("/{id}", response_model=schemas.AppointmentResponse)
 def get_single_appointment(id: int, db: Session = Depends(get_db),
                            current_user: int = Depends(oauth2.get_current_user)):
+    
+    # Check if the current user has the "doctor" or "patient" role
+    if current_user.user_type not in ["doctor", "patient"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors and patients can read appointments"
+        )
+    
     appointment = db.query(models.Appointment).filter(
         models.Appointment.id == id).first()
 
@@ -40,11 +54,19 @@ def get_single_appointment(id: int, db: Session = Depends(get_db),
     return appointment
 
 # Read All Appointments
-
-
 @router.get("/", response_model=List[schemas.AppointmentResponse])
 def get_appointment(db: Session = Depends(get_db),
                     current_user: int = Depends(oauth2.get_current_user), limit: int = 10, skip: int = 0, search: Optional[str] = ""):
+    
+
+     # Check if the current user has the "doctor" or "patient" role
+    if current_user.user_type not in ["doctor", "patient"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors and patients can read appointments"
+        )
+    
+
     appointment = db.query(models.Appointment)\
     .filter(models.Appointment.user_id == current_user.id)\
     .filter(models.Appointment.status.ilike(f'%{search}%'))\
@@ -54,12 +76,18 @@ def get_appointment(db: Session = Depends(get_db),
     return appointment
 
 # Update Appointment
-
-
 @router.put("/{id}", response_model=schemas.AppointmentResponse)
 def update_appointment(id: int, updated_appointment: schemas.AppointmentCreate, db: Session = Depends(get_db),
                        current_user: int = Depends(oauth2.get_current_user)):
+    
 
+     # Check if the current user has the "doctor" or "patient" role
+    if current_user.user_type not in ["doctor", "patient"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors and patients can update appointments"
+        )
+    
     appointment_query = db.query(models.Appointment).filter(
         models.Appointment.id == id)
 
@@ -83,6 +111,14 @@ def update_appointment(id: int, updated_appointment: schemas.AppointmentCreate, 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_appointment(id: int, db: Session = Depends(get_db),
                        current_user: int = Depends(oauth2.get_current_user)):
+    
+     # Check if the current user has the "doctor" or "patient" role
+    if current_user.user_type not in ["doctor", "patient"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors and patients can delete appointments"
+        )
+    
 
     appointment_query = db.query(models.Appointment).filter(
         models.Appointment.id == id)

@@ -16,10 +16,17 @@ router = APIRouter(
 
 """ IMMUNIZATION APIs """
 # Create immunization
-
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_immunization(immunization: schemas.ImmunizationCreate, db: Session = Depends(get_db),
                         current_user: int = Depends(oauth2.get_current_user)):
+    
+    # Check if the current user has the "doctor" role
+    if current_user.user_type != "doctor":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors can create immunization"
+        )
+    
     new_immunization = models.Immunization(user_id= current_user.id, **immunization.dict())
     db.add(new_immunization)
     db.commit()
@@ -27,11 +34,17 @@ def create_immunization(immunization: schemas.ImmunizationCreate, db: Session = 
     return new_immunization
 
 # Read One immunization
-
-
 @router.get("/{id}", response_model=schemas.ImmunizationResponse)
 def get_immunization(id: int, db: Session = Depends(get_db),
                      current_user: int = Depends(oauth2.get_current_user)):
+
+     # Check if the current user has the "doctor" or "hospital" or "patient" role
+    if current_user.user_type not in ["doctor", "hospital", "patient"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors, hospitals or patients can read immunization"
+        )
+    
     immunization = db.query(models.Immunization).filter(
         models.Immunization.id == id).first()
 
@@ -41,11 +54,17 @@ def get_immunization(id: int, db: Session = Depends(get_db),
     return immunization
 
 # Read All immunization
-
-
 @router.get("/", response_model=List[schemas.ImmunizationResponse])
 def get_immunization(db: Session = Depends(get_db),
                      current_user: int = Depends(oauth2.get_current_user), limit: int = 10, skip: int = 0, search: Optional[str] = ""):
+    
+     # Check if the current user has the "doctor" or "hospital" or "patient" role
+    if current_user.user_type not in ["doctor", "hospital", "patient"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors, hospitals or patients can read immunization"
+        )
+
     immunization = db.query(models.Immunization)\
     .filter(models.Immunization.user_id == current_user.id)\
     .filter(models.Immunization.vaccine_name.ilike(f'%{search}%'))\
@@ -55,11 +74,16 @@ def get_immunization(db: Session = Depends(get_db),
     return immunization
 
 # Update immunization
-
-
 @router.put("/{id}", response_model=schemas.ImmunizationResponse)
 def update_immunization(id: int, updated_immunization: schemas.ImmunizationCreate, db: Session = Depends(get_db),
                         current_user: int = Depends(oauth2.get_current_user)):
+    
+     # Check if the current user has the "doctor" role
+    if current_user.user_type != "doctor":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors can update immunization"
+        )
 
     immunization_query = db.query(models.Immunization).filter(
         models.Immunization.id == id)
@@ -84,6 +108,13 @@ def update_immunization(id: int, updated_immunization: schemas.ImmunizationCreat
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_immunization(id: int, db: Session = Depends(get_db),
                         current_user: int = Depends(oauth2.get_current_user)):
+    
+     # Check if the current user has the "doctor" role
+    if current_user.user_type != "doctor":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors can delete immunization"
+        )
 
     immunization_query = db.query(models.Immunization).filter(
         models.Immunization.id == id)

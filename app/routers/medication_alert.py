@@ -19,6 +19,14 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_medical_alert(medication_alert: schemas.MedicationAlertCreate, db: Session = Depends(get_db),
                          current_user: int = Depends(oauth2.get_current_user)):
+    
+      # Check if the current user has the "doctor" role
+    if current_user.user_type != "doctor":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors can create medical alert"
+        )
+    
     new_medical_alert = models.MedicationAlert(user_id= current_user.id, **medication_alert.dict())
     db.add(new_medical_alert)
     db.commit()
@@ -26,11 +34,17 @@ def create_medical_alert(medication_alert: schemas.MedicationAlertCreate, db: Se
     return new_medical_alert
 
 # Read one medical alert
-
-
 @router.get("/{id}", response_model=schemas.MedicationAlertResponse)
 def get_medical_alert(id: int, db: Session = Depends(get_db),
                       current_user: int = Depends(oauth2.get_current_user)):
+    
+     # Check if the current user has the "doctor" or "hospital" or "patient" role
+    if current_user.user_type not in ["doctor", "patient"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors or patients can read medical alert"
+        )
+    
     medical_alert = db.query(models.MedicationAlert).filter(
         models.MedicationAlert.id == id).first()
 
@@ -40,11 +54,17 @@ def get_medical_alert(id: int, db: Session = Depends(get_db),
     return medical_alert
 
 # Read All medical alerts
-
-
 @router.get("/", response_model=List[schemas.MedicationAlertResponse])
 def get_medical_alerts(db: Session = Depends(get_db),
                        current_user: int = Depends(oauth2.get_current_user), limit: int = 10, skip: int = 0, search: Optional[str] = ""):
+    
+     # Check if the current user has the "doctor" or "hospital" or "patient" role
+    if current_user.user_type not in ["doctor", "patient"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors or patients can read medical alert"
+        )
+    
     medical_alerts = db.query(models.MedicationAlert)\
     .filter(models.MedicationAlert.user_id == current_user.id)\
     .filter(models.MedicationAlert.dosage.ilike(f'%{search}%'))\
@@ -54,11 +74,16 @@ def get_medical_alerts(db: Session = Depends(get_db),
     return medical_alerts
 
 # Update medical alerts
-
-
 @router.put("/{id}", response_model=schemas.MedicationAlertResponse)
 def update_medical_alert(id: int, updated_medical_alert: schemas.MedicationAlertCreate, db: Session = Depends(get_db),
                          current_user: int = Depends(oauth2.get_current_user)):
+    
+      # Check if the current user has the "doctor" role
+    if current_user.user_type != "doctor":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors can update medical alert"
+        )
 
     medical_alert_query = db.query(models.MedicationAlert).filter(
         models.MedicationAlert.id == id)
@@ -83,6 +108,13 @@ def update_medical_alert(id: int, updated_medical_alert: schemas.MedicationAlert
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_medical_alert(id: int, db: Session = Depends(get_db),
                          current_user: int = Depends(oauth2.get_current_user)):
+    
+     # Check if the current user has the "doctor" role
+    if current_user.user_type != "doctor":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors can delete medical alert"
+        )
 
     medical_alert_query = db.query(models.MedicationAlert).filter(
         models.MedicationAlert.id == id)

@@ -17,6 +17,13 @@ router = APIRouter(
 def create_admission(admission: schemas.AdmissionCreate, db: Session = Depends(get_db),
                       current_user: int = Depends(oauth2.get_current_user)):
     
+    # Check if the current user has the "doctor" role
+    if current_user.user_type != "doctor":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors can admit a patient"
+        )
+    
     new_admission = models.Admission(user_id= current_user.id, **admission.dict())
     db.add(new_admission)
     db.commit()
@@ -27,6 +34,14 @@ def create_admission(admission: schemas.AdmissionCreate, db: Session = Depends(g
 @router.get("/{id}", response_model=schemas.AdmissionResponse)
 def get_one_admission(id: int, db: Session = Depends(get_db),
                       current_user: int = Depends(oauth2.get_current_user)):
+    
+    # Check if the current user has the "doctor" or "hospital" or "patient" role
+    if current_user.user_type not in ["doctor", "hospital", "patient"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors, hospitals or patients can read admission"
+        )
+    
     admission = db.query(models.Admission).filter(
         models.Admission.id == id).first()
 
@@ -39,7 +54,13 @@ def get_one_admission(id: int, db: Session = Depends(get_db),
 @router.get("/", response_model=List[schemas.AdmissionResponse])
 def get_admission(db: Session = Depends(get_db),
                   current_user: int = Depends(oauth2.get_current_user), limit: int = 10, skip: int = 0, search: Optional[str] = ""):
-    print(current_user.email)
+    
+    # Check if the current user has the "doctor" or "hospital" or "patient" role
+    if current_user.user_type not in ["doctor", "hospital", "patient"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors, hospitals or patients can read admission"
+        )
 
     admission = db.query(models.Admission)\
         .filter(models.Admission.user_id == current_user.id)\
@@ -55,6 +76,13 @@ def get_admission(db: Session = Depends(get_db),
 @router.put("/{id}", response_model=schemas.AdmissionResponse)
 def update_admission(id: int, updated_admission: schemas.AdmissionCreate, db: Session = Depends(get_db),
                      current_user: int = Depends(oauth2.get_current_user)):
+    
+    # Check if the current user has the "doctor" or "hospital" or "patient" role
+    if current_user.user_type not in ["doctor", "hospital"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors or hospitals can update admission"
+        )
 
     admission_query = db.query(models.Admission).filter(
         models.Admission.id == id)
@@ -78,6 +106,13 @@ def update_admission(id: int, updated_admission: schemas.AdmissionCreate, db: Se
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_admission(id: int, db: Session = Depends(get_db),
                      current_user: int = Depends(oauth2.get_current_user)):
+    
+    # Check if the current user has the "patient" role
+    if current_user.user_type != "patient":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only patients can delete admissions"
+        )
 
     admission_query = db.query(models.Admission).filter(models.Admission.id == id)
 

@@ -20,6 +20,14 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_adverse_reaction(adverse_reaction: schemas.AdverseReactionCreate, db: Session = Depends(get_db),
                             current_user: int = Depends(oauth2.get_current_user)):
+    
+    # Check if the current user has the "doctor" role
+    if current_user.user_type != "doctor":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors can create adverse reaction"
+        )
+    
     new_adverse_reaction = models.AdverseReaction(user_id= current_user.id, **adverse_reaction.dict())
     db.add(new_adverse_reaction)
     db.commit()
@@ -27,11 +35,17 @@ def create_adverse_reaction(adverse_reaction: schemas.AdverseReactionCreate, db:
     return new_adverse_reaction
 
 # Read One Adverse Reaction
-
-
 @router.get("/{id}", response_model=schemas.AdverseReactionResponse)
 def get_one_adverse_reaction(id: int, db: Session = Depends(get_db),
                              current_user: int = Depends(oauth2.get_current_user)):
+    
+     # Check if the current user has the "doctor" or "patient" role
+    if current_user.user_type not in ["doctor", "patient"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors and patients can read adverse reaction"
+        )
+    
     adverse_reaction = db.query(models.AdverseReaction).filter(
         models.AdverseReaction.id == id).first()
 
@@ -41,11 +55,17 @@ def get_one_adverse_reaction(id: int, db: Session = Depends(get_db),
     return adverse_reaction
 
 # Read All Adverse Reaction
-
-
 @router.get("/", response_model=List[schemas.AdverseReactionResponse])
 def get_adverse_reactions(db: Session = Depends(get_db),
                           current_user: int = Depends(oauth2.get_current_user), limit: int = 10, skip: int = 0, search: Optional[str] = ""):
+    
+     # Check if the current user has the "doctor" or "patient" role
+    if current_user.user_type not in ["doctor", "patient"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors and patients can read adverse reaction"
+        )
+    
     adverse_reactions = db.query(models.AdverseReaction)\
         .filter(models.AdverseReaction.user_id == current_user.id)\
         .filter(models.AdverseReaction.treatment.ilike(f'%{search}%'))\
@@ -55,11 +75,17 @@ def get_adverse_reactions(db: Session = Depends(get_db),
     return adverse_reactions
 
 # Update Adverse Reaction
-
-
 @router.put("/{id}", response_model=schemas.AdverseReactionResponse)
 def update_adverse_reaction(id: int, updated_adverse_reaction: schemas.AdverseReactionCreate, db: Session = Depends(get_db),
                             current_user: int = Depends(oauth2.get_current_user)):
+    
+    # Check if the current user has the "doctor" role
+    if current_user.user_type != "doctor":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors can update adverse reaction"
+        )
+    
 
     adverse_reaction_query = db.query(models.AdverseReaction).filter(
         models.AdverseReaction.id == id)
@@ -84,6 +110,13 @@ def update_adverse_reaction(id: int, updated_adverse_reaction: schemas.AdverseRe
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_adverse_reaction(id: int, db: Session = Depends(get_db),
                             current_user: int = Depends(oauth2.get_current_user)):
+    
+    # Check if the current user has the "doctor" role
+    if current_user.user_type != "patient":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only patient can delete adverse reaction"
+        )
 
     adverse_reaction_query = db.query(models.AdverseReaction).filter(models.AdverseReaction.id == id)
 

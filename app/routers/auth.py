@@ -22,9 +22,9 @@ def login_user(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Sess
 
     if not utils.verify(user_credentials.password, user.password):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid credentials")
-    
-    access_token = oauth2.create_access_token(data={"user_id": user.id})
-    
+
+    access_token = oauth2.create_access_token(data={"user_id": user.id, "user_type": user.user_type})
+
     # Create a Token response with the required fields
     token_response = Token(
         access_token=access_token,
@@ -34,12 +34,19 @@ def login_user(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Sess
         user_type=user.user_type,
         image=user.image
     )
-    
+
     # Set the access token as an HTTP-only cookie
     response = JSONResponse(content=token_response.dict())
-    response.set_cookie(key="access_token", value=access_token, httponly=True, secure=True, samesite="None")
-    
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        secure=True,
+        samesite="None"
+    )
+
     return response
+
 
 
 @router.post("/logout")

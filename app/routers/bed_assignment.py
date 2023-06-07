@@ -18,6 +18,14 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_bed_assignment(bed_assignment: schemas.BedAssignmentCreate, db: Session = Depends(get_db),
                           current_user: int = Depends(oauth2.get_current_user)):
+    
+    # Check if the current user has the "doctor" role
+    if current_user.user_type != "doctor":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors can assign bed"
+        )
+    
     new_bed_assignment = models.BedAssignment(user_id= current_user.id, **bed_assignment.dict())
     db.add(new_bed_assignment)
     db.commit()
@@ -25,11 +33,17 @@ def create_bed_assignment(bed_assignment: schemas.BedAssignmentCreate, db: Sessi
     return new_bed_assignment
 
 # Read One Bed Assignment
-
-
 @router.get("/{id}", response_model=schemas.BedAssignmentResponse)
 def get_bed_assignment(id: int, db: Session = Depends(get_db),
                        current_user: int = Depends(oauth2.get_current_user)):
+    
+    # Check if the current user has the "doctor" or "hospital" or "patient" role
+    if current_user.user_type not in ["doctor", "hospital", "patient"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors, hospitals or patients can read bed assignment"
+        )
+    
     bed_assignment = db.query(models.BedAssignment).filter(
         models.BedAssignment.id == id).first()
 
@@ -39,11 +53,17 @@ def get_bed_assignment(id: int, db: Session = Depends(get_db),
     return bed_assignment
 
 # Read All Bed Assignment
-
-
 @router.get("/", response_model=List[schemas.BedAssignmentResponse])
 def get_bed_assignment(db: Session = Depends(get_db),
                        current_user: int = Depends(oauth2.get_current_user), limit: int = 10, skip: int = 0, search: Optional[str] = ""):
+    
+     # Check if the current user has the "doctor" or "hospital" or "patient" role
+    if current_user.user_type not in ["doctor", "hospital", "patient"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors, hospitals or patients can read bed assignment"
+        )
+    
     bed_assignment = db.query(models.BedAssignment)\
     .filter(models.BedAssignment.user_id == current_user.id)\
     .filter(models.BedAssignment.patient_id.ilike(f'%{search}%'))\
@@ -52,11 +72,16 @@ def get_bed_assignment(db: Session = Depends(get_db),
     return bed_assignment
 
 # Update Bed Assignment
-
-
 @router.put("/{id}", response_model=schemas.BedAssignmentResponse)
 def update_bed_assignment(id: int, updated_bed_assignment: schemas.BedAssignmentCreate, db: Session = Depends(get_db),
                           current_user: int = Depends(oauth2.get_current_user)):
+    
+    # Check if the current user has the "doctor" role
+    if current_user.user_type != "doctor":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors can update bed assignment"
+        )
 
     bed_assignment_query = db.query(models.BedAssignment).filter(
         models.BedAssignment.id == id)
@@ -81,6 +106,13 @@ def update_bed_assignment(id: int, updated_bed_assignment: schemas.BedAssignment
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_bed(id: int, db: Session = Depends(get_db),
                current_user: int = Depends(oauth2.get_current_user)):
+    
+    # Check if the current user has the "doctor" role
+    if current_user.user_type != "doctor":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors can delete bed assignment"
+        )
 
     bed_assignment_query = db.query(models.BedAssignment).filter(
         models.BedAssignment.id == id)

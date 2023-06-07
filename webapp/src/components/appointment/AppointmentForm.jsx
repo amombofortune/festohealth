@@ -5,14 +5,15 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import MenuItem from "@mui/material/MenuItem";
 import "./appointment.scss";
+import UserContext from "../../contexts/UserContext";
 
-const AppointmentForm = () => {
+const AppointmentForm = (props) => {
   const [patient_id, setPatientID] = useState("");
-  const [doctor_id, setDoctorID] = useState("");
+  const [doctor_id, setDoctorID] = useState(props.doctor_id);
   const [type, setAppointmentType] = useState("");
   const [date, setAppointmentDate] = useState("");
   const [start_time, setStartTime] = useState("08:00 AM");
@@ -22,6 +23,17 @@ const AppointmentForm = () => {
   const [selectedStartTime, setSelectedStartTime] = useState(null);
   const [selectedEndTime, setSelectedEndTime] = useState(null);
   const [appointmentTypeDB, setAppointmentTypeDB] = useState([]);
+
+  const { userData } = useContext(UserContext);
+
+  useEffect(() => {
+    if (userData) {
+      // Access user data and set initial values
+      const { user_id } = userData;
+      setPatientID(user_id);
+      // Set other initial values...
+    }
+  }, [userData]);
 
   //Post data to database
   const handleSubmit = async (e) => {
@@ -160,12 +172,13 @@ const AppointmentForm = () => {
                 placeholder="Enter Patient ID"
                 variant="outlined"
                 type="text"
-                value={patient_id}
+                value={userData.user_id}
                 onChange={(event) => {
                   setPatientID(event.target.value);
                 }}
                 fullWidth
                 required
+                disabled
               ></TextField>
             </Grid>
             <Grid xs={12} sm={6} item>
@@ -180,6 +193,7 @@ const AppointmentForm = () => {
                 }}
                 fullWidth
                 required
+                disabled
               ></TextField>
             </Grid>
             <Grid xs={12} item>

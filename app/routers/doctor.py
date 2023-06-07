@@ -15,8 +15,6 @@ router = APIRouter(
 
 """ DOCTOR APIs """
 # Create doctor
-
-
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_doctor(doctor: schemas.DoctorCreate, db: Session = Depends(get_db)):
     new_doctor = models.Doctor(**doctor.dict())
@@ -26,10 +24,10 @@ def create_doctor(doctor: schemas.DoctorCreate, db: Session = Depends(get_db)):
     return new_doctor
 
 # Read One doctor
-
-
 @router.get("/{id}", response_model=schemas.DoctorResponse)
 def get_doctor(id: str, db: Session = Depends(get_db)):
+    
+
     doctor = db.query(models.Doctor).filter(models.Doctor.id == id).first()
 
     if not doctor:

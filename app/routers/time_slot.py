@@ -19,6 +19,14 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_time_slot(time_slot: schemas.TimeSlotCreate, db: Session = Depends(get_db),
                      current_user: int = Depends(oauth2.get_current_user)):
+    
+     # Check if the current user has the "doctor" or "hospital" or "patient" role
+    if current_user.user_type not in ["doctor", "nurse"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors or nurses can create time slots"
+        )
+    
     time_slot = models.TimeSlot(user_id= current_user.id, **time_slot.dict())
     db.add(time_slot)
     db.commit()
@@ -26,11 +34,17 @@ def create_time_slot(time_slot: schemas.TimeSlotCreate, db: Session = Depends(ge
     return time_slot
 
 # Read single time slot
-
-
 @router.get("/{id}", response_model=schemas.TimeSlotResponse)
 def get_time_slot(id: int, db: Session = Depends(get_db),
                   current_user: int = Depends(oauth2.get_current_user)):
+
+     # Check if the current user has the "doctor" or "hospital" or "patient" role
+    if current_user.user_type not in ["doctor", "nurse", "patient", "hospital"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors, nurses, patients or hospitals can create time slots"
+        )
+    
     time_slot = db.query(models.TimeSlot).filter(models.TimeSlot.id == id).first()
 
     if not time_slot:
@@ -39,11 +53,17 @@ def get_time_slot(id: int, db: Session = Depends(get_db),
     return time_slot
 
 # Read All time slots
-
-
 @router.get("/", response_model=List[schemas.TimeSlotResponse])
 def get_time_slot(db: Session = Depends(get_db),
                   current_user: int = Depends(oauth2.get_current_user), limit: int = 10, skip: int = 0, search: Optional[str] = ""):
+    
+     # Check if the current user has the "doctor" or "hospital" or "patient" role
+    if current_user.user_type not in ["doctor", "nurse", "patient", "hospital"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors, nurses, patients or hospitals can create time slots"
+        )
+    
     time_slot = db.query(models.TimeSlot)\
     .filter(models.TimeSlot.user_id == current_user.id)\
     .filter(models.TimeSlot.availability.ilike(f'%{search}%'))\
@@ -53,11 +73,16 @@ def get_time_slot(db: Session = Depends(get_db),
     return time_slot
 
 # Update time slot
-
-
 @router.put("/{id}", response_model=schemas.TimeSlotResponse)
 def update_time_slot(id: str, updated_time_slot: schemas.TimeSlotCreate, db: Session = Depends(get_db),
                      current_user: int = Depends(oauth2.get_current_user)):
+    
+     # Check if the current user has the "doctor" or "hospital" or "patient" role
+    if current_user.user_type not in ["doctor", "nurse"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors or nurses can update time slots"
+        )
 
     time_slot_query = db.query(models.TimeSlot).filter(models.TimeSlot.id == id)
 
@@ -81,6 +106,13 @@ def update_time_slot(id: str, updated_time_slot: schemas.TimeSlotCreate, db: Ses
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_time_slot(id: int, db: Session = Depends(get_db),
                      current_user: int = Depends(oauth2.get_current_user)):
+    
+     # Check if the current user has the "doctor" or "hospital" or "patient" role
+    if current_user.user_type not in ["doctor", "nurse"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors or nurses can delete time slots"
+        )
 
     time_slot_query = db.query(models.TimeSlot).filter(models.TimeSlot.id == id)
 

@@ -21,6 +21,14 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_work_schedule(work_schedule: schemas.WorkScheduleCreate, db: Session = Depends(get_db),
                          current_user: int = Depends(oauth2.get_current_user)):
+    
+    # Check if the current user has the "doctor" or "hospital" or "patient" role
+    if current_user.user_type not in ["doctor", "nurse"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors or nurses can create work schedule"
+        )
+    
     work_schedule = models.WorkSchedule(user_id= current_user.id, **work_schedule.dict())
     db.add(work_schedule)
     db.commit()
@@ -28,11 +36,17 @@ def create_work_schedule(work_schedule: schemas.WorkScheduleCreate, db: Session 
     return work_schedule
 
 # Read single work schedule
-
-
 @router.get("/{id}", response_model=schemas.WorkScheduleResponse)
 def get_work_schedule(id: int, db: Session = Depends(get_db),
                       current_user: int = Depends(oauth2.get_current_user)):
+    
+    # Check if the current user has the "doctor" or "hospital" or "patient" role
+    if current_user.user_type not in ["doctor", "nurse", "patient", "hospital"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors, nurses, patients or hospitals can read work schedule"
+        )
+    
     work_schedule = db.query(models.WorkSchedule).filter(models.WorkSchedule.id == id).first()
 
     if not work_schedule:
@@ -41,11 +55,17 @@ def get_work_schedule(id: int, db: Session = Depends(get_db),
     return work_schedule
 
 # Read All work schedules
-
-
 @router.get("/", response_model=List[schemas.WorkScheduleResponse])
 def get_work_schedule(db: Session = Depends(get_db),
                       current_user: int = Depends(oauth2.get_current_user), limit: int = 10, skip: int = 0, search: Optional[str] = ""):
+    
+    # Check if the current user has the "doctor" or "hospital" or "patient" role
+    if current_user.user_type not in ["doctor", "nurse", "patient", "hospital"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors, nurses, patients or hospitals can read work schedule"
+        )
+    
     work_schedule = db.query(models.WorkSchedule)\
     .filter(models.WorkSchedule.user_id == current_user.id)\
     .filter(models.WorkSchedule.doctor_id.ilike(f'%{search}%'))\
@@ -55,11 +75,16 @@ def get_work_schedule(db: Session = Depends(get_db),
     return work_schedule
 
 # Update work schedule
-
-
 @router.put("/{id}", response_model=schemas.WorkScheduleResponse)
 def update_work_schedule(id: int, updated_work_schedule: schemas.WorkScheduleCreate, db: Session = Depends(get_db),
                          current_user: int = Depends(oauth2.get_current_user)):
+    
+     # Check if the current user has the "doctor" or "hospital" or "patient" role
+    if current_user.user_type not in ["doctor", "nurse"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors or nurses can update work schedule"
+        )
 
     work_schedule_query = db.query(models.WorkSchedule).filter(models.WorkSchedule.id == id)
 
@@ -82,6 +107,13 @@ def update_work_schedule(id: int, updated_work_schedule: schemas.WorkScheduleCre
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_work_schedule(id: int, db: Session = Depends(get_db),
                          current_user: int = Depends(oauth2.get_current_user)):
+    
+     # Check if the current user has the "doctor" or "hospital" or "patient" role
+    if current_user.user_type not in ["doctor", "nurse"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors or nurses can delete work schedule"
+        )
 
     work_schedule_query = db.query(models.WorkSchedule).filter(models.WorkSchedule.id == id)
 

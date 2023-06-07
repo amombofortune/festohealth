@@ -19,6 +19,14 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_lab_test(lab_test: schemas.LabTestCreate, db: Session = Depends(get_db),
                     current_user: int = Depends(oauth2.get_current_user)):
+    
+      # Check if the current user has the "doctor" role
+    if current_user.user_type != "lab_technician":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only lab technician can create lab test"
+        )
+    
     new_lab_test = models.LabTest(user_id= current_user.id, **lab_test.dict())
     db.add(new_lab_test)
     db.commit()
@@ -26,11 +34,17 @@ def create_lab_test(lab_test: schemas.LabTestCreate, db: Session = Depends(get_d
     return new_lab_test
 
 # Read one lab test
-
-
 @router.get("/{id}", response_model=schemas.LabTestResponse)
 def get_lab_test(id: int, db: Session = Depends(get_db),
                  current_user: int = Depends(oauth2.get_current_user)):
+    
+     # Check if the current user has the "doctor" or "hospital" or "patient" role
+    if current_user.user_type not in ["doctor", "hospital", "patient", "lab_technician"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors, hospitals, patients or lab technicians can read lab test"
+        )
+    
     lab_test = db.query(models.LabTest).filter(models.LabTest.id == id).first()
 
     if not lab_test:
@@ -42,6 +56,14 @@ def get_lab_test(id: int, db: Session = Depends(get_db),
 @router.get("/", response_model=List[schemas.LabTestResponse])
 def get_lab_tests(db: Session = Depends(get_db),
                   current_user: int = Depends(oauth2.get_current_user), limit: int = 10, skip: int = 0, search: Optional[str] = ""):
+    
+     # Check if the current user has the "doctor" or "hospital" or "patient" role
+    if current_user.user_type not in ["doctor", "hospital", "patient", "lab_technician"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors, hospitals, patients or lab technicians can read lab test"
+        )
+    
     lab_tests = db.query(models.LabTest)\
     .filter(models.LabTest.user_id == current_user.id)\
     .filter(models.LabTest.test_name.ilike(f'%{search}%'))\
@@ -54,6 +76,13 @@ def get_lab_tests(db: Session = Depends(get_db),
 @router.put("/{id}", response_model=schemas.LabTestResponse)
 def update_lab_test(id: int, updated_lab_test: schemas.LabTestCreate, db: Session = Depends(get_db),
                     current_user: int = Depends(oauth2.get_current_user)):
+    
+     # Check if the current user has the "doctor" role
+    if current_user.user_type != "lab_technician":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only lab technician can update lab test"
+        )
 
     lab_test_query = db.query(models.LabTest).filter(models.LabTest.id == id)
 
@@ -76,6 +105,13 @@ def update_lab_test(id: int, updated_lab_test: schemas.LabTestCreate, db: Sessio
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_lab_test(id: int, db: Session = Depends(get_db),
                     current_user: int = Depends(oauth2.get_current_user)):
+    
+     # Check if the current user has the "doctor" role
+    if current_user.user_type != "lab_technician":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only lab technician can delete lab test"
+        )
 
     lab_test_query = db.query(models.LabTest).filter(models.LabTest.id == id)
 

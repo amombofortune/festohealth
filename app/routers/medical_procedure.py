@@ -21,6 +21,14 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_medical_procedure(medical_procedure: schemas.MedicalProcedureCreate, db: Session = Depends(get_db),
                              current_user: int = Depends(oauth2.get_current_user)):
+    
+     # Check if the current user has the "doctor" role
+    if current_user.user_type != "doctor":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors can create medical procedure"
+        )
+    
     new_medical_procedure = models.MedicalProcedure(user_id= current_user.id, **medical_procedure.dict())
     db.add(new_medical_procedure)
     db.commit()
@@ -28,11 +36,17 @@ def create_medical_procedure(medical_procedure: schemas.MedicalProcedureCreate, 
     return new_medical_procedure
 
 # Read one medical procedure
-
-
 @router.get("/{id}", response_model=schemas.MedicalProcedureResponse)
 def get_medical_procedure(id: int, db: Session = Depends(get_db),
                           current_user: int = Depends(oauth2.get_current_user)):
+    
+     # Check if the current user has the "doctor" or "hospital" or "patient" role
+    if current_user.user_type not in ["doctor", "hospital", "patient"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors, hospitals or patients can read medical procedure"
+        )
+    
     medical_procedure = db.query(models.MedicalProcedure).filter(
         models.MedicalProcedure.id == id).first()
 
@@ -42,11 +56,17 @@ def get_medical_procedure(id: int, db: Session = Depends(get_db),
     return medical_procedure
 
 # Read All medical procedures
-
-
 @router.get("/", response_model=List[schemas.MedicalProcedureResponse])
 def get_medical_procedure(db: Session = Depends(get_db),
                           current_user: int = Depends(oauth2.get_current_user), limit: int = 10, skip: int = 0, search: Optional[str] = ""):
+    
+     # Check if the current user has the "doctor" or "hospital" or "patient" role
+    if current_user.user_type not in ["doctor", "hospital", "patient"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors, hospitals or patients can read medical procedure"
+        )
+    
     medical_procedures = db.query(models.MedicalProcedure)\
     .filter(models.MedicalProcedure.user_id == current_user.id)\
     .filter(models.MedicalProcedure.name.ilike(f'%{search}%'))\
@@ -56,11 +76,16 @@ def get_medical_procedure(db: Session = Depends(get_db),
     return medical_procedures
 
 # Update medical procedure
-
-
 @router.put("/{id}", response_model=schemas.MedicalProcedureResponse)
 def update_medical_procedure(id: int, updated_medical_procedure: schemas.MedicalProcedureCreate, db: Session = Depends(get_db),
                              current_user: int = Depends(oauth2.get_current_user)):
+    
+     # Check if the current user has the "doctor" role
+    if current_user.user_type != "doctor":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors can create medical procedure"
+        )
 
     medical_procedure_query = db.query(models.MedicalProcedure).filter(
         models.MedicalProcedure.id == id)
@@ -85,6 +110,13 @@ def update_medical_procedure(id: int, updated_medical_procedure: schemas.Medical
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_medical_procedure(id: int, db: Session = Depends(get_db),
                              current_user: int = Depends(oauth2.get_current_user)):
+    
+     # Check if the current user has the "doctor" role
+    if current_user.user_type != "doctor":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors can create medical procedure"
+        )
 
     medical_procedure_query = db.query(models.MedicalProcedure).filter(
         models.MedicalProcedure.id == id)

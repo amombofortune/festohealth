@@ -58,12 +58,6 @@ function Login() {
       });
 
       console.log("Login Successful");
-      console.log("Access Token:", access_token);
-      console.log("User ID:", user_id);
-      console.log("Email:", userEmail);
-      console.log("User Type:", user_type);
-      console.log("Image:", image);
-
       document.cookie = `access_token=${access_token}; path=/;`;
 
       navigate("/");

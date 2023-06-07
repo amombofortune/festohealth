@@ -19,6 +19,14 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_medical_note(medical_note: schemas.MedicalNoteCreate, db: Session = Depends(get_db),
                         current_user: int = Depends(oauth2.get_current_user)):
+    
+     # Check if the current user has the "doctor" role
+    if current_user.user_type != "doctor":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors can create medical note"
+        )
+    
     new_medical_note = models.MedicalNote(user_id= current_user.id, **medical_note.dict())
     db.add(new_medical_note)
     db.commit()
@@ -26,11 +34,17 @@ def create_medical_note(medical_note: schemas.MedicalNoteCreate, db: Session = D
     return new_medical_note
 
 # Read one medical note
-
-
 @router.get("/{id}", response_model=schemas.MedicalNoteResponse)
 def get_medical_note(id: int, db: Session = Depends(get_db),
                      current_user: int = Depends(oauth2.get_current_user)):
+    
+      # Check if the current user has the "doctor" or "hospital" or "patient" role
+    if current_user.user_type not in ["doctor", "hospital", "patient"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors, hospitals or patients can read medical note"
+        )
+    
     medical_note = db.query(models.MedicalNote).filter(
         models.MedicalNote.id == id).first()
 
@@ -40,11 +54,17 @@ def get_medical_note(id: int, db: Session = Depends(get_db),
     return medical_note
 
 # Read All medical notes
-
-
 @router.get("/", response_model=List[schemas.MedicalNoteResponse])
 def get_medical_note(db: Session = Depends(get_db),
                      current_user: int = Depends(oauth2.get_current_user), limit: int = 10, skip: int = 0, search: Optional[str] = ""):
+    
+      # Check if the current user has the "doctor" or "hospital" or "patient" role
+    if current_user.user_type not in ["doctor", "hospital", "patient"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors, hospitals or patients can read medical note"
+        )
+    
     medical_notes = db.query(models.MedicalNote)\
     .filter(models.MedicalNote.user_id == current_user.id)\
     .filter(models.MedicalNote.note.ilike(f'%{search}%'))\
@@ -54,11 +74,16 @@ def get_medical_note(db: Session = Depends(get_db),
     return medical_notes
 
 # Update medical note
-
-
 @router.put("/{id}", response_model=schemas.MedicalNoteResponse)
 def update_medical_note(id: int, updated_medical_note: schemas.MedicalNoteCreate, db: Session = Depends(get_db),
                         current_user: int = Depends(oauth2.get_current_user)):
+    
+     # Check if the current user has the "doctor" role
+    if current_user.user_type != "doctor":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors can update medical note"
+        )
 
     medical_note_query = db.query(models.MedicalNote).filter(
         models.MedicalNote.id == id)
@@ -83,6 +108,14 @@ def update_medical_note(id: int, updated_medical_note: schemas.MedicalNoteCreate
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_medical_note(id: int, db: Session = Depends(get_db),
                         current_user: int = Depends(oauth2.get_current_user)):
+    
+      # Check if the current user has the "doctor" role
+    if current_user.user_type != "doctor":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only doctors can delete medical note"
+        )
+    
 
     medical_note_query = db.query(models.MedicalNote).filter(
         models.MedicalNote.id == id)

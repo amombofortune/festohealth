@@ -4,7 +4,6 @@ from . import models, schemas
 from ..database import get_db
 from .. import oauth2
 
-
 router = APIRouter(
      prefix="/profile",
      tags=['profile']
@@ -15,7 +14,7 @@ router = APIRouter(
 def get_user_by_id(user_id: str, db: Session = Depends(get_db)):
     return db.query(models.User).filter(models.User.id == user_id).first()
 
-@router.post("/profile", status_code=status.HTTP_200_OK)
+@router.post("/{user_id}/profile_image", status_code=status.HTTP_200_OK)
 def upload_image(
     user_id: str,
     image: UploadFile = File(...),
@@ -35,4 +34,5 @@ def upload_image(
     db.commit()
 
     return {"message": "Image uploaded successfully"}
+
 

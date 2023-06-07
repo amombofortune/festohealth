@@ -41,6 +41,7 @@ const viewModalStyle = {
 
 const UserProfileCard = ({ item }) => {
   const {
+    user_id,
     firstname,
     middlename,
     lastname,
@@ -186,7 +187,8 @@ const UserProfileCard = ({ item }) => {
               </Button>
             </Box>
             <Box sx={{ width: "100%" }}>
-              <AppointmentForm />
+              <AppointmentForm doctor_id={user_id} />{" "}
+              {/* Pass the user_id as a prop */}
             </Box>
           </Box>
         </Modal>

@@ -2,7 +2,7 @@
 
 from .database import Base
 from sqlalchemy import Float, ForeignKey, Text, func
-from sqlalchemy import Column, Integer, String, Date, DateTime, Time
+from sqlalchemy import Column, Integer, String, Date, DateTime, Time, LargeBinary
 from sqlalchemy.sql.sqltypes import TIMESTAMP, TIME
 from sqlalchemy.types import Boolean
 from sqlalchemy.sql.expression import text
@@ -11,6 +11,7 @@ from sqlalchemy.orm import relationship
 from .database import engine, SessionLocal
 from datetime import date, time, datetime, timedelta
 from sqlalchemy.dialects.postgresql import INTERVAL
+from typing import Optional
 import uuid
 import bcrypt
 
@@ -22,20 +23,22 @@ class User(Base):
     email = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
     user_type = Column(String, nullable=False)
+    image = Column(LargeBinary, nullable=True)
     registration_date = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     created_at = Column(TIMESTAMP, server_default=func.now())
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
 
 
-    def __init__(self, email, password, user_type):
+    def __init__(self, email, password, user_type, image: Optional[bytes] = None):
         self.id = str(uuid.uuid4().hex[:6].upper())
         self.email = email
         self.password = password
         self.user_type = user_type
+        self.image = image
 
     def __repr__(self):
-        return f"({self.id}, {self.email}, {self.user_type})"
+        return f"({self.id}, {self.email}, {self.user_type}, {self.image})"
     
 
 """ ADMINISTRATORS """
@@ -1607,29 +1610,29 @@ class Patient(Base):
     id = Column(String, primary_key=True)
     user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
     # Personal Information
-    firstname = Column(String)
+    firstname = Column(String, nullable=False)
     middlename = Column(String)
-    lastname = Column(String)
-    dob = Column(Date)
-    gender = Column(String)
-    phonenumber = Column(String(12))
-    email = Column(String)
+    lastname = Column(String, nullable=False)
+    dob = Column(Date, nullable=False)
+    gender = Column(String, nullable=False)
+    phonenumber = Column(String(12), nullable=False)
+    email = Column(String, nullable=False)
     address = Column(String(255))
-    city = Column(String(255))
+    city = Column(String(255), nullable=False)
     state = Column(String(255))
     postal_code = Column(String(10))
-    country = Column(String)
+    country = Column(String, nullable=False)
     # Emergency Contact Information
-    emergency_contact_name = Column(String)
-    emergency_contact_phone = Column(String(20))
-    relationship = Column(String)
+    emergency_contact_name = Column(String, nullable=False)
+    emergency_contact_phone = Column(String(20), nullable=False)
+    relationship = Column(String, nullable=False)
     # Insurance Information
-    insurance = Column(Boolean, server_default='FALSE')
-    provider_name = Column(String)
-    policy_number = Column(String)
-    group_number = Column(String)
-    effective_date = Column(Date)
-    expiration_date = Column(Date)
+    insurance = Column(String, nullable=False)
+    provider_name = Column(String, nullable=True)
+    policy_number = Column(String, nullable=True)
+    group_number = Column(String, nullable=True)
+    effective_date = Column(Date, nullable=True)
+    expiration_date = Column(Date, nullable=True)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 

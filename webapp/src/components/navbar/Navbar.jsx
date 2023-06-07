@@ -55,9 +55,15 @@ const Navbar = () => {
     }
   };
 
+  const handleProfile = () => {
+    navigate("/profile");
+  };
+
   const handleMenuClick = (item) => {
     if (item === "Logout") {
       handleLogout();
+    } else if (item === "Profile") {
+      handleProfile();
     } else {
       // Handle clicks for other menu items if needed
     }

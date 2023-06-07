@@ -201,18 +201,7 @@ export default function HospitalTable() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const access_token = document.cookie.replace(
-          /(?:(?:^|.*;\s*)access_token\s*=\s*([^;]*).*$)|^.*$/,
-          "$1"
-        );
-
-        const response = await axios.get("http://127.0.0.1:8000/hospital", {
-          withCredentials: true, // Enable sending cookies with the request
-          headers: {
-            Authorization: `Bearer ${access_token}`, // Include the access token as a request header
-          },
-        });
-
+        const response = await axios.get("http://127.0.0.1:8000/hospital");
         console.log(
           "Fetching hospital from database successful!!!",
           response.data
@@ -220,7 +209,7 @@ export default function HospitalTable() {
         setData(response.data);
       } catch (error) {
         console.error("Failed to fetch hospital data:", error);
-        // Handle error fetching hospital data
+        // Handle error fetching doctor data
       }
     };
 

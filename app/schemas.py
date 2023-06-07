@@ -15,6 +15,7 @@ class UserCreate(UserBase):
     email: EmailStr
     password: str
     user_type: str
+    image: Optional[bytes] = None
 
 class UserResponse(UserBase):#what we are returning for the user to see
     id: str
@@ -32,6 +33,10 @@ class UserLogin(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+    user_id: str
+    email: str
+    user_type: str
+    image: Optional[bytes] = None
 
 class TokenData(BaseModel):
     id: Optional[str] = None
@@ -451,7 +456,6 @@ class DoctorResponse(DoctorBase):
     id: str
     created_at: datetime
     user_id: str
-    user: UserResponse
 
 
     class Config:
@@ -505,7 +509,6 @@ class HospitalResponse(HospitalBase):
     id: str
     created_at: datetime
     user_id: str
-    user: UserResponse
 
 
     class Config:
@@ -590,7 +593,6 @@ class InsuranceProviderResponse(InsuranceProviderBase):
     id: str
     created_at: datetime
     user_id: str
-    user: UserResponse
 
 
     class Config:
@@ -1027,12 +1029,12 @@ class PatientBase(BaseModel):
     emergency_contact_name: str
     emergency_contact_phone: str
     relationship: str
-    insurance: bool
-    provider_name: str
-    policy_number: str
-    group_number: str
-    effective_date: date
-    expiration_date: date
+    insurance: str
+    provider_name: Optional[str] = None
+    policy_number: Optional[str] = None
+    group_number: Optional[str] = None
+    effective_date: Optional[date] = None
+    expiration_date: Optional[date] = None
 
 
 class PatientCreate(PatientBase):

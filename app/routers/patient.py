@@ -19,11 +19,22 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_patient(patient: schemas.PatientCreate, db: Session = Depends(get_db),
                    current_user: int = Depends(oauth2.get_current_user)):
-    patient = models.Patient(user_id= current_user.id, **patient.dict())
+    
+    if patient.insurance == "no":
+        # Set insurance field to "no" when insurance is "no"
+        patient.insurance = "no"
+        patient.provider_name = None
+        patient.policy_number = None
+        patient.group_number = None
+        patient.effective_date = None
+        patient.expiration_date = None
+    
+    patient = models.Patient(user_id=current_user.id, **patient.dict())
     db.add(patient)
     db.commit()
     db.refresh(patient)
     return patient
+
 
 # Read single patient
 

@@ -45,31 +45,17 @@ function Registration() {
     }
 
     try {
-      const access_token = document.cookie.replace(
-        /(?:(?:^|.*;\s*)access_token\s*=\s*([^;]*).*$)|^.*$/,
-        "$1"
-      );
-
-      const headers = {
-        Authorization: `Bearer ${access_token}`,
-        "Content-Type": "application/json",
-      };
-
       const data = {
         email,
         password,
         user_type,
       };
 
-      await axios.post("http://127.0.0.1:8000/users", data, {
-        withCredentials: true, // Enable sending cookies with the request
-        headers,
-      });
+      await axios.post("http://127.0.0.1:8000/users", data);
 
       // Redirect to the appropriate form component after successful registration
       handleRegistrationSuccess(user_type);
-      //window.location.reload(true);
-      console.log("Posting data to database successful!!!");
+      console.log("Posting data to the database successful!!!");
     } catch (error) {
       console.error("Failed to post data to the database:", error);
       // Handle error posting data
@@ -81,7 +67,7 @@ function Registration() {
     // Define your custom URL paths based on user_type in the App.js Route component
     switch (user_type) {
       case "patient":
-        return "/patientform";
+        return "/patientregistrationform";
       case "doctor":
         return "/doctorform";
       case "insuranceProvider":

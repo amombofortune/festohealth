@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { Link } from "react-router-dom";
 import {
   Button,
@@ -8,14 +8,17 @@ import {
   Typography,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { axiosInstance, handleExpiredToken } from "./axiosInstance";
 import "react-toastify/dist/ReactToastify.css";
 import { validateLogin } from "./LoginValidation";
+import UserContext from "../../contexts/UserContext";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
+
+  const { setUserData } = useContext(UserContext);
 
   const navigate = useNavigate();
 
@@ -26,7 +29,6 @@ function Login() {
     setErrors(validationErrors);
 
     if (Object.keys(validationErrors).length > 0) {
-      // If there are validation errors, handle them (e.g., display error messages)
       console.log("Validation Errors:", validationErrors);
       return;
     }
@@ -36,35 +38,45 @@ function Login() {
       formData.append("username", email);
       formData.append("password", password);
 
-      const response = await axios.post(
-        "http://127.0.0.1:8000/login",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-          withCredentials: true, // Enable sending cookies with the request
-        }
-      );
+      const response = await axiosInstance.post("/login", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        withCredentials: true,
+      });
+
+      const {
+        data: { access_token, user_id, email: userEmail, user_type, image },
+      } = response;
+
+      setUserData({
+        access_token,
+        user_id,
+        email: userEmail,
+        user_type,
+        image,
+      });
 
       console.log("Login Successful");
-      // Handle successful login, e.g., store access token in a cookie
-
-      const { access_token } = response.data;
       console.log("Access Token:", access_token);
+      console.log("User ID:", user_id);
+      console.log("Email:", userEmail);
+      console.log("User Type:", user_type);
+      console.log("Image:", image);
 
-      // Set the access token as an HTTP-only cookie
       document.cookie = `access_token=${access_token}; path=/;`;
 
-      // Reset the form fields
-      setEmail("");
-      setPassword("");
-
-      // Navigate to the desired page
       navigate("/");
     } catch (error) {
       console.error("Login Failed:", error);
-      // Handle login error, e.g., display error message to the user
+      if (error.response && error.response.status === 401) {
+        handleExpiredToken(navigate);
+      } else {
+        setErrors({ login: "Failed to log in. Please try again." });
+      }
+    } finally {
+      setEmail("");
+      setPassword("");
     }
   };
 

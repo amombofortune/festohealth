@@ -26,8 +26,6 @@ def create_insurance_provider(insurance_provider: schemas.InsuranceProviderCreat
     return new_insurance_provider
 
 # Read one insurance provider
-
-
 @router.get("/{id}", response_model=schemas.InsuranceProviderResponse)
 def get_insurance_provider(id: str, db: Session = Depends(get_db)):
     insurance_provider = db.query(models.InsuranceProvider).filter(
@@ -39,8 +37,6 @@ def get_insurance_provider(id: str, db: Session = Depends(get_db)):
     return insurance_provider
 
 # Read All insurance providers
-
-
 @router.get("/", response_model=List[schemas.InsuranceProviderResponse])
 def get_insurance_provider(db: Session = Depends(get_db)):
     insurance_provider = db.query(models.InsuranceProvider).all()

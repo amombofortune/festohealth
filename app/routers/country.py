@@ -18,9 +18,8 @@ router = APIRouter(
 """ COUNTRY APIs"""
 # Create Country
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def create_country(country: schemas.CountryCreate, db: Session = Depends(get_db),
-                    current_user: int = Depends(oauth2.get_current_user)):
-    new_country = models.Country(user_id= current_user.id, **country.dict())
+def create_country(country: schemas.CountryCreate, db: Session = Depends(get_db)):
+    new_country = models.Country(**country.dict())
     db.add(new_country)
     db.commit()
     db.refresh(new_country)
@@ -28,8 +27,7 @@ def create_country(country: schemas.CountryCreate, db: Session = Depends(get_db)
 
 # Read One Country
 @router.get("/{id}", response_model=schemas.CountryResponse)
-def get_country(id: int, db: Session = Depends(get_db),
-                current_user: int = Depends(oauth2.get_current_user)):
+def get_country(id: int, db: Session = Depends(get_db)):
     country = db.query(models.Country).filter(models.Country.id == id).first()
 
     if not country:
@@ -39,8 +37,7 @@ def get_country(id: int, db: Session = Depends(get_db),
 
 # Read All Countries
 @router.get("/", response_model=List[schemas.CountryResponse])
-def get_country(db: Session = Depends(get_db),
-                current_user: int = Depends(oauth2.get_current_user)):
+def get_country(db: Session = Depends(get_db)):
     country = db.query(models.Country).all()
     return country
 
@@ -48,8 +45,7 @@ def get_country(db: Session = Depends(get_db),
 
 
 @router.put("/{id}", response_model=schemas.CountryResponse)
-def update_country(id: int, updated_country: schemas.CountryCreate, db: Session = Depends(get_db),
-                   current_user: int = Depends(oauth2.get_current_user)):
+def update_country(id: int, updated_country: schemas.CountryCreate, db: Session = Depends(get_db)):
 
     country_query = db.query(models.Country).filter(models.Country.id == id)
 
@@ -58,10 +54,7 @@ def update_country(id: int, updated_country: schemas.CountryCreate, db: Session 
     if country == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Country with id: {id} does not exist")
-    
-    if country.user_id != current_user.id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                            detail=f"Not authorized to perform requested action")
+
 
     country_query.update(updated_country.dict(), synchronize_session=False)
     db.commit()
@@ -70,8 +63,7 @@ def update_country(id: int, updated_country: schemas.CountryCreate, db: Session 
 
 # Delete country
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_country(id: int, db: Session = Depends(get_db),
-                   current_user: int = Depends(oauth2.get_current_user)):
+def delete_country(id: int, db: Session = Depends(get_db)):
 
     country_query = db.query(models.Country).filter(models.Country.id == id)
 
@@ -81,9 +73,6 @@ def delete_country(id: int, db: Session = Depends(get_db),
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Country with id: {id} does not exist")
     
-    if country.user_id != current_user.id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                            detail=f"Not authorized to perform requested action")
 
     country_query.delete(synchronize_session=False)
     db.commit()

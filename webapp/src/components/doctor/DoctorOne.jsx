@@ -41,18 +41,7 @@ const DoctorOne = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const access_token = document.cookie.replace(
-          /(?:(?:^|.*;\s*)access_token\s*=\s*([^;]*).*$)|^.*$/,
-          "$1"
-        );
-
-        const response = await axios.get("http://127.0.0.1:8000/doctor", {
-          withCredentials: true, // Enable sending cookies with the request
-          headers: {
-            Authorization: `Bearer ${access_token}`, // Include the access token as a request header
-          },
-        });
-
+        const response = await axios.get("http://127.0.0.1:8000/doctor");
         console.log(
           "Fetching doctor from database successful!!!",
           response.data

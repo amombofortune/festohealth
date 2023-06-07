@@ -7,9 +7,9 @@ import Modal from "@mui/material/Modal";
 import "./patientTable.scss";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import { Button } from "@mui/material";
-import PatientForm from "../patient/PatientForm";
 import PatientEdit from "../patient/PatientEdit";
 import PatientView from "../patient/PatientView";
+import PatientMultiStepForm from "./PatientMultiStepForm";
 
 const modalStyle = {
   position: "fixed",
@@ -24,7 +24,7 @@ const modalStyle = {
   maxWidth: "95%",
   maxHeight: "95%",
   overflow: "auto",
-  width: "1000px",
+  width: "auto",
 };
 
 export default function PatientTable() {
@@ -342,7 +342,7 @@ export default function PatientTable() {
         <Modal open={openAddForm} onClose={handleCloseAddForm}>
           <Box style={modalStyle}>
             <Box sx={{ width: "100%" }}>
-              <PatientForm />
+              <PatientMultiStepForm />
             </Box>
           </Box>
         </Modal>

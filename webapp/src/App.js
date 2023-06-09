@@ -65,6 +65,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import DoctorForm from "./components/doctor/DoctorForm";
 import PatientRegistrationForm from "./components/patient/PatientRegistrationForm";
+import DoctorRegistrationForm from "./components/doctor/DoctorRegistrationForm";
 import Profile from "./components/profile/Profile";
 
 function App() {
@@ -138,6 +139,10 @@ function App() {
             <Route
               path="/patientregistrationform"
               element={<PatientRegistrationForm />}
+            />
+            <Route
+              path="/doctorregistrationform"
+              element={<DoctorRegistrationForm />}
             />
 
             {"Dashboard"}

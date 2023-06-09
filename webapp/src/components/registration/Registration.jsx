@@ -22,13 +22,12 @@ function Registration() {
 
   const navigate = useNavigate();
 
-  const handleRegistrationSuccess = (user_type) => {
-    // Redirect the user to the appropriate form component based on the userType
-    const customURL = getCustomURL(user_type);
-    navigate(customURL);
+  const handleRegistrationSuccess = () => {
+    navigate("/login"); // Redirect to login page after successful registration
   };
 
   //Post data to database
+  // Post data to database
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -53,8 +52,7 @@ function Registration() {
 
       await axios.post("http://127.0.0.1:8000/users", data);
 
-      // Redirect to the appropriate form component after successful registration
-      handleRegistrationSuccess(user_type);
+      handleRegistrationSuccess();
       console.log("Posting data to the database successful!!!");
     } catch (error) {
       console.error("Failed to post data to the database:", error);
@@ -62,24 +60,8 @@ function Registration() {
     }
   };
 
-  let formComponent;
-  const getCustomURL = (user_type) => {
-    // Define your custom URL paths based on user_type in the App.js Route component
-    switch (user_type) {
-      case "patient":
-        return "/patientregistrationform";
-      case "doctor":
-        return "/doctorform";
-      case "insuranceProvider":
-        return "/insuranceproviderform";
-      default:
-        return "/";
-    }
-  };
-
   return (
     <div>
-      {formComponent}
       <div
         style={{
           display: "flex",

@@ -16,8 +16,6 @@ const AppointmentForm = (props) => {
   const [doctor_id, setDoctorID] = useState(props.doctor_id);
   const [type, setAppointmentType] = useState("");
   const [date, setAppointmentDate] = useState("");
-  const [start_time, setStartTime] = useState("08:00 AM");
-  const [end_time, setEndTime] = useState("05:00 PM");
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState("");
   const [selectedStartTime, setSelectedStartTime] = useState(null);
@@ -39,9 +37,6 @@ const AppointmentForm = (props) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    setStartTime(start_time);
-    setEndTime(end_time);
-
     try {
       const access_token = document.cookie.replace(
         /(?:(?:^|.*;\s*)access_token\s*=\s*([^;]*).*$)|^.*$/,
@@ -58,8 +53,8 @@ const AppointmentForm = (props) => {
         doctor_id,
         type,
         date,
-        start_time,
-        end_time,
+        start_time: selectedStartTime, // Use selected start time
+        end_time: selectedEndTime, // Use selected end time
         description,
         status,
       };
@@ -140,7 +135,11 @@ const AppointmentForm = (props) => {
   // Set the interval value according to your requirements
   const interval = 60; //60 minutes
   // Define the available time slots
-  const availableTimeSlots = generateTimeSlots(start_time, end_time, interval);
+  const availableTimeSlots = generateTimeSlots(
+    "08:00 AM",
+    "05:00 PM",
+    interval
+  );
 
   function chunkArray(array, chunkSize) {
     const chunks = [];

@@ -9,13 +9,11 @@ class UserBase(BaseModel):
     password: str
     user_type: str
 
-
-
 class UserCreate(UserBase):
     email: EmailStr
     password: str
     user_type: str
-    image: Optional[bytes] = None
+
 
 class UserResponse(UserBase):#what we are returning for the user to see
     id: str
@@ -36,7 +34,6 @@ class Token(BaseModel):
     user_id: str
     email: str
     user_type: str
-    image: Optional[bytes] = None
 
 class TokenData(BaseModel):
     id: Optional[str] = None
@@ -443,9 +440,16 @@ class DoctorBase(BaseModel):
     state: str
     postal_code: str
     country: str
-    consultation_fee: float
-    rating: float
-    verified: bool
+    consultation_fee:  Optional[float] = None
+    rating:  Optional[float] = None
+    membership: str
+    organization_name: Optional[str] = None
+    membership_type: Optional[str] = None
+    membership_number: Optional[str] = None
+    start_date: Optional[date] = None
+    expiration_date: Optional[date] = None
+    membership_status: Optional[str] = None
+    verified: Optional[bool] = None
 
 
 class DoctorCreate(DoctorBase):
@@ -461,6 +465,23 @@ class DoctorResponse(DoctorBase):
     class Config:
         orm_mode = True
 
+
+"""Doctor Memberships"""
+class DoctorMembershipBase(BaseModel):
+    user_id: str
+    name: str
+
+class DoctorMembershipCreate(DoctorMembershipBase):
+    pass
+
+
+class DoctorMembershipResponse(DoctorMembershipBase):
+    id: int
+    created_at: datetime
+
+
+    class Config:
+        orm_mode = True
 
 """Genetic Condition"""
 class GeneticConditionBase(BaseModel):
@@ -1183,7 +1204,6 @@ class SpecialtyResponse(SpecialtyBase):
     id: int
     created_at: datetime
     user_id: str
-    user: UserResponse
 
 
 

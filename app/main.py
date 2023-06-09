@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .config import settings
 from .routers import administrator, admission, adverse_reaction_type, adverse_reaction, allergy, \
 appointment_reminder, appointment_type, appointment, bed_assignment, bed, billing, chronic_condition,\
-country, department, diagnosis, disease, doctor, genetic_condition, hospital, immunization, insurance_claim, \
+country, department, diagnosis, disease, doctor, doctor_membership, genetic_condition, hospital, immunization, insurance_claim, \
 insurance_provider_type, insurance_provider, it_staff, lab_technician, lab_test_result, lab_test, auth, \
 medical_condition, medical_device, medical_images, medical_note, medical_procedure, medication_alert,\
 medication, nurses, patient_consent, patient_feedback, patient_visit, patient, pharmacist, prescription, \
@@ -53,6 +53,7 @@ app.include_router(department.router)
 app.include_router(diagnosis.router)
 app.include_router(disease.router)
 app.include_router(doctor.router)
+app.include_router(doctor_membership.router)
 app.include_router(genetic_condition.router)
 app.include_router(hospital.router)
 app.include_router(immunization.router)

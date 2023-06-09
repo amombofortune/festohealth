@@ -25,14 +25,14 @@ def login_user(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Sess
 
     access_token = oauth2.create_access_token(data={"user_id": user.id, "user_type": user.user_type})
 
-    # Create a Token response with the required fields
+
+    # Create a Token response with the required fields, including the first_login flag
     token_response = Token(
         access_token=access_token,
         token_type="bearer",
         user_id=user.id,
         email=user.email,
-        user_type=user.user_type,
-        image=user.image
+        user_type=user.user_type
     )
 
     # Set the access token as an HTTP-only cookie
@@ -46,6 +46,7 @@ def login_user(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Sess
     )
 
     return response
+
 
 
 

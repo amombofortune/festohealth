@@ -37,8 +37,6 @@ def create_patient(patient: schemas.PatientCreate, db: Session = Depends(get_db)
 
 
 # Read single patient
-
-
 @router.get("/{id}", response_model=schemas.PatientResponse)
 def get_patient(id: str, db: Session = Depends(get_db),
                 current_user: int = Depends(oauth2.get_current_user)):
@@ -62,8 +60,6 @@ def get_patient(db: Session = Depends(get_db),
     return patient
 
 # Update patient
-
-
 @router.put("/{id}", response_model=schemas.PatientResponse)
 def update_patient(id: str, updated_patient: schemas.PatientCreate, db: Session = Depends(get_db),
                    current_user: int = Depends(oauth2.get_current_user)):

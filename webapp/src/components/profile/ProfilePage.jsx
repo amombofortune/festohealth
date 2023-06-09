@@ -13,7 +13,7 @@ const ProfilePage = () => {
   const { userData } = useContext(UserContext);
 
   // Access user data
-  const { access_token, user_id, email, user_type } = userData;
+  const { access_token, user_id, email, user_type } = userData || {};
 
   const handleImageClick = () => {
     setDialogOpen(true);

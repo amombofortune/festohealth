@@ -11,14 +11,21 @@ router = APIRouter(
 
 )
 
-""" USERS APIs"""
+""" USERS APIs
 # Create user account
-
-
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    hashed_password = utils.hash(user.password)
+    user.password = hashed_password
 
-    #hash the password - user.password
+
+    new_user = models.User(**user.dict())
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+"""
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.User)
+def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     hashed_password = utils.hash(user.password)
     user.password = hashed_password
 
@@ -26,11 +33,11 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+
     return new_user
 
+
 # Read single user account
-
-
 @router.get("/{id}", response_model=schemas.UserResponse)
 def get_user(id: str, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id == id).first()
@@ -41,16 +48,12 @@ def get_user(id: str, db: Session = Depends(get_db)):
     return user
 
 # Read All user account
-
-
 @router.get("/", response_model=List[schemas.UserResponse])
 def get_user_accounts(db: Session = Depends(get_db)):
     user_accounts = db.query(models.User).all()
     return user_accounts
 
 # Update user account
-
-
 @router.put("/{id}", response_model=schemas.UserResponse)
 def update_user_account(id: str, updated_user_account: schemas.UserCreate, db: Session = Depends(get_db)):
 

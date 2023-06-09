@@ -23,22 +23,20 @@ class User(Base):
     email = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
     user_type = Column(String, nullable=False)
-    image = Column(LargeBinary, nullable=True)
     registration_date = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     created_at = Column(TIMESTAMP, server_default=func.now())
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
 
 
-    def __init__(self, email, password, user_type, image: Optional[bytes] = None):
+    def __init__(self, email, password, user_type):
         self.id = str(uuid.uuid4().hex[:6].upper())
         self.email = email
         self.password = password
         self.user_type = user_type
-        self.image = image
 
     def __repr__(self):
-        return f"({self.id}, {self.email}, {self.user_type}, {self.image})"
+        return f"({self.id}, {self.email}, {self.user_type})"
     
 
 """ ADMINISTRATORS """
@@ -741,33 +739,40 @@ class Doctor(Base):
 
     id = Column(String, primary_key=True)
     user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
-    firstname = Column(String)
-    middlename = Column(String)
-    lastname = Column(String)
-    dob = Column(Date)
-    gender = Column(String)
-    phone_number = Column(String)
-    email = Column(String)
-    specialty = Column(String)
-    licence_number = Column(String)
-    address = Column(String)
-    city = Column(String)
-    state = Column(String)
-    postal_code = Column(String)
-    country = Column(String)
+    firstname = Column(String, nullable=False)
+    middlename = Column(String, nullable=True)
+    lastname = Column(String, nullable=False)
+    dob = Column(Date, nullable=False)
+    gender = Column(String, nullable=False)
+    phone_number = Column(String, nullable=False)
+    email = Column(String, nullable=False)
+    address = Column(String, nullable=True)
+    city = Column(String, nullable=True)
+    state = Column(String, nullable=True)
+    postal_code = Column(String, nullable=True)
+    country = Column(String, nullable=False)
+    licence_number = Column(String, nullable=False)
+    specialty = Column(String, nullable=False)
     consultation_fee = Column(Float, nullable=True)
     rating = Column(Float, nullable=True)
+    membership = Column(String, nullable=False)
+    organization_name = Column(String, nullable=True)
+    membership_type = Column(String, nullable=True)
+    membership_number = Column(String, nullable=True)
+    start_date = Column(String, nullable=True)
+    expiration_date = Column(Date, nullable=True)
+    membership_status = Column(String, nullable=True)
     verified = Column(Boolean, server_default='FALSE')
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
     user = relationship("User", foreign_keys=[user_id])
 
-
-
     #user = relationship("User", backref="doctor")
 
-    def __init__(self, user_id, firstname, middlename, lastname, dob, gender, phone_number, email, specialty, licence_number, address, city, state, postal_code, country, consultation_fee, rating, verified):
+    def __init__(self, user_id, firstname, middlename, lastname, dob, gender, phone_number, email, address, city, state, postal_code, country,\
+                  licence_number, specialty, consultation_fee, rating, membership, organization_name,\
+                        membership_type, membership_number, start_date, expiration_date, membership_status, verified):
         self.id = str(uuid.uuid4().hex[:6].upper())
         self.user_id = user_id
         self.firstname = firstname
@@ -777,19 +782,32 @@ class Doctor(Base):
         self.gender = gender
         self.phone_number = phone_number
         self.email = email
-        self.specialty = specialty
-        self.licence_number = licence_number
         self.address = address
         self.city = city
         self.state = state
         self.postal_code = postal_code
         self.country = country
+        self.licence_number = licence_number
+        self.specialty = specialty
         self.consultation_fee = consultation_fee
         self.rating = rating
+        self.membership = membership
+        self.organization_name = organization_name
+        self.membership_type = membership_type
+        self.membership_number = membership_number
+        self.start_date = start_date
+        self.expiration_date = expiration_date
+        self.membership_status = membership_status
         self.verified = verified
+        
 
     def __repr__(self):
-        return f"({self.id}, {self.user_id}, {self.firstname}, {self.middlename}, {self.lastname}, {self.dob},{self.gender}, {self.phone_number}, {self.email}, {self.specialty}, {self.licence_number}, {self.address}, {self.city}, {self.state}, {self.postal_code}, {self.country}, {self.consultation_fee}, {self.rating}, {self.verified})"
+        return f"({self.id}, {self.user_id}, {self.firstname}, {self.middlename}, {self.lastname}, {self.dob},\
+            {self.gender}, {self.phone_number}, {self.email}, {self.address}, {self.city}, \
+                {self.state}, {self.postal_code}, {self.country}, {self.licence_number}, \
+                    {self.specialty},  {self.consultation_fee}, {self.rating}, {self.membership},\
+                         {self.organization_name}, {self.membership_type}, {self.membership_number},\
+                             {self.start_date}, {self.expiration_date}, {self.membership_status} {self.verified})"
 
 
 """ GENETIC CONDITION """
@@ -1460,6 +1478,27 @@ class Medication(Base):
 
     def __repr__(self):
         return f"({self.id}, {self.user_id}, {self.patient_id}, {self.doctor_id}, {self.name}, {self.description}, {self.route_of_administration}, {self.dosage}, {self.unit}, {self.frequency})"
+
+
+""" MEMBERSHIP """
+class DoctorMembership(Base):
+    __tablename__ = "doctor_memberships"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    name = Column(String)
+    created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
+    user = relationship("User", foreign_keys=[user_id])
+
+    def __init__(self, user_id, name):
+        self.user_id = user_id
+        self.name = name
+        
+    def __repr__(self):
+        return f"({self.id}, {self.user_id}, {self.name})"
+
 
 """ NURSE """
 class Nurse(Base):

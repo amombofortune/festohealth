@@ -17,9 +17,7 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
-
   const { setUserData } = useContext(UserContext);
-
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -60,7 +58,20 @@ function Login() {
       console.log("Login Successful");
       document.cookie = `access_token=${access_token}; path=/;`;
 
-      navigate("/");
+      const registrationFormCompleted = response.data.registrationFormCompleted;
+
+      if (user_type === "doctor" && !registrationFormCompleted) {
+        navigate("/doctorregistrationform");
+      } else if (user_type === "patient" && !registrationFormCompleted) {
+        navigate("/patientregistrationform");
+      } else if (
+        user_type === "insuranceProvider" &&
+        !registrationFormCompleted
+      ) {
+        navigate("/insuranceregistrationform");
+      } else {
+        navigate("/");
+      }
     } catch (error) {
       console.error("Login Failed:", error);
       if (error.response && error.response.status === 401) {

@@ -67,6 +67,7 @@ import DoctorForm from "./components/doctor/DoctorForm";
 import PatientRegistrationForm from "./components/patient/PatientRegistrationForm";
 import DoctorRegistrationForm from "./components/doctor/DoctorRegistrationForm";
 import Profile from "./components/profile/Profile";
+import InsuranceRegistrationForm from "./components/insurance_provider/InsuranceRegistrationForm";
 
 function App() {
   const [userData, setUserData] = useState(null);
@@ -127,7 +128,10 @@ function App() {
             <Route path="/ward" element={<Ward />} />
             <Route path="/trial" element={<Trial />} />
             <Route path="/doctor_time_slot" element={<DoctorTimeSlot />} />
-
+            <Route
+              path="/insuranceregistrationform"
+              element={<InsuranceRegistrationForm />}
+            />
             <Route path="/appointment" element={<Appointment />} />
             <Route path="/appointmentedit" element={<AppointmentEdit />} />
             <Route path="/appointmentform" element={<AppointmentForm />} />

@@ -24,24 +24,25 @@ class User(Base):
     password = Column(String, nullable=False)
     user_type = Column(String, nullable=False)
     registration_date = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+    registration_form_completed = Column(Boolean, nullable=False, default=False)
     created_at = Column(TIMESTAMP, server_default=func.now())
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
 
-
-    def __init__(self, email, password, user_type):
+    def __init__(self, email, password, user_type, registration_form_completed=False):
         self.id = str(uuid.uuid4().hex[:6].upper())
         self.email = email
         self.password = password
         self.user_type = user_type
+        self.registration_form_completed = registration_form_completed
 
     def __repr__(self):
-        return f"({self.id}, {self.email}, {self.user_type})"
+        return f"({self.id}, {self.email}, {self.user_type}, {self.registration_form_completed})"
     
 
 """ ADMINISTRATORS """
 class Administrator(Base):
-    __tablename__ = "administrators"
+    __tablename__ = "administrators" 
 
     id = Column(String, primary_key=True)
     user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
@@ -981,19 +982,28 @@ class InsuranceProvider(Base):
 
     id = Column(String, primary_key=True)
     user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
-    name = Column(String(50))
-    type = Column(String)
-    licence_number = Column(String)
-    address = Column(String(255))
-    city = Column(String(255))
-    state = Column(String(255))
-    postal_code = Column(String(10))
-    country = Column(String)
-    phone_number = Column(String(20))
-    email = Column(String)
-    website = Column(String)
-    rating = Column(Float)
-    verified = Column(String)
+    name = Column(String(50), nullable=False)
+    description = Column(String, nullable=False)
+    products = Column(String, nullable=False)
+    address = Column(String(255), nullable=True)
+    city = Column(String(255), nullable=False)
+    state = Column(String(255), nullable=True)
+    postal_code = Column(String(10), nullable=True)
+    country = Column(String, nullable=False)
+    phone_number = Column(String(20), nullable=False)
+    email = Column(String, nullable=False)
+    website = Column(String, nullable=True)
+    licence_number = Column(String, nullable=False)
+    certification = Column(String, nullable=False)
+    certification_type = Column(String, nullable=True)
+    certification_number = Column(String, nullable=True)
+    issuing_authority = Column(String, nullable=True)
+    issue_date = Column(Date, nullable=True)
+    expiration_date = Column(Date, nullable=True)
+    customer_support_phone = Column(String(20), nullable=False)
+    customer_support_email = Column(String(20), nullable=False)
+    rating = Column(Float, nullable=True)
+    verified = Column(String, nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
@@ -1002,12 +1012,12 @@ class InsuranceProvider(Base):
 
     #user = relationship("User", backref="insurance_provider")
 
-    def __init__(self, user_id, name, type, licence_number, address, city, state, postal_code, country, phone_number, email, website, rating, verified):
+    def __init__(self, user_id, name, description, products, address, city, state, postal_code, country, phone_number, email, website, licence_number, certification, certification_type, certification_number, issuing_authority, issue_date, expiration_date, customer_support_phone, customer_support_email, rating, verified):
         self.id = str(uuid.uuid4().hex[:6].upper())
         self.user_id = user_id
         self.name = name
-        self.type = type
-        self.licence_number = licence_number
+        self.description = description
+        self.products = products
         self.address = address
         self.city = city
         self.state = state
@@ -1016,11 +1026,21 @@ class InsuranceProvider(Base):
         self.phone_number = phone_number
         self.email = email
         self.website = website
+        self.licence_number = licence_number
+        self.certification = certification
+        self.certification_type = certification_type
+        self.certification_number = certification_number
+        self.issuing_authority = issuing_authority
+        self.issue_date = issue_date
+        self.expiration_date = expiration_date
+        self.customer_support_phone = customer_support_phone
+        self.customer_support_email = customer_support_email
         self.rating = rating
         self.verified = verified
 
     def __repr__(self):
-        return f"({self.id}, {self.user_id}, {self.name}, {self.type}, {self.licence_number}, {self.address}, {self.city}, {self.state}, {self.postal_code}, {self.country}, {self.phone_number}, {self.email}, {self.website}, {self.rating}, {self.verified})"
+        return f"({self.id}, {self.user_id}, {self.name}, {self.description}, {self.products},{self.address}, {self.city}, {self.state}, {self.postal_code}, {self.country}, {self.phone_number}, {self.email}, {self.website}, {self.licence_number}, {self.certification},\
+             {self.certification_type}, {self.certification_number}, {self.issuing_authority}, {self.issue_date}, {self.expiration_date}, {self.customer_support_phone}, {self.customer_support_email}, {self.rating}, {self.verified})"
 
 
 session = SessionLocal()

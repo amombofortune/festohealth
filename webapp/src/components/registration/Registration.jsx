@@ -27,7 +27,6 @@ function Registration() {
   };
 
   //Post data to database
-  // Post data to database
   const handleSubmit = async (e) => {
     e.preventDefault();
 

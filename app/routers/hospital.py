@@ -16,8 +16,6 @@ router = APIRouter(
 
 """ HOSPITAL APIs """
 # Create hospital
-
-
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_hospital(hospital: schemas.HospitalCreate, db: Session = Depends(get_db)):
     new_hospital = models.Hospital(**hospital.dict())

@@ -13,27 +13,54 @@ router = APIRouter(
 
 )
 
+def update_registration_status(user_id: str, db: Session):
+    user = db.query(models.User).get(user_id)
+    if user:
+        user.registration_form_completed = True
+        db.commit()
+        db.refresh(user)
+        return user
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
 
 """ PATIENT APIs """
 # Create patient
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def create_patient(patient: schemas.PatientCreate, db: Session = Depends(get_db),
-                   current_user: int = Depends(oauth2.get_current_user)):
-    
+def create_patient(
+    patient: schemas.PatientCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(oauth2.get_current_user),
+):
+    existing_patient = db.query(models.Patient).filter_by(user_id=current_user.id).first()
+    if existing_patient:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Patient registration form has already been submitted",
+        )
+
     if patient.insurance == "no":
-        # Set insurance field to "no" when insurance is "no"
-        patient.insurance = "no"
+        # Set insurance fields to None when insurance is "no"
         patient.provider_name = None
         patient.policy_number = None
         patient.group_number = None
         patient.effective_date = None
         patient.expiration_date = None
-    
-    patient = models.Patient(user_id=current_user.id, **patient.dict())
-    db.add(patient)
+
+    patient_obj = models.Patient(user_id=current_user.id, **patient.dict())
+    db.add(patient_obj)
     db.commit()
-    db.refresh(patient)
-    return patient
+    db.refresh(patient_obj)
+
+    # Update registration status
+    update_registration_status(current_user.id, db)
+
+    return patient_obj
+
+
 
 
 # Read single patient

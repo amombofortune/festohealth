@@ -13,17 +13,50 @@ router = APIRouter(
 
 )
 
+def update_registration_status(user_id: str, db: Session):
+    user = db.query(models.User).get(user_id)
+    if user:
+        user.registration_form_completed = True
+        db.commit()
+        db.refresh(user)
+        return user
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
 
 """ INSURANCE PROVIDER APIs """
 # Create insurance providers
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def create_insurance_provider(insurance_provider: schemas.InsuranceProviderCreate, db: Session = Depends(get_db)):
-    new_insurance_provider = models.InsuranceProvider(**insurance_provider.dict())
-    db.add(new_insurance_provider)
+def create_insurance_provider(insurance_provider: schemas.InsuranceProviderCreate, db: Session = Depends(get_db),current_user: models.User = Depends(oauth2.get_current_user)):
+
+    existing_provider = db.query(models.InsuranceProvider).filter_by(user_id=current_user.id).first()
+    if existing_provider:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Insurance provider registration form has already been submitted",
+        )
+
+    if insurance_provider.certification == "no":
+        # Set insurance fields to None when insurance is "no"
+        insurance_provider.certification_type = None
+        insurance_provider.certification_number = None
+        insurance_provider.issuing_authority = None
+        insurance_provider.issue_date = None
+        insurance_provider.expiration_date = None
+
+    provider_obj = models.InsuranceProvider(user_id=current_user.id, **insurance_provider.dict())
+    db.add(provider_obj)
     db.commit()
-    db.refresh(new_insurance_provider)
-    return new_insurance_provider
+    db.refresh(provider_obj)
+
+    # Update registration status
+    update_registration_status(current_user.id, db)
+
+    return provider_obj
+
 
 # Read one insurance provider
 @router.get("/{id}", response_model=schemas.InsuranceProviderResponse)

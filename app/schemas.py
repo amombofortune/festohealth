@@ -15,6 +15,7 @@ class UserCreate(UserBase):
     user_type: str
 
 
+
 class UserResponse(UserBase):#what we are returning for the user to see
     id: str
     email: EmailStr
@@ -592,8 +593,8 @@ class InsuranceClaimResponse(InsuranceClaimBase):
 """Insurance provider"""
 class InsuranceProviderBase(BaseModel):
     name: str
-    type: str
-    licence_number: str
+    description: str
+    products: str
     address: str
     city: str
     state: str
@@ -602,6 +603,15 @@ class InsuranceProviderBase(BaseModel):
     phone_number: int
     email: EmailStr
     website: str
+    licence_number: str
+    certification: str
+    certification_type: Optional[str] = None
+    certification_number: Optional[str] = None
+    issuing_authority: Optional[str] = None
+    issue_date: Optional[date] = None
+    expiration_date: Optional[date] = None
+    customer_support_phone: str
+    customer_support_email: str
     rating: float
     verified: str
 

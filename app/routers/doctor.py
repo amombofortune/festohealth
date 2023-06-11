@@ -12,6 +12,19 @@ router = APIRouter(
 
 )
 
+def update_registration_status(user_id: str, db: Session):
+    user = db.query(models.User).get(user_id)
+    if user:
+        user.registration_form_completed = True
+        db.commit()
+        db.refresh(user)
+        return user
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
 
 """ DOCTOR APIs """
 # Create doctor
@@ -33,6 +46,10 @@ def create_doctor(doctor: schemas.DoctorCreate, db: Session = Depends(get_db),
     db.add(new_doctor)
     db.commit()
     db.refresh(new_doctor)
+
+    # Update registration status
+    update_registration_status(current_user.id, db)
+    
     return new_doctor
 
 # Read One doctor

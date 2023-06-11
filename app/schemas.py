@@ -21,6 +21,7 @@ class UserResponse(UserBase):#what we are returning for the user to see
     email: EmailStr
     user_type: str
     registration_date: datetime
+    registration_form_completed: bool
 
     class Config:
         orm_mode = True
@@ -35,6 +36,7 @@ class Token(BaseModel):
     user_id: str
     email: str
     user_type: str
+    registration_form_completed: bool
 
 class TokenData(BaseModel):
     id: Optional[str] = None

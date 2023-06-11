@@ -21,7 +21,7 @@ import axios from "axios";
 const steps = [
   "Personal Information",
   "Professional Information",
-  "Insurance Information",
+  "Profile Picture",
 ];
 
 export default function DoctorMultiStepForm() {

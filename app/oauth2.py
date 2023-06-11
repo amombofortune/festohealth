@@ -22,11 +22,14 @@ def create_access_token(data: dict) -> str:
 
     user_id = data.get("id")
     user_type = data.get("user_type")
+    registration_form_completed = data.get("registration_form_completed")
 
     if user_id:
         to_encode["user_id"] = user_id
     if user_type:
         to_encode["user_type"] = user_type
+    if registration_form_completed is not None:
+        to_encode["registration_form_completed"] = registration_form_completed
 
     expire = datetime.utcnow() + timedelta(minutes=int(ACCESS_TOKEN_EXPIRE_MINUTES))
     to_encode.update({"exp": expire})
@@ -37,22 +40,29 @@ def create_access_token(data: dict) -> str:
 
 
 
+
 def verify_access_token(token: str, credentials_exception):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
 
         user_id: str = payload.get("user_id")
         user_type: str = payload.get("user_type")
+        registration_form_completed: bool = payload.get("registration_form_completed")
 
         if user_id is None:
             raise credentials_exception
 
-        token_data = {"id": user_id, "user_type": user_type}
+        token_data = {
+            "id": user_id,
+            "user_type": user_type,
+            "registration_form_completed": registration_form_completed,
+        }
 
     except JWTError: 
         raise credentials_exception
 
     return token_data
+
 
 
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
@@ -78,6 +88,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
 
     user_id = token_data["id"]
     user_type = token_data.get("user_type", None)  # Get user_type from token_data (can be None if not provided)
+    registration_form_completed = token_data.get("registration_form_completed", False)  # Get registration_form_completed from token_data (default to False if not provided)
 
     user = db.query(models.User).filter(models.User.id == user_id).first()
 
@@ -85,8 +96,10 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         raise credentials_exception
 
     user.user_type = user_type
+    user.registration_form_completed = registration_form_completed
 
     return user
+
 
 
 

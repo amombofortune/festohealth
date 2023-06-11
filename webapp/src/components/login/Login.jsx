@@ -44,7 +44,13 @@ function Login() {
       });
 
       const {
-        data: { access_token, user_id, email: userEmail, user_type, image },
+        data: {
+          access_token,
+          user_id,
+          email: userEmail,
+          user_type,
+          registration_form_completed,
+        },
       } = response;
 
       setUserData({
@@ -52,25 +58,24 @@ function Login() {
         user_id,
         email: userEmail,
         user_type,
-        image,
+        registration_form_completed,
       });
 
       console.log("Login Successful");
       document.cookie = `access_token=${access_token}; path=/;`;
 
-      const registrationFormCompleted = response.data.registrationFormCompleted;
-
-      if (user_type === "doctor" && !registrationFormCompleted) {
-        navigate("/doctorregistrationform");
-      } else if (user_type === "patient" && !registrationFormCompleted) {
-        navigate("/patientregistrationform");
-      } else if (
-        user_type === "insuranceProvider" &&
-        !registrationFormCompleted
-      ) {
-        navigate("/insuranceregistrationform");
-      } else {
+      if (registration_form_completed) {
         navigate("/");
+      } else {
+        if (user_type === "doctor") {
+          navigate("/doctorregistrationform");
+        } else if (user_type === "patient") {
+          navigate("/patientregistrationform");
+        } else if (user_type === "insuranceProvider") {
+          navigate("/insuranceregistrationform");
+        } else {
+          navigate("/");
+        }
       }
     } catch (error) {
       console.error("Login Failed:", error);

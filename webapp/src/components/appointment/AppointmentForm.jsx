@@ -25,7 +25,7 @@ const AppointmentForm = (props) => {
   const { userData } = useContext(UserContext);
 
   useEffect(() => {
-    if (userData) {
+    if (userData && userData.user_id) {
       // Access user data and set initial values
       const { user_id } = userData;
       setPatientID(user_id);

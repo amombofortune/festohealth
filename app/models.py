@@ -393,6 +393,32 @@ session.add(appointment_type8)
 session.commit()
 session.close()
 
+
+"""AVAILABILITY """
+class Availability(Base):
+    __tablename__ = "availability"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
+    date = Column(String, nullable=False)
+    start_time = Column(String, nullable=False)
+    end_time = Column(String, nullable=False)
+    created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
+
+    user = relationship("User", foreign_keys=[user_id])
+
+
+    def __init__(self, user_id, date, start_time, end_time):
+        self.user_id = user_id
+        self.date = date
+        self.start_time = start_time
+        self.end_time = end_time
+
+    def __repr__(self):
+        return f"({self.user_id}, {self.date}, {self.start_time}, {self.end_time})"
+
+
+
 """  BED """
 class Bed(Base):
     __tablename__ = "beds"
@@ -2115,7 +2141,6 @@ class WorkSchedule(Base):
     start_time = Column(DateTime)
     end_time = Column(DateTime)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
-   #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
     user = relationship("User", foreign_keys=[user_id])
 

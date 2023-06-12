@@ -15,23 +15,17 @@ router = APIRouter(
 
 """ APPOINTMENT TYPE API """
 # Create Appointment type
-
-
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def create_appointment_type(appointment_type: schemas.AppointmentTypeCreate, db: Session = Depends(get_db),
-                             current_user: int = Depends(oauth2.get_current_user)):
-    new_appointment_type = models.AppointmentType(user_id= current_user.id, **appointment_type.dict())
+def create_appointment_type(appointment_type: schemas.AppointmentTypeCreate, db: Session = Depends(get_db)):
+    new_appointment_type = models.AppointmentType(**appointment_type.dict())
     db.add(new_appointment_type)
     db.commit()
     db.refresh(new_appointment_type)
     return new_appointment_type
 
 # Read One Appointment type
-
-
 @router.get("/{id}", response_model=schemas.AppointmentTypeResponse)
-def get_single_appointment_type(id: int, db: Session = Depends(get_db),
-                                current_user: int = Depends(oauth2.get_current_user)):
+def get_single_appointment_type(id: int, db: Session = Depends(get_db)):
     appointment_type = db.query(models.AppointmentType).filter(
         models.AppointmentType.id == id).first()
 
@@ -41,20 +35,14 @@ def get_single_appointment_type(id: int, db: Session = Depends(get_db),
     return appointment_type
 
 # Read All Appointment type
-
-
 @router.get("/", response_model=List[schemas.AppointmentTypeResponse])
-def get_appointment_type(db: Session = Depends(get_db),
-                         current_user: int = Depends(oauth2.get_current_user)):
+def get_appointment_type(db: Session = Depends(get_db)):
     appointment_type = db.query(models.AppointmentType).all()
     return appointment_type
 
 # Update Appointment type
-
-
 @router.put("/{id}", response_model=schemas.AppointmentTypeResponse)
-def update_appointment_type(id: int, updated_appointment_type: schemas.AppointmentTypeCreate, db: Session = Depends(get_db),
-                            current_user: int = Depends(oauth2.get_current_user)):
+def update_appointment_type(id: int, updated_appointment_type: schemas.AppointmentTypeCreate, db: Session = Depends(get_db)):
 
     appointment_type_query = db.query(models.AppointmentType).filter(
         models.AppointmentType.id == id)
@@ -64,10 +52,7 @@ def update_appointment_type(id: int, updated_appointment_type: schemas.Appointme
     if appointment_type == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Appointment type with id: {id} does not exist")
-    
-    if appointment_type.user_id != current_user.id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                            detail=f"Not authorized to perform requested action")
+
 
     appointment_type_query.update(updated_appointment_type.dict(),
                              synchronize_session=False)
@@ -77,8 +62,7 @@ def update_appointment_type(id: int, updated_appointment_type: schemas.Appointme
 
 # Delete Appointment type
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_appointment_type(id: int, db: Session = Depends(get_db),
-                            current_user: int = Depends(oauth2.get_current_user)):
+def delete_appointment_type(id: int, db: Session = Depends(get_db)):
 
     appointment_type_query = db.query(models.AppointmentType).filter(
         models.AppointmentType.id == id)
@@ -89,9 +73,6 @@ def delete_appointment_type(id: int, db: Session = Depends(get_db),
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Appointment type with id: {id} does not exist")
     
-    if appointment_type.user_id != current_user.id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                            detail=f"Not authorized to perform requested action")
 
     appointment_type_query.delete(synchronize_session=False)
     db.commit()

@@ -9,11 +9,11 @@ import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import MenuItem from "@mui/material/MenuItem";
 import "./appointment.scss";
-import UserContext from "../../contexts/UserContext";
+import { DoctorAvailabilityContext } from "../../contexts/DoctorAvailabilityContext";
 
-const AppointmentForm = (props) => {
+const AppointmentForm = () => {
   const [patient_id, setPatientID] = useState("");
-  const [doctor_id, setDoctorID] = useState(props.doctor_id);
+  const [doctor_id, setDoctorID] = useState("");
   const [type, setAppointmentType] = useState("");
   const [date, setAppointmentDate] = useState("");
   const [description, setDescription] = useState("");
@@ -22,16 +22,7 @@ const AppointmentForm = (props) => {
   const [selectedEndTime, setSelectedEndTime] = useState(null);
   const [appointmentTypeDB, setAppointmentTypeDB] = useState([]);
 
-  const { userData } = useContext(UserContext);
-
-  useEffect(() => {
-    if (userData && userData.user_id) {
-      // Access user data and set initial values
-      const { user_id } = userData;
-      setPatientID(user_id);
-      // Set other initial values...
-    }
-  }, [userData]);
+  const { unavailableTimeSlots } = useContext(DoctorAvailabilityContext);
 
   //Post data to database
   const handleSubmit = async (e) => {
@@ -129,7 +120,9 @@ const AppointmentForm = (props) => {
       timeSlots.push(timeSlot);
     }
 
-    return timeSlots;
+    return timeSlots.filter(
+      (timeSlot) => !unavailableTimeSlots.includes(timeSlot)
+    );
   };
 
   // Set the interval value according to your requirements
@@ -171,13 +164,12 @@ const AppointmentForm = (props) => {
                 placeholder="Enter Patient ID"
                 variant="outlined"
                 type="text"
-                value={userData.user_id}
+                value={patient_id}
                 onChange={(event) => {
                   setPatientID(event.target.value);
                 }}
                 fullWidth
                 required
-                disabled
               ></TextField>
             </Grid>
             <Grid xs={12} sm={6} item>
@@ -192,7 +184,6 @@ const AppointmentForm = (props) => {
                 }}
                 fullWidth
                 required
-                disabled
               ></TextField>
             </Grid>
             <Grid xs={12} item>

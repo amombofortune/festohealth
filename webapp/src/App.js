@@ -1,5 +1,6 @@
 import "./App.css";
 import UserContext from "./contexts/UserContext";
+import { DoctorAvailabilityProvider } from "./contexts/DoctorAvailabilityContext";
 import { useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Trial from "./components/trial/Trial";
@@ -68,6 +69,10 @@ import PatientRegistrationForm from "./components/patient/PatientRegistrationFor
 import DoctorRegistrationForm from "./components/doctor/DoctorRegistrationForm";
 import Profile from "./components/profile/Profile";
 import InsuranceRegistrationForm from "./components/insurance_provider/InsuranceRegistrationForm";
+import PatientHomePage from "./components/home/PatientHomePage";
+import DoctorHomePage from "./components/home/DoctorHomePage";
+import InsuranceProviderHomePage from "./components/home/InsuranceProviderHomePage";
+import DoctorAvailabilityForm from "./components/appointment/DoctorAvailabilityForm";
 
 function App() {
   const [userData, setUserData] = useState(null);
@@ -76,105 +81,120 @@ function App() {
     <div className="app">
       <BrowserRouter>
         <UserContext.Provider value={{ userData, setUserData }}>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/profile" element={<Profile />} />
+          <DoctorAvailabilityProvider>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route
+                path="/availability"
+                element={<DoctorAvailabilityForm />}
+              />
 
-            <Route path="/admission" element={<Admission />} />
-            <Route path="/adverse_reaction" element={<AdverseReaction />} />
-            <Route
-              path="/adverse_reaction_type"
-              element={<AdverseReactionType />}
-            />
-            <Route path="/allergy" element={<Allergy />} />
-            <Route path="/bed" element={<Bed />} />
-            <Route path="/billing" element={<Billing />} />
-            <Route path="/chronic_condition" element={<ChronicCondition />} />
-            <Route path="/diagnosis" element={<Diagnosis />} />
-            <Route path="/disease" element={<Disease />} />
-            <Route path="/country" element={<Country />} />
-            <Route path="/department" element={<Department />} />
-            <Route path="/doctor" element={<Doctor />} />
-            <Route path="/doctor_one" element={<DoctorOneComplete />} />
-            <Route path="/genetic_condition" element={<GeneticCondition />} />
-            <Route path="/hospital" element={<Hospital />} />
-            <Route path="/hospital_one" element={<HospitalOneComplete />} />
-            <Route path="/immunization" element={<Immunization />} />
-            <Route path="/insurance_claim" element={<InsuranceClaim />} />
-            <Route path="/insurance_provider" element={<InsuranceProvider />} />
-            <Route
-              path="/insurance_provider_one"
-              element={<InsuranceProviderComplete />}
-            />
-            <Route path="/lab_result" element={<LabResult />} />
-            <Route path="/lab_test" element={<LabTest />} />
-            <Route path="/medical_condition" element={<MedicalCondition />} />
-            <Route path="/medical_device" element={<MedicalDevice />} />
-            <Route path="/medical_image" element={<MedicalImage />} />
-            <Route path="/medical_note" element={<MedicalNote />} />
-            <Route path="/medical_procedure" element={<MedicalProcedure />} />
-            <Route path="/medication" element={<Medication />} />
-            <Route path="/medication_alert" element={<MedicationAlert />} />
-            <Route path="/nurse" element={<Nurse />} />
-            <Route path="/patient_consent" element={<PatientConsent />} />
-            <Route path="/patient" element={<Patient />} />
-            <Route path="/patient_feedback" element={<PatientFeedback />} />
-            <Route path="/patient_visit" element={<PatientVisit />} />
-            <Route path="/prescription" element={<Prescription />} />
-            <Route path="/referral" element={<Referral />} />
-            <Route path="/time_slot" element={<TimeSlot />} />
-            <Route path="/vaccination" element={<Vaccination />} />
-            <Route path="/vital_sign" element={<VitalSign />} />
-            <Route path="/ward" element={<Ward />} />
-            <Route path="/trial" element={<Trial />} />
-            <Route path="/doctor_time_slot" element={<DoctorTimeSlot />} />
-            <Route
-              path="/insuranceregistrationform"
-              element={<InsuranceRegistrationForm />}
-            />
-            <Route path="/appointment" element={<Appointment />} />
-            <Route path="/appointmentedit" element={<AppointmentEdit />} />
-            <Route path="/appointmentform" element={<AppointmentForm />} />
-            <Route path="/appointmenttable" element={<AppointmentTable />} />
-            <Route path="/complete" element={<Complete />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/registration" element={<Registration />} />
-            <Route path="/doctorform" element={<DoctorForm />} />
-            <Route
-              path="/patientregistrationform"
-              element={<PatientRegistrationForm />}
-            />
-            <Route
-              path="/doctorregistrationform"
-              element={<DoctorRegistrationForm />}
-            />
+              <Route path="/admission" element={<Admission />} />
+              <Route path="/adverse_reaction" element={<AdverseReaction />} />
+              <Route
+                path="/adverse_reaction_type"
+                element={<AdverseReactionType />}
+              />
+              <Route path="/allergy" element={<Allergy />} />
+              <Route path="/bed" element={<Bed />} />
+              <Route path="/billing" element={<Billing />} />
+              <Route path="/chronic_condition" element={<ChronicCondition />} />
+              <Route path="/diagnosis" element={<Diagnosis />} />
+              <Route path="/disease" element={<Disease />} />
+              <Route path="/country" element={<Country />} />
+              <Route path="/department" element={<Department />} />
+              <Route path="/doctor" element={<Doctor />} />
+              <Route path="/doctor_one" element={<DoctorOneComplete />} />
+              <Route path="/genetic_condition" element={<GeneticCondition />} />
+              <Route path="/hospital" element={<Hospital />} />
+              <Route path="/hospital_one" element={<HospitalOneComplete />} />
+              <Route path="/immunization" element={<Immunization />} />
+              <Route path="/insurance_claim" element={<InsuranceClaim />} />
+              <Route
+                path="/insurance_provider"
+                element={<InsuranceProvider />}
+              />
+              <Route
+                path="/insurance_provider_one"
+                element={<InsuranceProviderComplete />}
+              />
+              <Route path="/lab_result" element={<LabResult />} />
+              <Route path="/lab_test" element={<LabTest />} />
+              <Route path="/medical_condition" element={<MedicalCondition />} />
+              <Route path="/medical_device" element={<MedicalDevice />} />
+              <Route path="/medical_image" element={<MedicalImage />} />
+              <Route path="/medical_note" element={<MedicalNote />} />
+              <Route path="/medical_procedure" element={<MedicalProcedure />} />
+              <Route path="/medication" element={<Medication />} />
+              <Route path="/medication_alert" element={<MedicationAlert />} />
+              <Route path="/nurse" element={<Nurse />} />
+              <Route path="/patient_consent" element={<PatientConsent />} />
+              <Route path="/patient" element={<Patient />} />
+              <Route path="/patient_feedback" element={<PatientFeedback />} />
+              <Route path="/patient_visit" element={<PatientVisit />} />
+              <Route path="/prescription" element={<Prescription />} />
+              <Route path="/referral" element={<Referral />} />
+              <Route path="/time_slot" element={<TimeSlot />} />
+              <Route path="/vaccination" element={<Vaccination />} />
+              <Route path="/vital_sign" element={<VitalSign />} />
+              <Route path="/ward" element={<Ward />} />
+              <Route path="/trial" element={<Trial />} />
+              <Route path="/doctor_time_slot" element={<DoctorTimeSlot />} />
+              <Route
+                path="/insuranceregistrationform"
+                element={<InsuranceRegistrationForm />}
+              />
+              <Route path="/appointment" element={<Appointment />} />
+              <Route path="/appointmentedit" element={<AppointmentEdit />} />
+              <Route path="/appointmentform" element={<AppointmentForm />} />
+              <Route path="/appointmenttable" element={<AppointmentTable />} />
+              <Route path="/complete" element={<Complete />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/registration" element={<Registration />} />
+              <Route path="/doctorform" element={<DoctorForm />} />
+              <Route
+                path="/patientregistrationform"
+                element={<PatientRegistrationForm />}
+              />
+              <Route
+                path="/doctorregistrationform"
+                element={<DoctorRegistrationForm />}
+              />
+              <Route path="/patienthomepage" element={<PatientHomePage />} />
+              <Route path="/doctorhomepage" element={<DoctorHomePage />} />
+              <Route
+                path="/insurancehomepage"
+                element={<InsuranceProviderHomePage />}
+              />
 
-            {"Dashboard"}
-            <Route path="/">
-              <Route index element={<Home />} />
-              <Route path="users">
-                <Route index element={<List />} />
-                <Route path=":userId" element={<Single />} />
-                <Route
-                  path="new"
-                  element={<New inputs={userInputs} title="Add New User" />}
-                />
+              {"Dashboard"}
+              <Route path="/">
+                <Route index element={<Home />} />
+                <Route path="users">
+                  <Route index element={<List />} />
+                  <Route path=":userId" element={<Single />} />
+                  <Route
+                    path="new"
+                    element={<New inputs={userInputs} title="Add New User" />}
+                  />
+                </Route>
+                <Route path="products">
+                  <Route index element={<List />} />
+                  <Route path=":productId" element={<Single />} />
+                  <Route
+                    path="new"
+                    element={
+                      <New inputs={productInputs} title="Add New Product" />
+                    }
+                  />
+                </Route>
+                <Route path="/sidebar" element={<SideBar />} />
+                <Route path="/navbar" element={<NavBar />} />
               </Route>
-              <Route path="products">
-                <Route index element={<List />} />
-                <Route path=":productId" element={<Single />} />
-                <Route
-                  path="new"
-                  element={
-                    <New inputs={productInputs} title="Add New Product" />
-                  }
-                />
-              </Route>
-              <Route path="/sidebar" element={<SideBar />} />
-              <Route path="/navbar" element={<NavBar />} />
-            </Route>
-          </Routes>
-          <ToastContainer />
+            </Routes>
+            <ToastContainer />
+          </DoctorAvailabilityProvider>
         </UserContext.Provider>
       </BrowserRouter>
     </div>

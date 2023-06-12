@@ -65,16 +65,36 @@ function Login() {
       document.cookie = `access_token=${access_token}; path=/;`;
 
       if (registration_form_completed) {
-        navigate("/");
+        // User has completed registration
+        switch (user_type) {
+          case "doctor":
+            navigate("/doctorhomepage");
+            break;
+          case "patient":
+            navigate("/patienthomepage");
+            break;
+          case "insuranceProvider":
+            navigate("/insurancehomepage");
+            break;
+          default:
+            navigate("/");
+            break;
+        }
       } else {
-        if (user_type === "doctor") {
-          navigate("/doctorregistrationform");
-        } else if (user_type === "patient") {
-          navigate("/patientregistrationform");
-        } else if (user_type === "insuranceProvider") {
-          navigate("/insuranceregistrationform");
-        } else {
-          navigate("/");
+        // User has not completed registration
+        switch (user_type) {
+          case "doctor":
+            navigate("/doctorregistrationform");
+            break;
+          case "patient":
+            navigate("/patientregistrationform");
+            break;
+          case "insuranceProvider":
+            navigate("/insuranceregistrationform");
+            break;
+          default:
+            navigate("/");
+            break;
         }
       }
     } catch (error) {

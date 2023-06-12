@@ -143,6 +143,12 @@ const SideBar = () => {
             <span>Nurses</span>
           </li>
         </Link>
+        <Link to="/availability" style={{ textDecoration: "none" }}>
+          <li>
+            <InventoryIcon className="icon" />
+            <span>Appointments</span>
+          </li>
+        </Link>
       </React.Fragment>
     );
   };

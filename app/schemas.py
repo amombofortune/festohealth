@@ -1,6 +1,6 @@
 from datetime import date, datetime, time,timedelta
 from pydantic import BaseModel, EmailStr
-from typing import Optional
+from typing import Optional, List
 
 
 """User"""
@@ -260,6 +260,26 @@ class BedResponse(BedBase):
     class Config:
         orm_mode = True
 
+
+"""Availability """
+class AvailabilityBase(BaseModel):
+    date: str
+    start_time: List[str]
+    end_time: List[str]
+
+
+class AvailabilityCreate(AvailabilityBase):
+    pass
+
+
+class AvailabilityResponse(AvailabilityBase):
+    id: int
+    created_at: datetime
+    user_id: str
+
+
+    class Config:
+        orm_mode = True
 
 """Bed Assignment"""
 class BedAssignmentBase(BaseModel):

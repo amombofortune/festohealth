@@ -4,7 +4,7 @@ from .database import engine
 from fastapi.middleware.cors import CORSMiddleware
 from .config import settings
 from .routers import administrator, admission, adverse_reaction_type, adverse_reaction, allergy, \
-appointment_reminder, appointment_type, appointment, bed_assignment, bed, billing, chronic_condition,\
+appointment_reminder, appointment_type, appointment, availability, bed_assignment, bed, billing, chronic_condition,\
 country, department, diagnosis, disease, doctor, doctor_membership, genetic_condition, hospital, immunization, insurance_claim, \
 insurance_provider_type, insurance_provider, it_staff, lab_technician, lab_test_result, lab_test, auth, \
 medical_condition, medical_device, medical_images, medical_note, medical_procedure, medication_alert,\
@@ -34,8 +34,6 @@ models.Base.metadata.create_all(bind=engine)
 
 
 
-
-
 app.include_router(administrator.router)
 app.include_router(admission.router)
 app.include_router(adverse_reaction_type.router)
@@ -44,6 +42,7 @@ app.include_router(allergy.router)
 app.include_router(appointment_reminder.router)
 app.include_router(appointment_type.router)
 app.include_router(appointment.router)
+app.include_router(availability.router)
 app.include_router(bed_assignment.router)
 app.include_router(bed.router)
 app.include_router(billing.router)

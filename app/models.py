@@ -795,7 +795,6 @@ class Doctor(Base):
 
     user = relationship("User", foreign_keys=[user_id])
 
-    #user = relationship("User", backref="doctor")
 
     def __init__(self, user_id, firstname, middlename, lastname, dob, gender, phone_number, email, address, city, state, postal_code, country,\
                   licence_number, specialty, consultation_fee, rating, membership, organization_name,\
@@ -869,17 +868,23 @@ class Hospital(Base):
 
     id = Column(String, primary_key=True)
     user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
-    name = Column(String(255))
-    address = Column(String(255))
-    city = Column(String(255))
-    state = Column(String(255))
-    postal_code = Column(String(10))
-    country = Column(String)
-    email = Column(String)
-    phone_number = Column(String(20))
-    website = Column(String(255))
-    rating = Column(Float)
-    verified = Column(String)
+    name = Column(String(255), nullable=False)
+    address = Column(String(255), nullable=False)
+    city = Column(String(255), nullable=False)
+    state = Column(String(255), nullable=True)
+    postal_code = Column(String(10), nullable=True)
+    country = Column(String, nullable=False)
+    phone_number = Column(String(20), nullable=False)
+    email = Column(String, nullable=False)
+    website = Column(String(255), nullable=True)
+    licence_number = Column(String(255), nullable=False)
+    accreditation = Column(String, nullable=False)
+    accreditation_authority = Column(String(255), nullable=True)
+    accreditation_date = Column(Date, nullable=True)
+    accreditation_level = Column(String(255), nullable=True)
+    expiry_date = Column(Date, nullable=True)
+    rating = Column(Float, nullable=True)
+    verified = Column(String, nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
     #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
@@ -888,7 +893,7 @@ class Hospital(Base):
 
     #user = relationship("User", backref="hospital")
 
-    def __init__(self, user_id, name, address, city, state, postal_code, country, email, phone_number, website, rating, verified):
+    def __init__(self, user_id, name, address, city, state, postal_code, country, phone_number, email, website, licence_number, accreditation, accreditation_authority, accreditation_date, accreditation_level, expiry_date, rating, verified):
         self.id = str(uuid.uuid4().hex[:4].upper())
         self.user_id = user_id
         self.name = name
@@ -897,14 +902,21 @@ class Hospital(Base):
         self.state = state
         self.postal_code = postal_code
         self.country = country
-        self.email = email
         self.phone_number = phone_number
+        self.email = email
         self.website = website
+        self.licence_number = licence_number
+        self.accreditation = accreditation
+        self.accreditation_authority = accreditation_authority
+        self.accreditation_date = accreditation_date
+        self.accreditation_level = accreditation_level
+        self.expiry_date = expiry_date
         self.rating = rating
         self.verified = verified
 
     def __repr__(self):
-        return f"({self.id}, {self.user_id}, {self.name}, {self.address}, {self.city}, {self.state}, {self.postal_code}, {self.country}, {self.email}, {self.phone_number}, {self.website}, {self.rating}, {self.verified})"
+        return f"({self.id}, {self.user_id}, {self.name}, {self.address}, {self.city}, {self.state}, {self.postal_code}, {self.country}, {self.phone_number}, {self.email}, {self.website},\
+             {self.licence_number}, {self.accreditation}, {self.accreditation_authority}, {self.accreditation_date}, {self.accreditation_level}, {self.expiry_date}, {self.rating}, {self.verified})"
 
 
 session = SessionLocal()
@@ -1496,34 +1508,19 @@ class Medication(Base):
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE', onupdate='NO ACTION'))
-    patient_id = Column(String, ForeignKey('patients.id', ondelete='CASCADE', onupdate='NO ACTION'))
-    doctor_id = Column(String, ForeignKey('doctors.id', ondelete='CASCADE', onupdate='NO ACTION'))
     name = Column(String)
-    description = Column(String)
-    route_of_administration = Column(String)  # oral topical intravenous
-    dosage = Column(String)
-    unit = Column(String)
-    frequency = Column(String)  # twice daily once weekly
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
-    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
     user = relationship("User", foreign_keys=[user_id])
 
 
-    def __init__(self, user_id, patient_id, doctor_id, name, description, route_of_administration, dosage, unit, frequency):
+    def __init__(self, user_id, name):
         self.user_id = user_id
-        self.patient_id = patient_id
-        self.doctor_id = doctor_id
         self.name = name
-        self.description = description
-        self.route_of_administration = route_of_administration
-        self.dosage = dosage
-        self.unit = unit
-        self.frequency = frequency
         
 
     def __repr__(self):
-        return f"({self.id}, {self.user_id}, {self.patient_id}, {self.doctor_id}, {self.name}, {self.description}, {self.route_of_administration}, {self.dosage}, {self.unit}, {self.frequency})"
+        return f"({self.id}, {self.user_id}, {self.name})"
 
 
 """ MEMBERSHIP """
@@ -1719,9 +1716,7 @@ class Patient(Base):
     effective_date = Column(Date, nullable=True)
     expiration_date = Column(Date, nullable=True)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
-    #updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
-    #user = relationship("User")
 
 
     def __init__(self, user_id, firstname, middlename, lastname, dob, gender, phonenumber, email, address, city, state, postal_code, country, emergency_contact_name, emergency_contact_phone, relationship, insurance, provider_name, policy_number, group_number, effective_date, expiration_date):
@@ -2764,3 +2759,4 @@ session.commit()
 session.close()
 
 """
+

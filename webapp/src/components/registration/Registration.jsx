@@ -106,6 +106,8 @@ function Registration() {
                     <MenuItem value="insuranceProvider">
                       Insurance Provider
                     </MenuItem>
+                    <MenuItem value="hospital">Hospital</MenuItem>
+                    <MenuItem value="pharmacy">Pharmacy</MenuItem>
                   </TextField>
                   {errors.userTypeError && (
                     <p className="error-message">{errors.userTypeError}</p>

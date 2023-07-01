@@ -67,10 +67,13 @@ import "react-toastify/dist/ReactToastify.css";
 import DoctorForm from "./components/doctor/DoctorForm";
 import PatientRegistrationForm from "./components/patient/PatientRegistrationForm";
 import DoctorRegistrationForm from "./components/doctor/DoctorRegistrationForm";
+import HospitalRegistrationForm from "./components/hospital/HospitalRegistrationForm";
 import Profile from "./components/profile/Profile";
 import InsuranceRegistrationForm from "./components/insurance_provider/InsuranceRegistrationForm";
 import PatientHomePage from "./components/home/PatientHomePage";
 import DoctorHomePage from "./components/home/DoctorHomePage";
+import HospitalHomePage from "./components/home/HospitalHomePage";
+import PharmacyHomePage from "./components/home/PharmacyHomePage";
 import InsuranceProviderHomePage from "./components/home/InsuranceProviderHomePage";
 import DoctorAvailabilityForm from "./components/appointment/DoctorAvailabilityForm";
 
@@ -161,12 +164,18 @@ function App() {
                 path="/doctorregistrationform"
                 element={<DoctorRegistrationForm />}
               />
+              <Route
+                path="/hospitalregistrationform"
+                element={<HospitalRegistrationForm />}
+              />
               <Route path="/patienthomepage" element={<PatientHomePage />} />
               <Route path="/doctorhomepage" element={<DoctorHomePage />} />
               <Route
                 path="/insurancehomepage"
                 element={<InsuranceProviderHomePage />}
               />
+              <Route path="/hospitalhomepage" element={<HospitalHomePage />} />
+              <Route path="/pharmacyhomepage" element={<PharmacyHomePage />} />
 
               {"Dashboard"}
               <Route path="/">

@@ -1,8 +1,7 @@
 from .. import models, schemas, utils
-from fastapi import FastAPI, HTTPException, Response, status, Depends,APIRouter
+from fastapi import HTTPException, Response, status, Depends,APIRouter
 from ..database import get_db
 from sqlalchemy.orm import Session
-import bcrypt
 from typing import List
 
 router = APIRouter(

@@ -1,10 +1,10 @@
 from .. import models, schemas, utils
-from fastapi import FastAPI, HTTPException, Response, status, Depends,APIRouter
+from fastapi import FastAPI, HTTPException, Response, status, Depends,APIRouter, Query
 from ..database import get_db
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from .. import oauth2
-
+from sqlalchemy.orm.exc import NoResultFound
 
 router = APIRouter(
      prefix="/patient",
@@ -65,8 +65,7 @@ def create_patient(
 
 # Read single patient
 @router.get("/{id}", response_model=schemas.PatientResponse)
-def get_patient(id: str, db: Session = Depends(get_db),
-                current_user: int = Depends(oauth2.get_current_user)):
+def get_patient(id: str, db: Session = Depends(get_db)):
     patient = db.query(models.Patient).filter(models.Patient.id == id).first()
 
     if not patient:
@@ -75,15 +74,9 @@ def get_patient(id: str, db: Session = Depends(get_db),
     return patient
 
 # Read All patient
-@router.get("/", response_model=List[schemas.PatientResponse])
-def get_patient(db: Session = Depends(get_db),
-                current_user: int = Depends(oauth2.get_current_user), limit: int = 10, skip: int = 0, search: Optional[str] = ""):
-    patient = db.query(models.Patient)\
-    .filter(models.Patient.user_id == current_user.id)\
-    .filter(models.Patient.firstname.ilike(f'%{search}%'))\
-    .limit(limit)\
-    .offset(skip)\
-    .all()
+@router.get("/all", response_model=List[schemas.PatientResponse])
+def get_patient(db: Session = Depends(get_db)):
+    patient = db.query(models.Patient).all()
     return patient
 
 # Update patient
@@ -128,3 +121,4 @@ def delete_patient(id: str, db: Session = Depends(get_db),
     patient_query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+

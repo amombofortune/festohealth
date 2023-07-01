@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import "./sidebar.scss";
 import SpaceDashboardIcon from "@mui/icons-material/SpaceDashboard";
 import PeopleOutlineIcon from "@mui/icons-material/PeopleOutline";
@@ -16,9 +16,15 @@ import UserContext from "../../contexts/UserContext";
 
 const SideBar = () => {
   const { userData } = useContext(UserContext);
-
-  // Access user data - bring it back to get the null error
-  //const { user_type } = userData;
+  const [showDoctorSubMenu, setShowDoctorSubMenu] = useState(false);
+  const [showPatientSubMenu, setShowPatientSubMenu] = useState(false);
+  const [showNurseSubMenu, setShowNurseSubMenu] = useState(false);
+  const [showAppointmentSubMenu, setShowAppointmentSubMenu] = useState(false);
+  const [showAdmissionSubMenu, setShowAdmissionSubMenu] = useState(false);
+  const [showReferralSubMenu, setShowReferralSubMenu] = useState(false);
+  const [showPrescriptionSubMenu, setShowPrescriptionSubMenu] = useState(false);
+  const [showDiagnosisSubMenu, setShowDiagnosisSubMenu] = useState(false);
+  const [showLaboratorySubMenu, setShowLaboratorySubMenu] = useState(false);
 
   // Access user data
   const user_type = userData?.user_type;
@@ -36,49 +42,182 @@ const SideBar = () => {
         </Link>
 
         <p className="title">USERS</p>
-        <Link to="/doctor_one" style={{ textDecoration: "none" }}>
+        <Link
+          style={{ textDecoration: "none" }}
+          onClick={() => setShowDoctorSubMenu(!showDoctorSubMenu)}
+        >
           <li>
             <PeopleOutlineIcon className="icon" />
             <span>Doctors</span>
           </li>
         </Link>
+        {showDoctorSubMenu && (
+          <ul className="submenu">
+            <li>
+              <Link to="/doctor_one" style={{ textDecoration: "none" }}>
+                <PeopleOutlineIcon className="icon" />
+                <span>View Doctors</span>
+              </Link>
+            </li>
+            <li>
+              <Link to="/doctor_two" style={{ textDecoration: "none" }}>
+                <PeopleOutlineIcon className="icon" />
+                <span>Doctor 2</span>
+              </Link>
+            </li>
+          </ul>
+        )}
         <p className="title">OPERATIONS</p>
-        <Link to="/appointment" style={{ textDecoration: "none" }}>
+        <Link
+          style={{ textDecoration: "none" }}
+          onClick={() => setShowAppointmentSubMenu(!showAppointmentSubMenu)}
+        >
           <li>
             <InventoryIcon className="icon" />
             <span>Appointments</span>
           </li>
         </Link>
-        <Link to="/admission" style={{ textDecoration: "none" }}>
+        {showAppointmentSubMenu && (
+          <ul className="submenu">
+            <li>
+              <Link to="/appointment" style={{ textDecoration: "none" }}>
+                <InventoryIcon className="icon" />
+                <span>View Appointments</span>
+              </Link>
+            </li>
+            <li>
+              <Link to="/appointment" style={{ textDecoration: "none" }}>
+                <InventoryIcon className="icon" />
+                <span>Book Appointment</span>
+              </Link>
+            </li>
+          </ul>
+        )}
+        <Link
+          style={{ textDecoration: "none" }}
+          onClick={() => setShowAdmissionSubMenu(!showAdmissionSubMenu)}
+        >
           <li>
             <ConstructionIcon className="icon" />
             <span>Admissions</span>
           </li>
         </Link>
-        <Link to="/referral" style={{ textDecoration: "none" }}>
+        {showAdmissionSubMenu && (
+          <ul className="submenu">
+            <li>
+              <Link to="/admission" style={{ textDecoration: "none" }}>
+                <PeopleOutlineIcon className="icon" />
+                <span>Admission 1</span>
+              </Link>
+            </li>
+            <li>
+              <Link to="/admission" style={{ textDecoration: "none" }}>
+                <PeopleOutlineIcon className="icon" />
+                <span>Admission 2</span>
+              </Link>
+            </li>
+          </ul>
+        )}
+        <Link
+          style={{ textDecoration: "none" }}
+          onClick={() => setShowReferralSubMenu(!showReferralSubMenu)}
+        >
           <li>
             <ConstructionIcon className="icon" />
             <span>Referrals</span>
           </li>
         </Link>
-        <Link to="/prescription" style={{ textDecoration: "none" }}>
+        {showReferralSubMenu && (
+          <ul className="submenu">
+            <li>
+              <Link to="/referral" style={{ textDecoration: "none" }}>
+                <PeopleOutlineIcon className="icon" />
+                <span>Referral 1</span>
+              </Link>
+            </li>
+            <li>
+              <Link to="/referral" style={{ textDecoration: "none" }}>
+                <PeopleOutlineIcon className="icon" />
+                <span>Referral 2</span>
+              </Link>
+            </li>
+          </ul>
+        )}
+        <Link
+          style={{ textDecoration: "none" }}
+          onClick={() => setShowPrescriptionSubMenu(!showPrescriptionSubMenu)}
+        >
           <li>
             <ConstructionIcon className="icon" />
             <span>Prescription</span>
           </li>
         </Link>
-        <Link to="/diagnosis" style={{ textDecoration: "none" }}>
+        {showPrescriptionSubMenu && (
+          <ul className="submenu">
+            <li>
+              <Link to="/prescription" style={{ textDecoration: "none" }}>
+                <PeopleOutlineIcon className="icon" />
+                <span>Prescription 1</span>
+              </Link>
+            </li>
+            <li>
+              <Link to="/prescription" style={{ textDecoration: "none" }}>
+                <PeopleOutlineIcon className="icon" />
+                <span>Prescription 2</span>
+              </Link>
+            </li>
+          </ul>
+        )}
+        <Link
+          style={{ textDecoration: "none" }}
+          onClick={() => setShowDiagnosisSubMenu(!showDiagnosisSubMenu)}
+        >
           <li>
             <ConstructionIcon className="icon" />
             <span>Diagnosis</span>
           </li>
         </Link>
-        <Link to="/lab_test" style={{ textDecoration: "none" }}>
+        {showDiagnosisSubMenu && (
+          <ul className="submenu">
+            <li>
+              <Link to="/diagnosis" style={{ textDecoration: "none" }}>
+                <PeopleOutlineIcon className="icon" />
+                <span>Diagnosis 1</span>
+              </Link>
+            </li>
+            <li>
+              <Link to="/diagnosis" style={{ textDecoration: "none" }}>
+                <PeopleOutlineIcon className="icon" />
+                <span>Diagnosis 2</span>
+              </Link>
+            </li>
+          </ul>
+        )}
+        <Link
+          style={{ textDecoration: "none" }}
+          onClick={() => setShowLaboratorySubMenu(!showLaboratorySubMenu)}
+        >
           <li>
             <MedicationIcon className="icon" />
             <span>Laboratory</span>
           </li>
         </Link>
+        {showLaboratorySubMenu && (
+          <ul className="submenu">
+            <li>
+              <Link to="/lab_test" style={{ textDecoration: "none" }}>
+                <PeopleOutlineIcon className="icon" />
+                <span>Laboratory 1</span>
+              </Link>
+            </li>
+            <li>
+              <Link to="/lab_test" style={{ textDecoration: "none" }}>
+                <PeopleOutlineIcon className="icon" />
+                <span>Laboratory 2</span>
+              </Link>
+            </li>
+          </ul>
+        )}
         <p className="title">THIRD PARTIES</p>
         <Link to="/insurance_provider_one" style={{ textDecoration: "none" }}>
           <li>
@@ -164,46 +303,158 @@ const SideBar = () => {
             <span>Dashboard</span>
           </li>
         </Link>
-
         <p className="title">USERS</p>
-        <Link to="/doctor_one" style={{ textDecoration: "none" }}>
+        <Link
+          style={{ textDecoration: "none" }}
+          onClick={() => setShowDoctorSubMenu(!showDoctorSubMenu)}
+        >
           <li>
             <PeopleOutlineIcon className="icon" />
             <span>Doctors</span>
           </li>
         </Link>
-
-        <Link to="/patient" style={{ textDecoration: "none" }}>
+        {showDoctorSubMenu && (
+          <ul className="submenu">
+            <li>
+              <Link to="/doctor_one" style={{ textDecoration: "none" }}>
+                <PeopleOutlineIcon className="icon" />
+                <span>View Doctors</span>
+              </Link>
+            </li>
+            <li>
+              <Link to="/doctor_two" style={{ textDecoration: "none" }}>
+                <PeopleOutlineIcon className="icon" />
+                <span>Manage Doctors</span>
+              </Link>
+            </li>
+          </ul>
+        )}
+        <Link
+          style={{ textDecoration: "none" }}
+          onClick={() => setShowPatientSubMenu(!showPatientSubMenu)}
+        >
           <li>
-            <PersonIcon className="icon" />
+            <PeopleOutlineIcon className="icon" />
             <span>Patients</span>
           </li>
         </Link>
-        <Link to="/nurse" style={{ textDecoration: "none" }}>
+        {showPatientSubMenu && (
+          <ul className="submenu">
+            <li>
+              <Link to="/patient" style={{ textDecoration: "none" }}>
+                <PeopleOutlineIcon className="icon" />
+                <span>View Patients</span>
+              </Link>
+            </li>
+            <li>
+              <Link to="/patient" style={{ textDecoration: "none" }}>
+                <PeopleOutlineIcon className="icon" />
+                <span>Manage Patients</span>
+              </Link>
+            </li>
+          </ul>
+        )}
+        <Link
+          style={{ textDecoration: "none" }}
+          onClick={() => setShowNurseSubMenu(!showNurseSubMenu)}
+        >
           <li>
-            <Person3Icon className="icon" />
-            <span>Nurses</span>
+            <PeopleOutlineIcon className="icon" />
+            <span>Nurse</span>
           </li>
         </Link>
+        {showNurseSubMenu && (
+          <ul className="submenu">
+            <li>
+              <Link to="/nurse" style={{ textDecoration: "none" }}>
+                <PeopleOutlineIcon className="icon" />
+                <span>View Nurses</span>
+              </Link>
+            </li>
+            <li>
+              <Link to="/nurse" style={{ textDecoration: "none" }}>
+                <PeopleOutlineIcon className="icon" />
+                <span>Manage Nurses</span>
+              </Link>
+            </li>
+          </ul>
+        )}
         <p className="title">OPERATIONS</p>
-        <Link to="/appointment" style={{ textDecoration: "none" }}>
+        <Link
+          style={{ textDecoration: "none" }}
+          onClick={() => setShowAppointmentSubMenu(!showAppointmentSubMenu)}
+        >
           <li>
-            <InventoryIcon className="icon" />
+            <PeopleOutlineIcon className="icon" />
             <span>Appointments</span>
           </li>
         </Link>
-        <Link to="/admission" style={{ textDecoration: "none" }}>
+        {showAppointmentSubMenu && (
+          <ul className="submenu">
+            <li>
+              <Link to="/nurse" style={{ textDecoration: "none" }}>
+                <InventoryIcon className="icon" />
+                <span>View Appointments</span>
+              </Link>
+            </li>
+            <li>
+              <Link to="/nurse" style={{ textDecoration: "none" }}>
+                <InventoryIcon className="icon" />
+                <span>Manage Appointments</span>
+              </Link>
+            </li>
+          </ul>
+        )}
+        <Link
+          style={{ textDecoration: "none" }}
+          onClick={() => setShowAdmissionSubMenu(!showAdmissionSubMenu)}
+        >
           <li>
-            <ConstructionIcon className="icon" />
+            <PeopleOutlineIcon className="icon" />
             <span>Admissions</span>
           </li>
         </Link>
-        <Link to="/referral" style={{ textDecoration: "none" }}>
+        {showAdmissionSubMenu && (
+          <ul className="submenu">
+            <li>
+              <Link to="/admission" style={{ textDecoration: "none" }}>
+                <PeopleOutlineIcon className="icon" />
+                <span>View Admissions</span>
+              </Link>
+            </li>
+            <li>
+              <Link to="/nurse" style={{ textDecoration: "none" }}>
+                <PeopleOutlineIcon className="icon" />
+                <span>Manage Admissions</span>
+              </Link>
+            </li>
+          </ul>
+        )}
+        <Link
+          style={{ textDecoration: "none" }}
+          onClick={() => setShowReferralSubMenu(!showReferralSubMenu)}
+        >
           <li>
-            <ConstructionIcon className="icon" />
+            <PeopleOutlineIcon className="icon" />
             <span>Referrals</span>
           </li>
         </Link>
+        {showReferralSubMenu && (
+          <ul className="submenu">
+            <li>
+              <Link to="/referrals" style={{ textDecoration: "none" }}>
+                <PeopleOutlineIcon className="icon" />
+                <span>View Referrals</span>
+              </Link>
+            </li>
+            <li>
+              <Link to="/nurse" style={{ textDecoration: "none" }}>
+                <PeopleOutlineIcon className="icon" />
+                <span>Manage Referrals</span>
+              </Link>
+            </li>
+          </ul>
+        )}
         <Link to="/prescription" style={{ textDecoration: "none" }}>
           <li>
             <ConstructionIcon className="icon" />
@@ -216,12 +467,37 @@ const SideBar = () => {
             <span>Diagnosis</span>
           </li>
         </Link>
-        <Link to="/lab_test" style={{ textDecoration: "none" }}>
+        <Link to="/medication" style={{ textDecoration: "none" }}>
           <li>
-            <MedicationIcon className="icon" />
+            <ConstructionIcon className="icon" />
+            <span>Medication</span>
+          </li>
+        </Link>
+        <Link
+          style={{ textDecoration: "none" }}
+          onClick={() => setShowLaboratorySubMenu(!showLaboratorySubMenu)}
+        >
+          <li>
+            <PeopleOutlineIcon className="icon" />
             <span>Laboratory</span>
           </li>
         </Link>
+        {showLaboratorySubMenu && (
+          <ul className="submenu">
+            <li>
+              <Link to="/lab_test" style={{ textDecoration: "none" }}>
+                <PeopleOutlineIcon className="icon" />
+                <span>Lab Tests</span>
+              </Link>
+            </li>
+            <li>
+              <Link to="/lab_results" style={{ textDecoration: "none" }}>
+                <PeopleOutlineIcon className="icon" />
+                <span>Lab Results</span>
+              </Link>
+            </li>
+          </ul>
+        )}
         <Link to="/medical_device" style={{ textDecoration: "none" }}>
           <li>
             <VaccinesIcon className="icon" />

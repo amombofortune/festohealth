@@ -3,16 +3,16 @@ import "./home.scss";
 import SideBar from "../sidebar/SideBar";
 import Navbar from "../navbar/Navbar";
 
-function PatientHomePage() {
+function PharmacyHomePage() {
   return (
     <div className="homepage">
       <SideBar />
       <div className="homepageContainer">
         <Navbar />
-        <div className="appointmentTable">PatientHomePage</div>
+        <div classname="appointmentTable">PharmacyHomePage</div>
       </div>
     </div>
   );
 }
 
-export default PatientHomePage;
+export default PharmacyHomePage;

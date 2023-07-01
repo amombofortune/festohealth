@@ -538,9 +538,15 @@ class HospitalBase(BaseModel):
     state: str
     postal_code: str
     country: str
-    email: EmailStr
     phone_number: str
+    email: EmailStr
     website: str
+    licence_number: str
+    accreditation: str
+    accreditation_authority: Optional[str] = None
+    accreditation_date: Optional[date] = None
+    accreditation_level: Optional[str] = None
+    expiry_date: Optional[date] = None
     rating: float
     verified: str
 
@@ -932,16 +938,7 @@ class MedicalProcedureResponse(MedicalProcedureBase):
 
 """Medication"""
 class MedicationBase(BaseModel):
-    patient_id: str
-    doctor_id: str
     name: str
-    description: str
-    route_of_administration: str
-    dosage: str
-    unit: str
-    frequency: str
-  
-
 
 class MedicationCreate(MedicationBase):
     pass
@@ -951,7 +948,6 @@ class MedicationResponse(MedicationBase):
     id: int
     created_at: datetime
     user_id: str
-    user: UserResponse
 
 
     class Config:
@@ -1065,6 +1061,8 @@ class PatientVisitResponse(PatientVisitBase):
         orm_mode = True
 
 
+
+
 """Patient """
 class PatientBase(BaseModel):
     firstname: str
@@ -1103,6 +1101,10 @@ class PatientResponse(PatientBase):
     class Config:
         orm_mode = True
 
+
+
+
+  
 
 """Pharmacist"""
 class PharmacistBase(BaseModel):

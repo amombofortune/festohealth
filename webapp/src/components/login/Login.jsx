@@ -76,6 +76,12 @@ function Login() {
           case "insuranceProvider":
             navigate("/insurancehomepage");
             break;
+          case "hospital":
+            navigate("/hospitalhomepage");
+            break;
+          case "pharmacy":
+            navigate("/pharmacyhomepage");
+            break;
           default:
             navigate("/");
             break;
@@ -91,6 +97,12 @@ function Login() {
             break;
           case "insuranceProvider":
             navigate("/insuranceregistrationform");
+            break;
+          case "hospital":
+            navigate("/hospitalregistrationform");
+            break;
+          case "pharmacy":
+            navigate("/pharmacyregistrationform");
             break;
           default:
             navigate("/");

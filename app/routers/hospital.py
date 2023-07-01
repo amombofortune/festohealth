@@ -13,16 +13,47 @@ router = APIRouter(
 
 )
 
+def update_registration_status(user_id: str, db: Session):
+    user = db.query(models.User).get(user_id)
+    if user:
+        user.registration_form_completed = True
+        db.commit()
+        db.refresh(user)
+        return user
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
 
 """ HOSPITAL APIs """
 # Create hospital
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def create_hospital(hospital: schemas.HospitalCreate, db: Session = Depends(get_db)):
-    new_hospital = models.Hospital(**hospital.dict())
-    db.add(new_hospital)
+def create_hospital(hospital: schemas.HospitalCreate, db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
+    
+    existing_hospital = db.query(models.Hospital).filter_by(user_id=current_user.id).first()
+    if existing_hospital:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Hospital registration form has already been submitted",
+        )
+    
+    if hospital.accreditation == "no":
+        # Set accreditation fields to None when accreditation is "no"
+        hospital.accreditation_authority = None
+        hospital.accreditation_date = None
+        hospital.accreditation_level = None
+        hospital.expiry_date = None
+
+    provider_obj = models.Hospital(user_id=current_user.id, **hospital.dict())
+    db.add(provider_obj)
     db.commit()
-    db.refresh(new_hospital)
-    return new_hospital
+    db.refresh(provider_obj)
+
+    # Update registration status
+    update_registration_status(current_user.id, db)
+
+    return provider_obj
 
 # Read One hospital
 

@@ -37,48 +37,6 @@ export default function MedicationTable() {
       width: 100,
       editable: true,
     },
-    {
-      field: "description",
-      headerName: "Description",
-      width: 150,
-      editable: true,
-    },
-    {
-      field: "route_of_administration",
-      headerName: "Route of Administration",
-      width: 160,
-      editable: true,
-    },
-    {
-      field: "dosage",
-      headerName: "Dosage",
-      width: 100,
-      editable: true,
-    },
-    {
-      field: "unit",
-      headerName: "Unit",
-      width: 150,
-      editable: true,
-    },
-    {
-      field: "frequency",
-      headerName: "Frequency",
-      width: 110,
-      editable: true,
-    },
-    {
-      field: "patient_id",
-      headerName: "Patient ID",
-      width: 110,
-      editable: true,
-    },
-    {
-      field: "doctor_id",
-      headerName: "Doctor ID",
-      width: 110,
-      editable: true,
-    },
 
     {
       field: "actions",

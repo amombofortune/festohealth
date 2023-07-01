@@ -4,8 +4,9 @@ import {
   Grid,
   TextField,
   Typography,
+  MenuItem,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./Prescription.scss";
 
@@ -15,6 +16,8 @@ const PrescriptionForm = () => {
   const [medication, setMedication] = useState("");
   const [dosage, setDosage] = useState("");
   const [instructions, setInstructions] = useState("");
+
+  const [medicationDB, setMedicationDB] = useState([]);
 
   //Post data to database
   const handleSubmit = async (e) => {
@@ -51,6 +54,25 @@ const PrescriptionForm = () => {
       // Handle error posting data
     }
   };
+
+  //Fetch medication
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get("http://127.0.0.1:8000/medication");
+        console.log(
+          "Fetching medication from database successful!!!",
+          response.data
+        );
+        setMedicationDB(response.data);
+      } catch (error) {
+        console.error("Failed to fetch medication data:", error);
+        // Handle error fetching medication data
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <div>
@@ -98,17 +120,21 @@ const PrescriptionForm = () => {
             </Grid>
             <Grid xs={12} item>
               <TextField
-                label="Medication"
-                placeholder="Enter Medication"
-                variant="outlined"
-                type="text"
+                id="medication"
+                select
+                label="Select Medication"
                 value={medication}
                 onChange={(event) => {
                   setMedication(event.target.value);
                 }}
                 fullWidth
-                required
-              ></TextField>
+              >
+                {medicationDB.map((item) => (
+                  <MenuItem key={item.id} value={item.name}>
+                    {item.name}
+                  </MenuItem>
+                ))}
+              </TextField>
             </Grid>
             <Grid xs={12} sm={6} item>
               <TextField
